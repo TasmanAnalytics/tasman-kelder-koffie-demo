@@ -1,0 +1,6 @@
+country_code,country_name,region,carrier
+NL,Netherlands,Benelux,PostNL
+BE,Belgium,Benelux,DHL
+LU,Luxembourg,Benelux,DHL
+DE,Germany,DACH,DHL
+FR,France,Other EU,DHL

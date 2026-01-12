@@ -1,0 +1,9 @@
+kelder:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('KELDER_DUCKDB_PATH') }}"
+      threads: 4
+      settings:
+        TimeZone: UTC

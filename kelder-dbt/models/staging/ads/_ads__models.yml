@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_ads__ad_spend_daily
+    description: Ad spend per platform, campaign and day in EUR. Meta is paid_social, Google is paid_search.
+    columns:
+      - name: spend_date
+        description: Day of spend (platform account time zone, Europe/Amsterdam).
+        tests: [not_null]
+      - name: platform
+        description: meta or google.
+        tests:
+          - accepted_values: {arguments: {values: ['meta', 'google']}}
+      - name: channel
+        description: Channel the spend is attributed to.
+        tests:
+          - accepted_values: {arguments: {values: ['paid_social', 'paid_search']}}
+      - name: campaign_id
+        description: Platform campaign id.
+      - name: campaign_name
+        description: Platform campaign name.
+      - name: spend_eur
+        description: Spend in EUR.
+      - name: impressions
+        description: Impressions.
+      - name: clicks
+        description: Clicks.
+    tests:
+      - unique_combination:
+          arguments: {columns: [spend_date, platform, campaign_id]}

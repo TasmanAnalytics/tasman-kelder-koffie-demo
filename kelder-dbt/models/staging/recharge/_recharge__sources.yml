@@ -1,0 +1,20 @@
+version: 2
+
+sources:
+  - name: recharge
+    description: Recharge subscription billing, synced by Fivetran.
+    schema: raw_recharge
+    loaded_at_field: _fivetran_synced
+    tables:
+      - name: customers
+        description: Recharge customers, linked to Shopify customers.
+      - name: subscriptions
+        description: >
+          Recharge subscriptions, current state. Recharge has no paused status: a paused
+          subscription is 'active' with paused_until set.
+      - name: subscription_events
+        description: Status history of Recharge subscriptions.
+      - name: charges
+        description: >
+          One row per billing charge. A failed charge is retried in place: number_times_tried
+          counts attempts and processed_at is set once it succeeds.

@@ -1,0 +1,32 @@
+version: 2
+
+sources:
+  - name: shopify
+    description: Shopify store and the Shopify subscription app, synced by Fivetran from January 2025.
+    schema: raw_shopify
+    loaded_at_field: _fivetran_synced
+    tables:
+      - name: customers
+        description: One row per Shopify customer, current state.
+      - name: products
+        description: Product catalogue.
+      - name: product_variants
+        description: Sellable variants (size, grind) with list prices including VAT.
+      - name: orders
+        description: One row per order. Subscription renewals are orders too.
+      - name: order_lines
+        description: Line items per order.
+      - name: refunds
+        description: Refunds against orders.
+      - name: fulfillments
+        description: Shipments per order, with carrier and delivery time.
+      - name: subscription_contracts
+        description: >
+          Subscription contracts from the Shopify subscription app. Current state as of the
+          connector's last sync (see _fivetran_synced).
+      - name: subscription_contract_events
+        description: Status history of subscription contracts from the app's webhook log.
+      - name: subscription_billing_attempts
+        description: >
+          Billing attempts for subscription contracts. The idempotency key holds the contract id,
+          the billing cycle date and the attempt number.

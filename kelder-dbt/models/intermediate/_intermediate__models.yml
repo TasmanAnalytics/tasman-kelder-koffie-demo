@@ -1,0 +1,146 @@
+version: 2
+
+models:
+  - name: int_reporting_months
+    description: Calendar months from January 2025 up to the as-of date, with start and end instants at 00:00 Amsterdam time.
+    columns:
+      - name: month
+        description: First day of the month.
+        tests: [unique, not_null]
+      - name: month_start
+        description: 00:00 Amsterdam time on the first of the month, as an instant.
+      - name: month_end
+        description: Start of the following month.
+      - name: is_latest_month
+        description: True for the last full month before the as-of date.
+
+  - name: int_subscriptions_unified
+    description: >
+      One row per subscription key across the Shopify subscription app and Recharge. A
+      subscription keeps its key for its whole life: Shopify contracts use their contract id, a
+      Recharge subscription that carries a Shopify contract id continues that contract's key,
+      and other Recharge subscriptions get their own key. Status is unified here and nowhere else.
+    columns:
+      - name: subscription_key
+        description: Stable subscription key, shp-<contract id> or rch-<Recharge subscription id>.
+        tests: [unique, not_null]
+      - name: origin_system
+        description: System the subscription started in.
+        tests:
+          - accepted_values: {arguments: {values: ['shopify', 'recharge']}}
+      - name: shopify_contract_id
+        description: Shopify contract id, when the subscription started in Shopify.
+      - name: recharge_subscription_id
+        description: Recharge subscription id, when the subscription has one.
+      - name: customer_id
+        description: Shopify customer id.
+        tests: [not_null]
+      - name: started_at
+        description: When the subscription started (UTC).
+        tests: [not_null]
+      - name: origin_order_id
+        description: The checkout order that started the subscription.
+      - name: is_gift
+        description: Prepaid gift subscription.
+      - name: interval_days
+        description: Days between shipments.
+      - name: quantity
+        description: Bags per shipment.
+      - name: variant_id
+        description: Coffee variant on subscription.
+      - name: price_eur
+        description: Current price per shipment (Recharge).
+      - name: payment_method
+        description: Payment method recorded by the Shopify app.
+      - name: status
+        description: Unified status.
+        tests:
+          - not_null
+          - accepted_values: {arguments: {values: ['active', 'paused', 'cancelled', 'expired']}}
+      - name: churned_at
+        description: When a cancelled subscription was cancelled.
+      - name: ended_at
+        description: When a cancelled or expired subscription ended.
+      - name: cancellation_reason
+        description: Reason for cancelled subscriptions.
+
+  - name: int_charges_unified
+    description: Billing attempts from Shopify and charges from Recharge, keyed to the subscription key.
+    columns:
+      - name: subscription_key
+        description: Subscription billed.
+        tests: [not_null]
+      - name: source_system
+        description: shopify or recharge.
+        tests:
+          - accepted_values: {arguments: {values: ['shopify', 'recharge']}}
+      - name: source_id
+        description: Billing attempt id or charge id in the source system.
+      - name: billing_cycle_date
+        description: Local date the billing cycle was first due.
+      - name: attempted_at
+        description: When the attempt ran, or when a Recharge charge was paid.
+      - name: is_success
+        description: True when paid.
+      - name: attempts
+        description: Attempt number (Shopify) or attempts so far (Recharge).
+      - name: order_id
+        description: Order created by a successful charge.
+    tests:
+      - unique_combination:
+          arguments: {columns: [source_system, source_id]}
+
+  - name: int_payment_episodes
+    description: >
+      One row per billing cycle with a failed payment (dunning episode), with the first failure
+      and the recovery, if a retry succeeded. Billing runs at 05:00 Amsterdam time; retries on days
+      1, 3, 7, 14, 21 and 28; billing gives up on day 30 and cancels with max_retries_reached.
+    columns:
+      - name: subscription_key
+        description: Subscription.
+        tests: [not_null]
+      - name: billing_cycle_date
+        description: Local date of the first failed attempt.
+      - name: first_failed_at
+        description: First failed payment, 05:00 Amsterdam time on the cycle date.
+      - name: recovered_at
+        description: When a retry succeeded, if one did.
+      - name: is_recovered_within_30_days
+        description: True if a retry succeeded within 30 days of the first failure.
+    tests:
+      - unique_combination:
+          arguments: {columns: [subscription_key, billing_cycle_date]}
+
+  - name: int_subscription_events
+    description: >
+      Unified event stream per subscription key: started, paused, resumed, cancelled, expired,
+      payment_failed and payment_recovered. The governed metrics read from this model.
+    columns:
+      - name: subscription_key
+        description: Subscription.
+        tests:
+          - not_null
+          - relationships: {arguments: {to: ref('int_subscriptions_unified'), field: subscription_key}}
+      - name: event_type
+        description: What happened.
+        tests:
+          - accepted_values: {arguments: {values: ['started', 'paused', 'resumed', 'cancelled', 'expired', 'payment_failed', 'payment_recovered']}}
+      - name: occurred_at
+        description: When it happened (UTC).
+        tests: [not_null]
+      - name: event_month
+        description: Local calendar month of the event.
+      - name: source
+        description: Where the event comes from (subscription row, shopify or recharge status history, billing).
+      - name: cancellation_reason
+        description: Reason, for cancelled events.
+      - name: is_voluntary_cancellation
+        description: Cancelled by the customer, as opposed to billing giving up (max_retries_reached).
+      - name: billing_cycle_date
+        description: Billing cycle, for payment_failed events.
+      - name: recovered_at
+        description: Recovery time, for payment_failed events that recovered.
+      - name: is_recovered_within_30_days
+        description: For payment_failed events, whether a retry succeeded within 30 days.
+      - name: is_gift
+        description: Event of a prepaid gift subscription.

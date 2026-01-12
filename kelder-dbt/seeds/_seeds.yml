@@ -1,0 +1,8 @@
+version: 2
+seeds:
+  - name: countries
+    description: Countries Kelder ships to, with the reporting region and the default carrier.
+    columns:
+      - name: country_code
+        description: ISO 3166-1 alpha-2 code, as stored on Shopify customers.
+        tests: [unique, not_null]

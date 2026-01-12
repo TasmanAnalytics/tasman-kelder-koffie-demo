@@ -1,0 +1,129 @@
+version: 2
+
+models:
+  - name: stg_recharge__customers
+    description: Recharge customers.
+    columns:
+      - name: recharge_customer_id
+        description: Recharge customer id.
+        tests: [unique, not_null]
+      - name: shopify_customer_id
+        description: Matching Shopify customer.
+        tests:
+          - not_null
+          - relationships: {arguments: {to: ref('stg_shopify__customers'), field: customer_id}}
+      - name: email
+        description: Email address, lower case.
+      - name: created_at
+        description: When the Recharge customer was created (UTC).
+
+  - name: stg_recharge__subscriptions
+    description: >
+      Recharge subscriptions, current state. Recharge has no paused status: a paused
+      subscription is 'active' with paused_until set. int_subscriptions_unified maps this.
+    columns:
+      - name: recharge_subscription_id
+        description: Recharge subscription id.
+        tests: [unique, not_null]
+      - name: recharge_customer_id
+        description: Recharge customer.
+        tests:
+          - relationships: {arguments: {to: ref('stg_recharge__customers'), field: recharge_customer_id}}
+      - name: shopify_customer_id
+        description: Shopify customer, via the Recharge customer.
+      - name: shopify_contract_id
+        description: >
+          Shopify subscription contract this Recharge subscription continues, when there is one
+          (external_contract_id). Empty for subscriptions created in Recharge.
+      - name: variant_id
+        description: Shopify variant on subscription.
+      - name: sku
+        description: SKU on subscription.
+      - name: quantity
+        description: Bags per shipment.
+      - name: price_eur
+        description: Price per shipment including VAT and shipping. Zero for prepaid gifts.
+      - name: interval_days
+        description: Days between shipments.
+      - name: source_status
+        description: Recharge status.
+        tests:
+          - accepted_values: {arguments: {values: ['active', 'cancelled', 'expired']}}
+      - name: created_at
+        description: Subscription creation time as recorded by Recharge (UTC).
+      - name: updated_at
+        description: Last change.
+      - name: cancelled_at
+        description: When the subscription ended.
+      - name: cancellation_reason
+        description: Customer's reason code, or max_retries_reached when billing gave up.
+      - name: cancellation_reason_comments
+        description: Free-text comment from the cancel flow.
+      - name: next_charge_scheduled_at
+        description: Next scheduled charge.
+      - name: paused_until
+        description: End date of the current pause. Set means paused.
+      - name: is_prepaid
+        description: Prepaid subscription (gifts).
+      - name: is_gift
+        description: Gift subscription (property is_gift).
+      - name: synced_at
+        description: When Fivetran last synced the row.
+
+  - name: stg_recharge__subscription_events
+    description: Status history of Recharge subscriptions.
+    columns:
+      - name: recharge_event_id
+        description: Event id.
+        tests: [unique, not_null]
+      - name: recharge_subscription_id
+        description: Subscription the event belongs to.
+        tests:
+          - relationships: {arguments: {to: ref('stg_recharge__subscriptions'), field: recharge_subscription_id}}
+      - name: verb
+        description: What happened.
+        tests:
+          - accepted_values: {arguments: {values: ['created', 'activated', 'cancelled', 'paused', 'unpaused', 'expired']}}
+      - name: occurred_at
+        description: When it happened (UTC).
+      - name: cancellation_reason
+        description: Reason, for cancelled events.
+      - name: paused_until
+        description: Planned end of the pause, for paused events.
+      - name: pause_source
+        description: customer_portal, or cancel_flow when the pause was offered while cancelling.
+
+  - name: stg_recharge__charges
+    description: >
+      Recharge charges. A failed charge is retried in place: number_times_tried counts the
+      attempts and processed_at is set once it succeeds.
+    columns:
+      - name: charge_id
+        description: Recharge charge id.
+        tests: [unique, not_null]
+      - name: recharge_customer_id
+        description: Customer charged.
+      - name: recharge_subscription_id
+        description: Subscription charged.
+        tests:
+          - relationships: {arguments: {to: ref('stg_recharge__subscriptions'), field: recharge_subscription_id}}
+      - name: status
+        description: success, error (still failing or given up), refunded or skipped.
+        tests:
+          - accepted_values: {arguments: {values: ['success', 'error', 'refunded', 'skipped']}}
+      - name: scheduled_at
+        description: When the charge was first due (UTC).
+      - name: processed_at
+        description: When it was paid.
+      - name: total_price_eur
+        description: Amount charged.
+      - name: error_type
+        description: Payment error for failed charges.
+      - name: retry_date
+        description: Next retry for a charge that is still failing.
+      - name: number_times_tried
+        description: Attempts so far, including the first.
+      - name: order_id
+        description: Shopify order created by the charge.
+      - name: billing_cycle_date
+        description: Local date the charge was first due.

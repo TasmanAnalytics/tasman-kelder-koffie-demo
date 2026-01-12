@@ -1,0 +1,306 @@
+version: 2
+
+models:
+  - name: stg_shopify__customers
+    description: Shopify customers, one row per customer.
+    columns:
+      - name: customer_id
+        description: Shopify customer id.
+        tests: [unique, not_null]
+      - name: email
+        description: Email address, lower case.
+      - name: first_name
+        description: First name.
+      - name: last_name
+        description: Last name.
+      - name: country_code
+        description: Country of the default address, ISO 3166-1 alpha-2.
+        tests:
+          - accepted_values: {arguments: {values: ['NL', 'BE', 'DE', 'LU', 'FR']}}
+      - name: created_at
+        description: When the customer record was created (UTC).
+      - name: accepts_marketing
+        description: Whether the customer gave marketing consent.
+      - name: tags
+        description: Shopify customer tags, comma separated.
+
+  - name: stg_shopify__products
+    description: Products in the catalogue.
+    columns:
+      - name: product_id
+        description: Shopify product id.
+        tests: [unique, not_null]
+      - name: product_title
+        description: Product name as shown in the shop.
+      - name: product_type
+        description: Kelder product type.
+        tests:
+          - accepted_values: {arguments: {values: ['single_origin', 'blend', 'decaf', 'equipment', 'gift_box', 'gift_subscription', 'bundle']}}
+
+  - name: stg_shopify__product_variants
+    description: Sellable variants with list prices including VAT, joined to their product.
+    columns:
+      - name: variant_id
+        description: Shopify variant id.
+        tests: [unique, not_null]
+      - name: product_id
+        description: Parent product.
+        tests:
+          - relationships: {arguments: {to: ref('stg_shopify__products'), field: product_id}}
+      - name: sku
+        description: Stock keeping unit.
+        tests: [unique, not_null]
+      - name: variant_title
+        description: Variant label, for example "250 g / filter".
+      - name: list_price_eur
+        description: List price in EUR, including VAT.
+      - name: grams
+        description: Shipping weight in grams.
+      - name: product_title
+        description: Product name.
+      - name: product_type
+        description: Kelder product type.
+
+  - name: stg_shopify__orders
+    description: >
+      Shopify orders, one row per order. Subscription renewals are orders created by the
+      billing system (source_name subscription_contract or recharge). Web orders get a channel
+      from UTM parameters and the referrer.
+    columns:
+      - name: order_id
+        description: Shopify order id.
+        tests: [unique, not_null]
+      - name: order_name
+        description: Human-readable order number, like "#K48213".
+        tests: [unique]
+      - name: customer_id
+        description: Shopify customer id.
+        tests:
+          - not_null
+          - relationships: {arguments: {to: ref('stg_shopify__customers'), field: customer_id}}
+      - name: created_at
+        description: When the order was placed (UTC).
+        tests: [not_null]
+      - name: processed_at
+        description: When payment was processed (UTC).
+      - name: financial_status
+        description: Payment status.
+        tests:
+          - accepted_values: {arguments: {values: ['paid', 'refunded', 'partially_refunded']}}
+      - name: fulfillment_status
+        description: fulfilled once the order has shipped; empty before that.
+      - name: currency
+        description: Always EUR.
+        tests:
+          - accepted_values: {arguments: {values: ['EUR']}}
+      - name: subtotal_price_eur
+        description: Line totals after discounts, including VAT, excluding shipping.
+      - name: total_tax_eur
+        description: VAT included in the order total.
+      - name: total_discounts_eur
+        description: Discounts applied (subscriber discount, discount codes).
+      - name: total_price_eur
+        description: Amount charged, including VAT and shipping.
+      - name: source_name
+        description: Where the order came from.
+        tests:
+          - accepted_values: {arguments: {values: ['web', 'subscription_contract', 'recharge']}}
+      - name: is_subscription_renewal
+        description: True for orders created by a scheduled subscription charge.
+      - name: is_subscription_first_order
+        description: True for the web checkout that started a subscription.
+      - name: is_gift_subscription_order
+        description: True for prepaid gift subscription purchases and their shipments.
+      - name: tags
+        description: Shopify order tags.
+      - name: landing_site
+        description: First page of the visit that led to the order, with query string.
+      - name: referring_site
+        description: Referrer of that visit.
+      - name: utm_source
+        description: utm_source from the landing site.
+      - name: utm_medium
+        description: utm_medium from the landing site.
+      - name: utm_campaign
+        description: utm_campaign from the landing site.
+      - name: channel
+        description: >
+          Marketing channel for web orders: paid_social, paid_search, email, organic, referral or
+          direct. Empty for subscription renewals.
+        tests:
+          - accepted_values: {arguments: {values: ['paid_social', 'paid_search', 'email', 'organic', 'referral', 'direct']}}
+      - name: discount_codes
+        description: Discount codes used, as JSON.
+      - name: cancelled_at
+        description: When the order was cancelled, if it was.
+
+  - name: stg_shopify__order_lines
+    description: Order line items.
+    columns:
+      - name: order_line_id
+        description: Shopify line item id.
+        tests: [unique, not_null]
+      - name: order_id
+        description: Parent order.
+        tests:
+          - relationships: {arguments: {to: ref('stg_shopify__orders'), field: order_id}}
+      - name: variant_id
+        description: Variant sold.
+        tests:
+          - relationships: {arguments: {to: ref('stg_shopify__product_variants'), field: variant_id}}
+      - name: sku
+        description: SKU sold.
+      - name: quantity
+        description: Units.
+      - name: unit_price_eur
+        description: Unit list price including VAT.
+      - name: discount_eur
+        description: Discount on this line.
+      - name: line_total_eur
+        description: Quantity times unit price, minus discount.
+
+  - name: stg_shopify__refunds
+    description: Refunds against orders.
+    columns:
+      - name: refund_id
+        description: Shopify refund id.
+        tests: [unique, not_null]
+      - name: order_id
+        description: Refunded order.
+        tests:
+          - relationships: {arguments: {to: ref('stg_shopify__orders'), field: order_id}}
+      - name: refunded_at
+        description: When the refund was issued (UTC).
+      - name: refund_amount_eur
+        description: Amount refunded.
+      - name: refund_note
+        description: Reason entered by customer service, for example late_delivery or wrong_grind.
+
+  - name: stg_shopify__fulfillments
+    description: Shipments. One fulfillment per order.
+    columns:
+      - name: fulfillment_id
+        description: Shopify fulfillment id.
+        tests: [unique, not_null]
+      - name: order_id
+        description: Order shipped.
+        tests:
+          - relationships: {arguments: {to: ref('stg_shopify__orders'), field: order_id}}
+      - name: shipped_at
+        description: When the parcel was handed to the carrier (UTC).
+      - name: carrier
+        description: PostNL for the Netherlands, DHL elsewhere.
+        tests:
+          - accepted_values: {arguments: {values: ['PostNL', 'DHL']}}
+      - name: fulfillment_status
+        description: success, or failure when the carrier never delivered.
+        tests:
+          - accepted_values: {arguments: {values: ['success', 'failure']}}
+      - name: delivered_at
+        description: When the carrier delivered (UTC). Empty while in transit or if never delivered.
+
+  - name: stg_shopify__subscription_contracts
+    description: >
+      Subscription contracts from the Shopify subscription app. Statuses are the app's own
+      (ACTIVE, PAUSED, CANCELLED, FAILED, EXPIRED); int_subscriptions_unified maps them.
+    columns:
+      - name: contract_id
+        description: Shopify subscription contract id.
+        tests: [unique, not_null]
+      - name: customer_id
+        description: Shopify customer id.
+        tests:
+          - relationships: {arguments: {to: ref('stg_shopify__customers'), field: customer_id}}
+      - name: source_status
+        description: Contract status in the Shopify app.
+        tests:
+          - accepted_values: {arguments: {values: ['ACTIVE', 'PAUSED', 'CANCELLED', 'FAILED', 'EXPIRED']}}
+      - name: created_at
+        description: When the contract was created, which is when the subscription started (UTC).
+      - name: updated_at
+        description: Last change to the contract.
+      - name: next_billing_date
+        description: Next scheduled billing date, local date.
+      - name: billing_interval
+        description: Billing interval unit, WEEK.
+      - name: billing_interval_count
+        description: Number of interval units between shipments (2, 4 or 6 weeks).
+      - name: interval_days
+        description: Days between shipments.
+      - name: variant_id
+        description: Coffee variant on subscription.
+      - name: quantity
+        description: Bags per shipment.
+      - name: paused_at
+        description: Start of the current pause, for paused contracts.
+      - name: pause_until
+        description: Date the current pause ends, for paused contracts.
+      - name: cancelled_at
+        description: When the contract ended (cancelled, failed or expired).
+      - name: cancellation_reason
+        description: Customer's reason, or max_retries_reached when billing gave up.
+      - name: is_gift
+        description: Prepaid gift subscription (custom attribute is_gift).
+      - name: grind
+        description: Grind chosen by the subscriber.
+      - name: payment_method
+        description: Payment method, mandate (SEPA or iDEAL), card or paypal.
+      - name: origin_order_id
+        description: The checkout order that created the contract.
+      - name: synced_at
+        description: When Fivetran last synced the row.
+
+  - name: stg_shopify__subscription_contract_events
+    description: Status history of contracts, from the subscription app's webhook log.
+    columns:
+      - name: contract_event_id
+        description: Event id.
+        tests: [unique, not_null]
+      - name: contract_id
+        description: Contract the event belongs to.
+        tests:
+          - relationships: {arguments: {to: ref('stg_shopify__subscription_contracts'), field: contract_id}}
+      - name: event_type
+        description: What happened.
+        tests:
+          - accepted_values: {arguments: {values: ['created', 'paused', 'resumed', 'cancelled', 'expired', 'billing_failed', 'billing_succeeded']}}
+      - name: occurred_at
+        description: When it happened (UTC).
+      - name: reason
+        description: Cancellation reason, for cancelled events.
+      - name: pause_until
+        description: Planned end of the pause, for paused events.
+      - name: error_code
+        description: Payment error, for billing_failed events.
+      - name: order_id
+        description: Order created, for billing_succeeded events.
+
+  - name: stg_shopify__subscription_billing_attempts
+    description: Every billing attempt for a contract, including retries after a failed payment.
+    columns:
+      - name: billing_attempt_id
+        description: Attempt id.
+        tests: [unique, not_null]
+      - name: contract_id
+        description: Contract billed.
+        tests:
+          - relationships: {arguments: {to: ref('stg_shopify__subscription_contracts'), field: contract_id}}
+      - name: attempted_at
+        description: When the attempt ran (UTC).
+      - name: completed_at
+        description: When the payment provider answered.
+      - name: error_code
+        description: Payment error; empty on success.
+      - name: error_message
+        description: Provider's error message.
+      - name: is_success
+        description: True when the attempt was paid.
+      - name: order_id
+        description: Order created by a successful attempt.
+      - name: idempotency_key
+        description: kelder-<contract id>-<billing cycle yyyymmdd>-<attempt number>.
+        tests: [unique]
+      - name: billing_cycle_date
+        description: Billing cycle the attempt belongs to. Retries keep the cycle date of the first attempt.
+      - name: attempt_number
+        description: 1 for the first attempt of a cycle, then counting up with each retry.

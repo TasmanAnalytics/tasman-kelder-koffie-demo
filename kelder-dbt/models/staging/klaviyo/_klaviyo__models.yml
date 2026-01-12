@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  - name: stg_klaviyo__profiles
+    description: Klaviyo profiles.
+    columns:
+      - name: profile_id
+        description: Klaviyo profile id.
+        tests: [unique, not_null]
+      - name: email
+        description: Email address, lower case.
+      - name: shopify_customer_id
+        description: Matching Shopify customer.
+      - name: created_at
+        description: When the profile was created (UTC).
+  - name: stg_klaviyo__campaigns
+    description: Weekly newsletter campaigns, sent on Thursdays at 10:00 Amsterdam time.
+    columns:
+      - name: campaign_id
+        description: Klaviyo campaign id.
+        tests: [unique, not_null]
+      - name: campaign_name
+        description: Internal campaign name, prefixed with the send date.
+      - name: subject
+        description: Email subject line.
+      - name: sent_at
+        description: Send time (UTC).
+      - name: status
+        description: Campaign status.
+      - name: audience_size
+        description: Profiles the campaign was sent to.
+  - name: stg_klaviyo__flows
+    description: Automated flows.
+    columns:
+      - name: flow_id
+        description: Klaviyo flow id.
+        tests: [unique, not_null]
+      - name: flow_name
+        description: Flow name.
+  - name: stg_klaviyo__events
+    description: Email engagement and Placed Order events per profile.
+    columns:
+      - name: event_id
+        description: Klaviyo event id.
+        tests: [unique, not_null]
+      - name: metric_name
+        description: Event type.
+        tests:
+          - accepted_values: {arguments: {values: ['Received Email', 'Opened Email', 'Clicked Email', 'Placed Order', 'Unsubscribed']}}
+      - name: profile_id
+        description: Profile.
+        tests:
+          - relationships: {arguments: {to: ref('stg_klaviyo__profiles'), field: profile_id}}
+      - name: occurred_at
+        description: When it happened (UTC).
+      - name: campaign_id
+        description: Campaign, for campaign emails.
+      - name: flow_id
+        description: Flow, for flow emails.
+      - name: value_eur
+        description: Order value, for Placed Order.
+      - name: attributed_message_id
+        description: Message Klaviyo attributes the event to.
+      - name: order_id
+        description: Shopify order, for Placed Order.

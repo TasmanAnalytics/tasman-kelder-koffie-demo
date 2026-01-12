@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: ads
+    description: Daily campaign performance from Meta Ads and Google Ads, synced by Fivetran.
+    schema: raw_ads
+    loaded_at_field: _fivetran_synced
+    tables:
+      - name: meta_ads_daily
+        description: Meta (Facebook and Instagram) spend per campaign per day, in EUR.
+      - name: google_ads_daily
+        description: Google Ads cost per campaign per day, in micros of EUR.

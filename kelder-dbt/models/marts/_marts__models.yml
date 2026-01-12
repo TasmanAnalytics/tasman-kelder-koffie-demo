@@ -1,0 +1,265 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: One row per Shopify customer, with first web order and subscription summary.
+    columns:
+      - name: customer_id
+        description: Shopify customer id.
+        tests: [unique, not_null]
+      - name: email
+        description: Email address.
+      - name: first_name
+        description: First name.
+      - name: last_name
+        description: Last name.
+      - name: country_code
+        description: Country code.
+      - name: country_name
+        description: Country name.
+      - name: region
+        description: Reporting region (Benelux, DACH, Other EU).
+      - name: created_at
+        description: When the customer record was created.
+      - name: accepts_marketing
+        description: Marketing consent.
+      - name: first_order_at
+        description: First web order.
+      - name: first_order_channel
+        description: Channel of the first web order.
+      - name: web_orders
+        description: Number of web orders (excludes subscription renewals).
+      - name: subscriptions
+        description: Number of subscriptions the customer has had.
+      - name: is_active_subscriber
+        description: Has an active or paused non-gift subscription now.
+
+  - name: fct_orders
+    description: One row per Shopify order, with channel, subscription and gift flags, refunds and delivery.
+    columns:
+      - name: order_id
+        description: Shopify order id.
+        tests: [unique, not_null]
+      - name: order_name
+        description: Order number.
+      - name: customer_id
+        description: Customer.
+        tests:
+          - relationships: {arguments: {to: ref('dim_customers'), field: customer_id}}
+      - name: created_at
+        description: When the order was placed (UTC).
+      - name: order_date
+        description: Local date of the order.
+      - name: source_name
+        description: web, subscription_contract or recharge.
+      - name: channel
+        description: Marketing channel of web orders. Empty for renewals.
+      - name: is_subscription_order
+        description: Subscription checkout or renewal.
+      - name: is_subscription_first_order
+        description: The checkout that started a subscription.
+      - name: is_subscription_renewal
+        description: Created by a scheduled subscription charge.
+      - name: is_gift
+        description: Gift subscription purchase or shipment, or a Christmas gift box.
+      - name: contains_bundle
+        description: Contains the Vaderdag Bundel.
+      - name: items
+        description: Units on the order.
+      - name: subtotal_price_eur
+        description: Line totals after discounts, including VAT.
+      - name: total_discounts_eur
+        description: Discounts.
+      - name: total_tax_eur
+        description: VAT included.
+      - name: total_price_eur
+        description: Amount charged, including shipping.
+      - name: is_refunded
+        description: Any refund against the order.
+      - name: refunded_eur
+        description: Total refunded.
+      - name: first_refunded_at
+        description: First refund.
+      - name: carrier
+        description: PostNL or DHL.
+      - name: shipped_at
+        description: Handed to the carrier.
+      - name: delivered_at
+        description: Delivered.
+      - name: has_failed_delivery
+        description: Carrier never delivered.
+      - name: delivery_days
+        description: Local calendar days from shipping to delivery.
+
+  - name: fct_subscriptions
+    description: One row per subscription key, with status, churn timestamp, MRR and acquisition channel.
+    columns:
+      - name: subscription_key
+        description: Stable subscription key.
+        tests: [unique, not_null]
+      - name: customer_id
+        description: Customer.
+        tests:
+          - relationships: {arguments: {to: ref('dim_customers'), field: customer_id}}
+      - name: origin_system
+        description: shopify or recharge.
+      - name: shopify_contract_id
+        description: Shopify contract id, if any.
+      - name: recharge_subscription_id
+        description: Recharge subscription id, if any.
+      - name: started_at
+        description: When the subscription started.
+      - name: churned_at
+        description: Timestamp the subscription entered a terminal cancelled state.
+      - name: ended_at
+        description: When the subscription ended (cancelled or expired).
+      - name: status
+        description: Unified subscription status.
+        tests:
+          - accepted_values: {arguments: {values: ['active', 'paused', 'cancelled', 'expired']}}
+      - name: cancellation_reason
+        description: Reason, for cancelled subscriptions.
+      - name: is_gift
+        description: Prepaid gift subscription.
+      - name: interval_days
+        description: Days between shipments.
+      - name: quantity
+        description: Bags per shipment.
+      - name: variant_id
+        description: Coffee variant.
+      - name: sku
+        description: Coffee SKU.
+      - name: product_title
+        description: Coffee name.
+      - name: price_eur
+        description: Price per shipment.
+      - name: mrr_eur
+        description: MRR attributed to the subscription (price per shipment normalised to a month, active subscriptions only).
+      - name: payment_method
+        description: Payment method, where known.
+      - name: origin_order_id
+        description: Checkout order that started the subscription.
+      - name: first_order_channel
+        description: Channel of that checkout order.
+
+  - name: fct_subscription_events
+    description: Subscription events from int_subscription_events, one row per event.
+    columns:
+      - name: subscription_event_id
+        description: Surrogate key.
+        tests: [unique, not_null]
+      - name: subscription_key
+        description: Subscription.
+        tests:
+          - relationships: {arguments: {to: ref('fct_subscriptions'), field: subscription_key}}
+      - name: event_type
+        description: started, paused, resumed, cancelled, expired, payment_failed or payment_recovered.
+      - name: occurred_at
+        description: When it happened.
+      - name: event_month
+        description: Local month.
+      - name: source
+        description: Origin of the event.
+      - name: cancellation_reason
+        description: For cancelled events.
+      - name: is_voluntary_cancellation
+        description: Customer-initiated cancellation.
+      - name: billing_cycle_date
+        description: For payment_failed events.
+      - name: recovered_at
+        description: For recovered payment_failed events.
+      - name: is_recovered_within_30_days
+        description: For payment_failed events.
+      - name: is_gift
+        description: Gift subscription event.
+
+  - name: metrics_subscriber_churn_monthly
+    description: >
+      Governed monthly subscriber churn. Base: subscriptions active or paused at 00:00 Amsterdam
+      time on the first of the month, excluding gift subscriptions. Churned: voluntary
+      cancellations in the month plus subscriptions whose payment failed in the month.
+    columns:
+      - name: month
+        description: First day of the month.
+        tests: [unique, not_null]
+      - name: base_subscribers
+        description: Subscriptions active or paused at the start of the month, excluding gifts.
+      - name: churned_subscribers
+        description: Subscriptions counted as churned in the month.
+      - name: churn_rate
+        description: churned_subscribers / base_subscribers.
+
+  - name: metrics_new_subscribers_monthly
+    description: New subscriptions started per month, excluding gift subscriptions.
+    columns:
+      - name: month
+        description: First day of the month.
+        tests: [unique, not_null]
+      - name: new_subscribers
+        description: Subscriptions started in the month, excluding gifts.
+      - name: new_subscribers_paid
+        description: Of which the first order came through paid social or paid search.
+      - name: new_subscribers_unpaid
+        description: Of which the first order came through another channel.
+      - name: new_subscribers_without_web_order
+        description: Of which no web checkout order is linked.
+
+  - name: metrics_pause_rate_monthly
+    description: Pauses per month. Pause rate is pauses started in the month over the base at the start of the month.
+    columns:
+      - name: month
+        description: First day of the month.
+        tests: [unique, not_null]
+      - name: base_subscribers
+        description: Base at the start of the month, as in churn.
+      - name: paused_at_month_start
+        description: Base subscriptions paused at the start of the month.
+      - name: pauses_started
+        description: Pauses started in the month.
+      - name: pause_rate
+        description: pauses_started / base_subscribers.
+      - name: paused_share
+        description: paused_at_month_start / base_subscribers.
+
+  - name: metrics_email_attribution_daily
+    description: >
+      Daily email activity and email-attributed revenue: Klaviyo Placed Order value where the same
+      profile clicked an email within the five days before the order.
+    columns:
+      - name: day
+        description: Local date.
+        tests: [unique, not_null]
+      - name: emails_received
+        description: Received Email events.
+      - name: emails_opened
+        description: Opened Email events.
+      - name: emails_clicked
+        description: Clicked Email events.
+      - name: placed_orders
+        description: Placed Order events.
+      - name: placed_order_revenue_eur
+        description: Value of Placed Order events.
+      - name: attributed_orders
+        description: Placed Orders with a click in the previous five days.
+      - name: attributed_revenue_eur
+        description: Email-attributed revenue.
+
+  - name: metrics_cac_monthly
+    description: Monthly customer acquisition cost for paid channels.
+    columns:
+      - name: month
+        description: First day of the month.
+        tests: [not_null]
+      - name: channel
+        description: paid_social or paid_search.
+      - name: platform
+        description: meta or google.
+      - name: ad_spend_eur
+        description: Spend on the platform in the month.
+      - name: new_subscribers
+        description: New subscriptions (not gifts) whose first order came through the channel.
+      - name: cac_eur
+        description: ad_spend_eur / new_subscribers.
+    tests:
+      - unique_combination:
+          arguments: {columns: [month, channel]}

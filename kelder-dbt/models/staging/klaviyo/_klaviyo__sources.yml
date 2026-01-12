@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: klaviyo
+    description: Klaviyo email marketing, synced by Fivetran.
+    schema: raw_klaviyo
+    loaded_at_field: _fivetran_synced
+    tables:
+      - name: profiles
+        description: Klaviyo profiles (people with marketing consent), linked to Shopify customers.
+      - name: campaigns
+        description: Newsletter campaigns, one per weekly send.
+      - name: flows
+        description: Automated flows (welcome, post-purchase, win-back, abandoned checkout).
+      - name: events
+        description: >
+          Engagement and order events per profile. Placed Order events are Shopify web orders by
+          profiles; attributed_message_id is Klaviyo's own attribution.
