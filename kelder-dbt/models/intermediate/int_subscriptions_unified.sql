@@ -38,7 +38,17 @@ from_shopify as (
         r.synced_at as recharge_synced_at,
         -- once a contract has a Recharge subscription, Recharge holds its current state
         case when r.recharge_subscription_id is null then c.cancelled_at else r.cancelled_at end as ended_at_source,
-        case when r.recharge_subscription_id is null then c.cancellation_reason else r.cancellation_reason end as cancellation_reason
+        case when r.recharge_subscription_id is null then c.cancellation_reason else r.cancellation_reason end as cancellation_reason,
+        -- 2026-03-12 billing migration (decision 0007): the legacy import path had no paused state,
+        -- so contracts that were PAUSED at the last Shopify sync arrived in Recharge as cancelled,
+        -- stamped 2026-03-12 00:00:00 UTC with no reason. Genuine cancellations queued during the
+        -- freeze carry the same stamp, but their contract was ACTIVE, so they are not flagged.
+        coalesce(
+            c.source_status = 'PAUSED'
+            and r.cancelled_at = timestamptz '2026-03-12 00:00:00+00'
+            and r.cancellation_reason is null,
+            false
+        ) as is_migration_artifact
     from contracts as c
     left join recharge as r on r.shopify_contract_id = c.contract_id
 ),
@@ -63,7 +73,8 @@ from_recharge as (
         r.paused_until,
         r.synced_at as recharge_synced_at,
         r.cancelled_at as ended_at_source,
-        r.cancellation_reason
+        r.cancellation_reason,
+        false as is_migration_artifact
     from recharge as r
     left join first_recharge_charge as f using (recharge_subscription_id)
     where r.shopify_contract_id is null
@@ -112,5 +123,6 @@ select
     status,
     case when status = 'cancelled' then ended_at_source end as churned_at,
     case when status in ('cancelled', 'expired') then ended_at_source end as ended_at,
-    case when status = 'cancelled' then cancellation_reason end as cancellation_reason
+    case when status = 'cancelled' then cancellation_reason end as cancellation_reason,
+    is_migration_artifact
 from unified

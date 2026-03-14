@@ -1,0 +1,17 @@
+version: 2
+seeds:
+  - name: business_events
+    description: >
+      Source CSV for context.business_events. One row per dated event that moved a metric.
+      affected_metrics is semicolon separated here and an array in the model.
+    config:
+      schema: context_seeds
+      column_types:
+        event_date: date
+        event_type: varchar
+        title: varchar
+        description: varchar
+        affected_metrics: varchar
+        expected_effect: varchar
+        owner: varchar
+        source_link: varchar

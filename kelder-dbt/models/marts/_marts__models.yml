@@ -111,6 +111,11 @@ models:
         description: When the subscription started.
       - name: churned_at
         description: Timestamp the subscription entered a terminal cancelled state.
+        meta:
+          caveat: >
+            The 2026-03-12 Recharge backfill wrote churned_at for ~1,900
+            paused subscriptions. These rows carry is_migration_artifact
+            = true and are excluded from churn metrics as of v2026.03.2.
       - name: ended_at
         description: When the subscription ended (cancelled or expired).
       - name: status
@@ -141,6 +146,11 @@ models:
         description: Checkout order that started the subscription.
       - name: first_order_channel
         description: Channel of that checkout order.
+      - name: is_migration_artifact
+        description: >
+          True for subscriptions that were paused at the last Shopify sync and arrived in Recharge
+          as cancelled at 2026-03-12 00:00:00 UTC with no reason (decision 0007). They were not
+          cancelled. Excluded from churn metrics.
 
   - name: fct_subscription_events
     description: Subscription events from int_subscription_events, one row per event.
@@ -172,22 +182,31 @@ models:
         description: For payment_failed events.
       - name: is_gift
         description: Gift subscription event.
+      - name: is_migration_artifact
+        description: True for the cancellation events written by the 2026-03-12 migration (decision 0007). They did not happen.
 
   - name: metrics_subscriber_churn_monthly
     description: >
       Governed monthly subscriber churn. Base: subscriptions active or paused at 00:00 Amsterdam
       time on the first of the month, excluding gift subscriptions. Churned: voluntary
       cancellations in the month plus subscriptions whose payment failed in the month.
+      Migration artefacts (decision 0007) are excluded; the _raw columns include them.
     columns:
       - name: month
         description: First day of the month.
         tests: [unique, not_null]
       - name: base_subscribers
-        description: Subscriptions active or paused at the start of the month, excluding gifts.
+        description: Subscriptions active or paused at the start of the month, excluding gifts. Adjusted.
       - name: churned_subscribers
-        description: Subscriptions counted as churned in the month.
+        description: Subscriptions counted as churned in the month. Adjusted.
       - name: churn_rate
-        description: churned_subscribers / base_subscribers.
+        description: churned_subscribers / base_subscribers. Adjusted; the number to report.
+      - name: base_subscribers_raw
+        description: Base with migration artefacts treated as cancelled, as in Recharge exports.
+      - name: churned_subscribers_raw
+        description: Churned including migration artefacts.
+      - name: churn_rate_raw
+        description: Churn including migration artefacts. For finance reconciliation against Recharge exports only.
 
   - name: metrics_new_subscribers_monthly
     description: New subscriptions started per month, excluding gift subscriptions.

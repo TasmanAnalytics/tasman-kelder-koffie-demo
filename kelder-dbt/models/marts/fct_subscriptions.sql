@@ -35,7 +35,8 @@ select
     end as mrr_eur,
     s.payment_method,
     s.origin_order_id,
-    o.channel as first_order_channel
+    o.channel as first_order_channel,
+    s.is_migration_artifact
 from subs as s
 left join orders as o on o.order_id = s.origin_order_id
 left join variants as v on v.variant_id = s.variant_id

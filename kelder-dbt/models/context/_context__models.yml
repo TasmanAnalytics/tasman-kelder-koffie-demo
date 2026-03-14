@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: context_business_events
+    description: >
+      context.business_events: dated events that moved a metric (migrations, promotions,
+      outages, definition changes, logistics). Check this table before explaining any anomaly
+      in a metric. One row per event; see source_link for the decision record, ticket or thread.
+    columns:
+      - name: event_date
+        description: Date the event started (local date).
+        tests: [not_null]
+      - name: event_type
+        description: migration, promo, outage, definition_change or logistics.
+        tests:
+          - accepted_values: {arguments: {values: ['migration', 'promo', 'outage', 'definition_change', 'logistics']}}
+      - name: title
+        description: Short title.
+        tests: [not_null, unique]
+      - name: description
+        description: What happened and what it does to the numbers.
+      - name: affected_metrics
+        description: Metrics the event moves, as an array of metric names.
+      - name: expected_effect
+        description: Expected direction of the effect (up, down, gap, none), with a qualifier where the effect is not real.
+      - name: owner
+        description: Person who owns the event record.
+      - name: source_link
+        description: Decision record, Linear ticket, Slack thread or Notion page with the detail.

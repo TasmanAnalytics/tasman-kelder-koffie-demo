@@ -2,8 +2,9 @@ with months as (
     select * from {{ ref('int_reporting_months') }}
 ),
 
+-- adjusted stream: migration artefacts stay paused (decision 0007)
 events as (
-    select * from {{ ref('int_subscription_events') }}
+    select * from {{ ref('int_subscription_events_adjusted') }}
     where not is_gift
 ),
 
