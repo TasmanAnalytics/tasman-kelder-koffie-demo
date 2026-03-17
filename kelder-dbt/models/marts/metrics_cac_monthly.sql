@@ -19,6 +19,7 @@ new_subs as (
     select {{ local_month('started_at') }} as month, first_order_channel as channel, count(*) as new_subscribers
     from {{ ref('fct_subscriptions') }}
     where not is_gift
+        and not is_legacy_pause_restore
     group by 1, 2
 )
 

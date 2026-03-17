@@ -151,6 +151,17 @@ models:
           True for subscriptions that were paused at the last Shopify sync and arrived in Recharge
           as cancelled at 2026-03-12 00:00:00 UTC with no reason (decision 0007). They were not
           cancelled. Excluded from churn metrics.
+      - name: is_legacy_pause_restore
+        description: >
+          True for Recharge subscriptions re-created by operations for a customer whose pause was
+          wiped by the migration (properties.restore_source = legacy_pause).
+        meta:
+          caveat: >
+            Restores are continuations, not new subscribers. The restore continues the original
+            subscription's key and tenure (continues_subscription_key). Exclude restores from new
+            subscriber counts and from acquisition metrics.
+      - name: continues_subscription_key
+        description: For restores, the key of the original subscription they continue.
 
   - name: fct_subscription_events
     description: Subscription events from int_subscription_events, one row per event.
@@ -209,7 +220,9 @@ models:
         description: Churn including migration artefacts. For finance reconciliation against Recharge exports only.
 
   - name: metrics_new_subscribers_monthly
-    description: New subscriptions started per month, excluding gift subscriptions.
+    description: >
+      New subscriptions started per month, excluding gift subscriptions and legacy pause restores
+      (restores continue an existing subscription).
     columns:
       - name: month
         description: First day of the month.

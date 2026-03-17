@@ -21,6 +21,8 @@ select
     s.paused_until,
     s.is_prepaid,
     coalesce(cast(json_extract(s.properties, '$.is_gift') as boolean), false) as is_gift,
+    json_extract_string(s.properties, '$.restore_source') as restore_source,
+    try_cast(json_extract_string(s.properties, '$.legacy_contract_id') as bigint) as legacy_contract_id,
     s._fivetran_synced as synced_at
 from {{ source('recharge', 'subscriptions') }} as s
 left join {{ ref('stg_recharge__customers') }} as c on c.recharge_customer_id = s.customer_id

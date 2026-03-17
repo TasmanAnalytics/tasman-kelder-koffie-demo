@@ -67,6 +67,14 @@ models:
         description: Prepaid subscription (gifts).
       - name: is_gift
         description: Gift subscription (property is_gift).
+      - name: restore_source
+        description: >
+          legacy_pause for subscriptions the operations team re-created for customers whose pause
+          was wiped by the 2026-03-12 migration. See context/quirks/legacy_pause_restores.md.
+        tests:
+          - accepted_values: {arguments: {values: ['legacy_pause']}}
+      - name: legacy_contract_id
+        description: For restores, the Shopify contract whose pause was wiped.
       - name: synced_at
         description: When Fivetran last synced the row.
 

@@ -48,7 +48,9 @@ from_shopify as (
             and r.cancelled_at = timestamptz '2026-03-12 00:00:00+00'
             and r.cancellation_reason is null,
             false
-        ) as is_migration_artifact
+        ) as is_migration_artifact,
+        false as is_legacy_pause_restore,
+        cast(null as varchar) as continues_subscription_key
     from contracts as c
     left join recharge as r on r.shopify_contract_id = c.contract_id
 ),
@@ -74,7 +76,11 @@ from_recharge as (
         r.synced_at as recharge_synced_at,
         r.cancelled_at as ended_at_source,
         r.cancellation_reason,
-        false as is_migration_artifact
+        false as is_migration_artifact,
+        -- operations re-created wiped pauses as new Recharge subscriptions from 2026-03-16;
+        -- they continue the original subscription (context/quirks/legacy_pause_restores.md)
+        coalesce(r.restore_source = 'legacy_pause', false) as is_legacy_pause_restore,
+        case when r.restore_source = 'legacy_pause' then 'shp-' || r.legacy_contract_id end as continues_subscription_key
     from recharge as r
     left join first_recharge_charge as f using (recharge_subscription_id)
     where r.shopify_contract_id is null
@@ -124,5 +130,7 @@ select
     case when status = 'cancelled' then ended_at_source end as churned_at,
     case when status in ('cancelled', 'expired') then ended_at_source end as ended_at,
     case when status = 'cancelled' then cancellation_reason end as cancellation_reason,
-    is_migration_artifact
+    is_migration_artifact,
+    is_legacy_pause_restore,
+    continues_subscription_key
 from unified

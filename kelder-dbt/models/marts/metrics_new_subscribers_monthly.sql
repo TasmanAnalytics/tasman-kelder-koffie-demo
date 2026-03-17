@@ -2,9 +2,11 @@ with months as (
     select * from {{ ref('int_reporting_months') }}
 ),
 
+-- restores continue an existing subscription and are not new (context/quirks/legacy_pause_restores.md)
 subs as (
     select * from {{ ref('fct_subscriptions') }}
     where not is_gift
+        and not is_legacy_pause_restore
 )
 
 select
