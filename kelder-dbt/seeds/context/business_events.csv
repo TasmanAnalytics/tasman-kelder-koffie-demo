@@ -1,2 +1,3 @@
 event_date,event_type,title,description,affected_metrics,expected_effect,owner,source_link
 2026-03-12,migration,Shopify to Recharge billing migration,"Legacy import path has no paused state; about 1,900 paused subscriptions arrived as cancelled at 00:00 UTC. Flagged and excluded from churn.",subscriber_churn_rate;mrr,up (artificial),Sanne (data),context/decisions/0007
+2026-03-28,promo,Pause-instead-of-cancel campaign,Recharge cancel flow now offers a pause. A rising pause rate is expected and healthy.,subscriber_churn_rate;pause_rate,down,Joris (retention),Linear KEL-412
