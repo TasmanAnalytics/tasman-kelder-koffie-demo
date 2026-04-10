@@ -1,5 +1,7 @@
 -- Email-attributed revenue: Klaviyo Placed Order value where the same profile clicked an email
 -- in the five days before the order.
+-- The Fivetran Klaviyo connector was down from 2026-04-09 06:00 UTC to 2026-04-10 13:00 UTC and
+-- never backfilled (context.business_events). Days touched by the gap are flagged incomplete.
 
 with days as (
     select cast(d as date) as day
@@ -50,6 +52,7 @@ email_activity as (
 
 select
     d.day,
+    d.day between date '2026-04-09' and date '2026-04-15' as is_incomplete,
     coalesce(a.emails_received, 0) as emails_received,
     coalesce(a.emails_opened, 0) as emails_opened,
     coalesce(a.emails_clicked, 0) as emails_clicked,

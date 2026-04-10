@@ -1,3 +1,4 @@
 event_date,event_type,title,description,affected_metrics,expected_effect,owner,source_link
 2026-03-12,migration,Shopify to Recharge billing migration,"Legacy import path has no paused state; about 1,900 paused subscriptions arrived as cancelled at 00:00 UTC. Flagged and excluded from churn.",subscriber_churn_rate;mrr,up (artificial),Sanne (data),context/decisions/0007
 2026-03-28,promo,Pause-instead-of-cancel campaign,Recharge cancel flow now offers a pause. A rising pause rate is expected and healthy.,subscriber_churn_rate;pause_rate,down,Joris (retention),Linear KEL-412
+2026-04-09,outage,Fivetran Klaviyo connector down 31h,No Klaviyo events from 06:00 UTC on 9 April to 13:00 UTC on 10 April. The 9 April campaign's results are incomplete.,email_attributed_revenue,gap,Sanne (data),https://kelder-coffee.slack.com/archives/C04KDATA01/p1775807400123459

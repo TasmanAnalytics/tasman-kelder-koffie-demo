@@ -257,10 +257,18 @@ models:
     description: >
       Daily email activity and email-attributed revenue: Klaviyo Placed Order value where the same
       profile clicked an email within the five days before the order.
+    meta:
+      caveat: >
+        No Klaviyo data from 2026-04-09 06:00 UTC to 2026-04-10 13:00 UTC (Fivetran connector
+        outage, never backfilled); figures for 9 and 10 April are incomplete. Orders placed up to
+        five days later lost the clicks that would have attributed them, so attributed revenue is
+        understated until 15 April. Shopify orders are complete. See context.business_events.
     columns:
       - name: day
         description: Local date.
         tests: [unique, not_null]
+      - name: is_incomplete
+        description: True for 9 to 15 April 2026, the days touched by the Klaviyo connector outage.
       - name: emails_received
         description: Received Email events.
       - name: emails_opened
