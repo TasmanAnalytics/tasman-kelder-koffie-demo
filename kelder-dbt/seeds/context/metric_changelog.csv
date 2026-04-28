@@ -1,0 +1,3 @@
+metric,version,valid_from,definition,reason_for_change
+subscriber_churn_rate,v1,2025-01-01,Cancelled in month / active at month start. Failed payments count as churn on day one,Initial definition
+subscriber_churn_rate,v2,2026-05-01,"As v1, with a 30-day dunning grace before a failed payment counts as churn",Recharge dunning recovers a material share of failed payments; day-one counting overstated losses

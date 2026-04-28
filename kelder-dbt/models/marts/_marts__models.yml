@@ -200,24 +200,46 @@ models:
     description: >
       Governed monthly subscriber churn. Base: subscriptions active or paused at 00:00 Amsterdam
       time on the first of the month, excluding gift subscriptions. Churned: voluntary
-      cancellations in the month plus subscriptions whose payment failed in the month.
-      Migration artefacts (decision 0007) are excluded; the _raw columns include them.
+      cancellations in the month plus failed payments, counted per the definition version.
+      Migration artefacts are excluded (decision 0007); the _raw columns include them.
+    meta:
+      caveat: >
+        v1 before May 2026, v2 from May (decision 0009, context.metric_changelog). The
+        as-reported series changes definition on 1 May 2026; use churn_rate_v2_restated for
+        comparisons across that date. The latest month is provisional (is_provisional): v2 does
+        not count failures younger than 30 days yet, so it will be revised upward.
     columns:
       - name: month
         description: First day of the month.
         tests: [unique, not_null]
+      - name: definition_version_as_reported
+        description: Churn definition used for the as-reported series in this month, v1 or v2.
+        tests:
+          - accepted_values: {arguments: {values: ['v1', 'v2']}}
       - name: base_subscribers
         description: Subscriptions active or paused at the start of the month, excluding gifts. Adjusted.
       - name: churned_subscribers
-        description: Subscriptions counted as churned in the month. Adjusted.
-      - name: churn_rate
-        description: churned_subscribers / base_subscribers. Adjusted; the number to report.
+        description: Churned subscriptions, as reported (v1 before May 2026, v2 from May). Adjusted.
+      - name: churn_rate_as_reported
+        description: churned_subscribers / base_subscribers. The as-reported number. Adjusted.
       - name: base_subscribers_raw
         description: Base with migration artefacts treated as cancelled, as in Recharge exports.
       - name: churned_subscribers_raw
-        description: Churned including migration artefacts.
-      - name: churn_rate_raw
-        description: Churn including migration artefacts. For finance reconciliation against Recharge exports only.
+        description: As-reported churned count including migration artefacts.
+      - name: churn_rate_as_reported_raw
+        description: As-reported churn including migration artefacts. For finance reconciliation against Recharge exports only; never report it without the adjusted rate.
+      - name: churned_subscribers_v1
+        description: Churned under v1 for every month. Adjusted.
+      - name: churn_rate_v1
+        description: v1 churn for every month. Adjusted.
+      - name: base_subscribers_v2_restated
+        description: Base for the restated v2 series. Adjusted.
+      - name: churned_subscribers_v2_restated
+        description: Churned under v2 for every month. Adjusted.
+      - name: churn_rate_v2_restated
+        description: v2 churn for every month. Adjusted. Use for like-for-like comparisons across 1 May 2026.
+      - name: is_provisional
+        description: True for the latest month. v2 churn for it will be revised upward as failed payments pass 30 days.
 
   - name: metrics_new_subscribers_monthly
     description: >

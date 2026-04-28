@@ -27,3 +27,28 @@ models:
         description: Person who owns the event record.
       - name: source_link
         description: Decision record, Linear ticket, Slack thread or Notion page with the detail.
+
+  - name: context_metric_changelog
+    description: >
+      context.metric_changelog: versioned metric definitions. When a metric's definition changes,
+      add a row here and a decision record. Rendered to context/metric_changelog.md.
+    columns:
+      - name: metric
+        description: Metric name.
+        tests: [not_null]
+      - name: version
+        description: Definition version, v1, v2 and so on.
+        tests: [not_null]
+      - name: valid_from
+        description: First month the definition applies to in the as-reported series.
+      - name: valid_to
+        description: Day before the next version starts; empty for the current version.
+      - name: definition
+        description: The definition in words.
+      - name: reason_for_change
+        description: Why the definition changed.
+      - name: is_current
+        description: True for the version in force now.
+    tests:
+      - unique_combination:
+          arguments: {columns: [metric, version]}

@@ -15,3 +15,13 @@ seeds:
         expected_effect: varchar
         owner: varchar
         source_link: varchar
+  - name: metric_changelog
+    description: Source CSV for context.metric_changelog. One row per metric definition version.
+    config:
+      schema: context_seeds
+      column_types:
+        metric: varchar
+        version: varchar
+        valid_from: date
+        definition: varchar
+        reason_for_change: varchar
