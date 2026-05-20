@@ -90,6 +90,11 @@ models:
         description: Carrier never delivered.
       - name: delivery_days
         description: Local calendar days from shipping to delivery.
+        meta:
+          caveat: >
+            PostNL strike, 18 to 24 May 2026: Dutch PostNL parcels shipped in that week took 3 to 7
+            days and about 1% were never delivered. Late-delivery refunds rose to about 6% of those
+            orders. Exclude the week, or say so, when comparing delivery times or refund rates.
 
   - name: fct_subscriptions
     description: One row per subscription key, with status, churn timestamp, MRR and acquisition channel.
