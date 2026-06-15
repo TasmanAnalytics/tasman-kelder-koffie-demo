@@ -145,6 +145,10 @@ models:
         description: Price per shipment.
       - name: mrr_eur
         description: MRR attributed to the subscription (price per shipment normalised to a month, active subscriptions only).
+        meta:
+          caveat: >
+            Zero for gift subscriptions by design. Gifts are prepaid for three shipments, paid once
+            at purchase, and sit outside subscriber metrics (context/quirks/gift_subscriptions.md).
       - name: payment_method
         description: Payment method, where known.
       - name: origin_order_id

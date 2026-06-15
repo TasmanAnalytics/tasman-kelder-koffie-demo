@@ -4,3 +4,4 @@ event_date,event_type,title,description,affected_metrics,expected_effect,owner,s
 2026-04-09,outage,Fivetran Klaviyo connector down 31h,No Klaviyo events from 06:00 UTC on 9 April to 13:00 UTC on 10 April. The 9 April campaign's results are incomplete.,email_attributed_revenue,gap,Sanne (data),https://kelder-coffee.slack.com/archives/C04KDATA01/p1775807400123459
 2026-05-01,definition_change,Churn v2: 30-day dunning grace,Failed payments count as churn only if not recovered within 30 days.,subscriber_churn_rate,down (definitional),Sanne (data),context/decisions/0009
 2026-05-19,logistics,PostNL courier strike,Dutch PostNL deliveries delayed 3 to 7 days for parcels shipped 18 to 24 May.,refund_rate;delivery_days,up,Lotte (operations),Linear KEL-467
+2026-06-14,promo,Father's Day gift bundle,"Vaderdag Bundel and gift subscriptions, 14 to 21 June. Gift MRR is zero by design.",aov;new_customers,up,Joris (retention),Notion campaign page
