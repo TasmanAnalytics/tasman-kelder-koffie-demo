@@ -1,0 +1,145 @@
+# Verified queries: known-correct SQL for questions people ask often.
+# Use them as the starting point for these questions and for anything close to them.
+# CI runs every query and compares the result with a pinned answer kept outside this repository,
+# so a change that moves any of these numbers fails the pull request.
+# Marts live in the default schema; context tables in the context schema.
+
+version: 1
+queries:
+  - id: churn_last_month
+    question: What was subscriber churn last month?
+    pins_down: >
+      The latest full month before the as-of date (June 2026), as reported, which is the v2
+      definition from May 2026. Migration artefacts excluded. The month is provisional: v2 does not
+      count failed payments younger than 30 days yet, so it will be revised upward.
+    sql: |
+      select
+          month,
+          definition_version_as_reported,
+          base_subscribers,
+          churned_subscribers,
+          churn_rate_as_reported,
+          is_provisional
+      from metrics_subscriber_churn_monthly
+      where month = (select max(month) from metrics_subscriber_churn_monthly)
+
+  - id: churn_march_2026
+    question: What was real churn in March 2026?
+    pins_down: >
+      Raw and adjusted churn are both returned and the adjustment is named. On 12 March 2026 the
+      Shopify to Recharge billing migration wrote about 1,900 paused subscriptions as cancelled
+      (decision 0007). Real churn is the adjusted rate. The raw rate matches Recharge exports and
+      must never be quoted without the adjusted rate.
+    sql: |
+      select
+          c.month,
+          c.churn_rate_as_reported as churn_rate_adjusted,
+          c.churn_rate_as_reported_raw as churn_rate_raw,
+          c.churned_subscribers as churned_adjusted,
+          c.churned_subscribers_raw as churned_raw,
+          (select count(*) from fct_subscriptions where is_migration_artifact) as migration_artifacts,
+          e.title as adjustment,
+          e.source_link
+      from metrics_subscriber_churn_monthly as c
+      join context.business_events as e on e.event_date = date '2026-03-12'
+      where c.month = date '2026-03-01'
+
+  - id: churn_yoy_like_for_like
+    question: How did churn in the first half of 2026 compare with the first half of 2025, like for like?
+    pins_down: >
+      Uses the restated v2 series, because the as-reported series changes definition on
+      1 May 2026 (decision 0009). Mean monthly churn, January to June, each year. June 2026 is
+      provisional and will be revised upward.
+    sql: |
+      select
+          avg(case when month between date '2025-01-01' and date '2025-06-01' then churn_rate_v2_restated end)
+              as h1_2025_churn_rate_v2,
+          avg(case when month between date '2026-01-01' and date '2026-06-01' then churn_rate_v2_restated end)
+              as h1_2026_churn_rate_v2,
+          avg(case when month between date '2026-01-01' and date '2026-06-01' then churn_rate_v2_restated end)
+              - avg(case when month between date '2025-01-01' and date '2025-06-01' then churn_rate_v2_restated end)
+              as change_in_churn_rate,
+          max(case when is_provisional then month end) as provisional_month
+      from metrics_subscriber_churn_monthly
+
+  - id: cac_by_channel
+    question: Which channel has the best CAC?
+    pins_down: >
+      First half of 2026. CAC is ad spend over new subscribers whose first order came through the
+      channel (UTM parameters on the first order, grouped as in stg_shopify__orders). Only paid
+      channels have spend. Restores and gift subscriptions are not new subscribers.
+    sql: |
+      select
+          channel,
+          sum(ad_spend_eur) as ad_spend_eur,
+          sum(new_subscribers) as new_subscribers,
+          round(sum(ad_spend_eur) / sum(new_subscribers), 2) as cac_eur
+      from metrics_cac_monthly
+      where month between date '2026-01-01' and date '2026-06-01'
+      group by channel
+      order by cac_eur
+
+  - id: fathers_day_bundle
+    question: How did the Father's Day bundle perform?
+    pins_down: >
+      Bundle SKU BUNDLE-VADERDAG-2026. Promotion dates from context.business_events: 14 to
+      21 June 2026. Gift subscriptions sold in the same week are reported separately; their MRR is
+      zero by design.
+    sql: |
+      with promo as (
+          select event_date as start_date, event_date + 7 as end_date
+          from context.business_events
+          where event_type = 'promo' and title = 'Father''s Day gift bundle'
+      ),
+      bundle_orders as (
+          select o.order_id, o.customer_id, o.total_price_eur, o.created_at
+          from fct_orders as o
+          cross join promo as p
+          where o.contains_bundle and o.order_date between p.start_date and p.end_date
+      ),
+      gifts as (
+          select count(*) as gift_subscriptions_sold
+          from fct_subscriptions as s
+          cross join promo as p
+          where s.is_gift and s.started_date between p.start_date and p.end_date
+      )
+      select
+          count(*) as bundle_orders,
+          round(sum(b.total_price_eur), 2) as bundle_order_revenue_eur,
+          round(avg(b.total_price_eur), 2) as bundle_order_aov_eur,
+          count(case when c.first_order_at = b.created_at then 1 end) as bundle_orders_from_new_customers,
+          (select gift_subscriptions_sold from gifts) as gift_subscriptions_sold
+      from bundle_orders as b
+      join dim_customers as c using (customer_id)
+
+  - id: email_revenue_april_2026
+    question: What was email-attributed revenue in April 2026?
+    pins_down: >
+      The value is returned together with the missing-data window: no Klaviyo data from
+      2026-04-09 06:00 UTC to 2026-04-10 13:00 UTC (Fivetran connector outage), so April is
+      understated and the 9 April campaign looks like it flopped. Shopify orders are complete.
+    sql: |
+      select
+          round(sum(d.attributed_revenue_eur), 2) as attributed_revenue_eur,
+          count(case when d.is_incomplete then 1 end) as incomplete_days,
+          (select description from context.business_events
+           where event_type = 'outage' and event_date = date '2026-04-09') as missing_data
+      from metrics_email_attribution_daily as d
+      where d.day between date '2026-04-01' and date '2026-04-30'
+
+  - id: new_subscribers_june_2026
+    question: How many new subscribers did we add in June 2026?
+    pins_down: >
+      Restores (legacy pause restores, continuations of existing subscriptions) and gift
+      subscriptions are excluded. Their counts are returned so the exclusion is visible.
+    sql: |
+      select
+          n.new_subscribers,
+          (select count(*) from fct_subscriptions
+           where is_legacy_pause_restore and started_date between date '2026-06-01' and date '2026-06-30')
+              as restores_excluded,
+          (select count(*) from fct_subscriptions
+           where is_gift and started_date between date '2026-06-01' and date '2026-06-30')
+              as gift_subscriptions_excluded
+      from metrics_new_subscribers_monthly as n
+      where n.month = date '2026-06-01'

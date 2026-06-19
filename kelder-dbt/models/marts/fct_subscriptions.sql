@@ -17,6 +17,7 @@ select
     s.shopify_contract_id,
     s.recharge_subscription_id,
     s.started_at,
+    {{ local_date('s.started_at') }} as started_date,
     s.churned_at,
     s.ended_at,
     s.status,

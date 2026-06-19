@@ -114,6 +114,8 @@ models:
         description: Recharge subscription id, if any.
       - name: started_at
         description: When the subscription started.
+      - name: started_date
+        description: Local (Amsterdam) date the subscription started.
       - name: churned_at
         description: Timestamp the subscription entered a terminal cancelled state.
         meta:
@@ -125,6 +127,12 @@ models:
         description: When the subscription ended (cancelled or expired).
       - name: status
         description: Unified subscription status.
+        meta:
+          caveat: >
+            Shopify and Recharge use different source values (ACTIVE, PAUSED, CANCELLED, FAILED,
+            EXPIRED in Shopify; active, cancelled, expired plus paused_until in Recharge); unified in
+            one intermediate model, int_subscriptions_unified. Current status only: for status at a
+            point in time use the event stream.
         tests:
           - accepted_values: {arguments: {values: ['active', 'paused', 'cancelled', 'expired']}}
       - name: cancellation_reason
