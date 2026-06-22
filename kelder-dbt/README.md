@@ -11,6 +11,7 @@ intermediate tables and the marts in `main`.
 - `models/marts/`: facts, dimensions and the governed `metrics_*` models. Report numbers from these.
 - `seeds/`: small reference tables.
 - `tests/`: singular tests. Generic tests live next to the models in YAML.
+- `docs/`: an ERD of the marts, and a proposed domain model.
 
 ## Running
 
