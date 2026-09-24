@@ -7,7 +7,7 @@ WORKSPACE ?= installed
 PROMPTS ?= all
 N ?= 3
 
-.PHONY: index all generate load build build-all test test-data test-truth test-dbt check freeze-verified charts workspaces leak-check trials summary context-files clean
+.PHONY: serve serve-stop serve-status index all generate load build build-all test test-data test-truth test-dbt check freeze-verified charts workspaces leak-check trials summary context-files clean
 
 all: generate load build-all test charts index
 
@@ -63,3 +63,13 @@ clean:
 
 index:
 	$(PY) scripts/render_index.py
+
+# ktx MCP servers for the agent workspaces (127.0.0.1:7801-7803); WORKSPACE=installed|written|rot for one
+serve:
+	$(PY) scripts/ktx_serve.py start $(if $(filter command line,$(origin WORKSPACE)),--workspace $(WORKSPACE))
+
+serve-stop:
+	$(PY) scripts/ktx_serve.py stop $(if $(filter command line,$(origin WORKSPACE)),--workspace $(WORKSPACE))
+
+serve-status:
+	$(PY) scripts/ktx_serve.py status

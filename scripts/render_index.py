@@ -257,7 +257,7 @@ def main():
     steps = [
         ("Build everything from scratch", "Generate the data, load the warehouse, build the three states, run the tests, render the charts. Takes about three minutes.", "uv sync && make all"),
         ("Run the checks CI runs", "Verified queries against pinned answers, and the context capture check on the rot pull request body. Red on purpose.", "make check STATE=rot PR_BODY=kelder-dbt/.pr/rot.md"),
-        ("Create the agent workspaces", "installed, written and rot under ~/kelder-demo, each with its own ktx project and warehouse copy. Then start their ktx servers.", "make workspaces && uv run python scripts/ktx_serve.py start"),
+        ("Create the agent workspaces", "installed, written and rot under ~/kelder-demo, each with its own ktx project and warehouse copy. Then start their ktx servers.", "make workspaces && make serve"),
         ("Prove the isolation", "Leak check across every workspace, then dry runs that confirm the tools, the denied reads and that AGENTS.md loads.", "make leak-check && uv run python scripts/verify_isolation.py"),
         ("Run trials", "Same question, fresh session, pinned model, every transcript kept. Start with three runs per question.", "make trials WORKSPACE=installed N=3 && make summary"),
         ("Record the clips", "Clip one: installed and written side by side. Clip two: the rot diff, the rot agent, then the failing check.", "scripts/demo_terminal.sh side-by-side"),

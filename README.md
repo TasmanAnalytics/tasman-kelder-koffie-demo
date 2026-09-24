@@ -83,7 +83,7 @@ describes what ktx derived from the before-context state without any written con
 
 ```
 make workspaces                                   # ~/kelder-demo/{installed,written,rot}
-uv run python scripts/ktx_serve.py start          # one ktx MCP server per workspace, 127.0.0.1 only
+make serve                                        # one ktx MCP server per workspace (make serve-status, make serve-stop)
 make leak-check                                   # fails if any workspace could see the answer
 uv run python scripts/verify_isolation.py         # dry runs: tools, denied reads, AGENTS.md loads
 make trials WORKSPACE=installed N=3               # needs ANTHROPIC_API_KEY in .env (see .env.example)
