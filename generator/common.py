@@ -146,8 +146,8 @@ def add_months(sec, n) -> np.ndarray:
     d64 = day.astype("datetime64[D]")
     m = d64.astype("datetime64[M]")
     dom = (d64 - m).astype(np.int64)
-    m2 = m + n
-    days_in_m2 = ((m2 + 1).astype("datetime64[D]") - m2.astype("datetime64[D]")).astype(np.int64)
+    m2 = m + n.astype("timedelta64[M]")
+    days_in_m2 = ((m2 + np.timedelta64(1, "M")).astype("datetime64[D]") - m2.astype("datetime64[D]")).astype(np.int64)
     dom2 = np.minimum(dom, days_in_m2 - 1)
     return (m2.astype("datetime64[D]").astype(np.int64) + dom2) * DAY + tod
 
