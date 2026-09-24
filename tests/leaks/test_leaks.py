@@ -170,3 +170,12 @@ def test_dedicated_config_dir_has_no_memory_or_instructions():
     for name in ("CLAUDE.md", "projects", "agents", "commands", "skills", "plugins"):
         p = cfg / name
         assert not (p.exists() and (p.is_file() or any(p.iterdir()))), p
+
+
+def test_no_user_level_memory_that_could_load():
+    home = Path.home()
+    assert not (home / ".claude" / "CLAUDE.md").exists()
+    for projects in (home / ".claude" / "projects", make_workspace.CONFIG_DIR / "projects"):
+        for w in ALL:
+            slug = str(DEMO / w).replace("/", "-")
+            assert not (projects / slug / "memory").exists(), projects / slug

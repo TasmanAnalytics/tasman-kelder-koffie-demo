@@ -1,0 +1,13 @@
+# Exact wording. Do not edit without rerunning every affected trial and logging the change.
+prompts:
+  churn_spike_why: Why did subscriber churn spike in March 2026?
+  churn_board_number: What was subscriber churn in March 2026? I need one number for the board deck.
+  email_revenue_april: Email-attributed revenue dropped in April 2026. What happened?
+  churn_may_improvement: Churn improved in May 2026. What drove the improvement?
+  churn_yoy_like_for_like: Has churn improved year on year? Compare the first half of 2026 with the first half of 2025, like for like.
+  new_subscribers_june: How many new subscribers did we add in June 2026, and what drove it?
+
+matrix:
+  installed: [churn_spike_why, churn_board_number, email_revenue_april, churn_may_improvement, churn_yoy_like_for_like, new_subscribers_june]
+  written: [churn_spike_why, churn_board_number, email_revenue_april, churn_may_improvement, churn_yoy_like_for_like, new_subscribers_june]
+  rot: [churn_yoy_like_for_like, churn_spike_why, churn_board_number]
