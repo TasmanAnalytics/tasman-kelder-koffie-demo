@@ -1,0 +1,199 @@
+# Kelder Coffee synthetic data generator: every parameter, target, date and the seed.
+# Times are Europe/Amsterdam local wall time unless the key ends in _utc.
+
+seed: 20260312
+
+timezone: Europe/Amsterdam
+
+dates:
+  launch: 2023-04-01
+  window_start: 2025-01-01          # Fivetran connectors start syncing
+  window_end: 2026-06-30            # last day of data
+  cutoff_local: 2026-07-01 00:00    # extract cutoff; nothing after this reaches the warehouse
+  as_of: 2026-07-01
+  simulate_until: 2026-08-31        # unpinned continuation so every dunning episode resolves in the truth
+  # migration
+  freeze_start_local: 2026-03-11 20:00
+  freeze_end_local: 2026-03-12 12:00
+  shopify_last_sync_utc: 2026-03-11 21:30:00
+  import_stamp_utc: 2026-03-12 00:00:00
+  cancel_queue_start_local: 2026-03-05 00:00   # Shopify app stopped processing cancellations; requests queued
+  pause_blackout_start_local: 2026-03-12 00:00
+  pause_blackout_end_local: 2026-03-28 00:00   # Recharge portal pauses from 28 March
+  shopify_pause_last_local: 2026-03-11 20:00   # last moment a Shopify pause can start
+  restore_job_first_day: 2026-03-16
+  restore_job_time: "09:15"
+  pause_diversion_start_local: 2026-03-28 00:00
+  # other incidents
+  klaviyo_outage_start_utc: 2026-04-09 06:00:00
+  klaviyo_outage_end_utc: 2026-04-10 13:00:00
+  strike_ship_start: 2026-05-18
+  strike_ship_end: 2026-05-24
+  bundle_start: 2026-06-14
+  bundle_end: 2026-06-21
+  black_friday: 2025-11-28
+
+targets:
+  base_2025_01_01: 20000
+  base_2025_01_01_tol: 300
+  base_2026_03_01: 31200
+  base_2026_03_01_tol: 150
+  artefacts_min: 1880
+  artefacts_max: 1920
+  march_raw_min: 0.0937
+  march_raw_max: 0.0943
+  march_adj_min: 0.0327
+  march_adj_max: 0.0333
+  march_raw_round: 0.094
+  queued_cancellations_min: 120
+  queued_cancellations_max: 180
+  v1_minus_v2_q1_2026_min_pp: 0.4
+  v1_minus_v2_q1_2026_max_pp: 0.7
+  yoy_improvement_min_pp: 0.3
+  yoy_improvement_max_pp: 0.8
+  monthly_tolerance_pp: 0.02
+  # Monthly v1 adjusted churn: the calibration anchor
+  v1_adjusted:
+    2025-01: 0.037
+    2025-02: 0.035
+    2025-03: 0.034
+    2025-04: 0.033
+    2025-05: 0.033
+    2025-06: 0.032
+    2025-07: 0.034
+    2025-08: 0.034
+    2025-09: 0.031
+    2025-10: 0.030
+    2025-11: 0.030
+    2025-12: 0.031
+    2026-01: 0.034
+    2026-02: 0.030
+    2026-03: 0.033
+    2026-04: 0.028
+    2026-05: 0.029
+    2026-06: 0.028
+
+world:
+  involuntary_share: 0.36
+  country_mix: {NL: 0.72, BE: 0.13, DE: 0.12, LU: 0.015, FR: 0.015}
+  plan_interval_days: {14: 0.35, 28: 0.55, 42: 0.10}
+  bags_per_shipment: {1: 0.70, 2: 0.25, 3: 0.05}
+  bag_size_g: {250: 0.85, 1000: 0.15}
+  grind: {whole_bean: 0.55, filter: 0.25, espresso: 0.12, french_press: 0.08}
+  payment_method: {mandate: 0.62, card: 0.30, paypal: 0.08}
+  payment_failure_multiplier: {mandate: 0.7, card: 1.6, paypal: 1.0}
+  recovery_probability: {mandate: 0.52, card: 0.40, paypal: 0.45}
+  retry_days: [1, 3, 7, 14, 21, 28]
+  recovery_day_weights: [0.34, 0.24, 0.18, 0.12, 0.07, 0.05]
+  unrecovered_cancel_day: 30
+  frailty_gamma_shape: 2.0
+  # voluntary hazard per tenure month (monthly probability, unpinned; relative weight when pinned)
+  voluntary_hazard_by_tenure: {1: 0.070, 2: 0.050, 3: 0.040, 4: 0.032, 5: 0.030, 6: 0.028}
+  voluntary_hazard_7: 0.020
+  voluntary_hazard_18: 0.016
+  promo_multiplier: 1.5
+  promo_months_of_effect: 4
+  post_pause_multiplier: 4.0
+  post_pause_days: 7
+  cancel_near_shipment_share: 0.40
+  cancel_near_shipment_days: 3
+  # unpinned failure probability per scheduled charge (warm-up only), before method multiplier
+  warmup_failure_prob_per_charge: 0.0105
+  base_pause_hazard: 0.020
+  summer_pause_multiplier: 1.8
+  pause_duration_months: {1: 0.35, 2: 0.30, 3: 0.20, 6: 0.15}
+  pause_diversion_share: 0.35
+  # second subscription for an existing customer
+  second_subscription_share: 0.03
+  retail_customer_converts_share: 0.06
+  consent_share: 0.66
+
+acquisition:
+  # warm-up: launch to 2024-12, gently rising curve; scale solved so base_2025_01_01 hits target
+  warmup_start_level: 0.35
+  warmup_end_level: 1.0
+  # main window: 2025-01 onwards, base level 1.0 rising gently per month; scale solved for base_2026_03_01
+  monthly_growth: 0.012
+  multipliers:
+    "11": 1.7        # Black Friday month (applied every November)
+    "12": 1.2
+    "07": 0.85
+    "08": 0.85
+    "2026-01": 1.4
+    "2026-06": 1.15
+  promo_cohort_months: ["2024-11", "2025-01", "2025-09", "2025-11", "2026-01"]
+  # initial guesses for the solver
+  warmup_scale_guess: 1500
+  main_scale_guess: 1600
+
+gifts:
+  dec_2025_count: 300
+  fathers_day_count: 450
+  shipments: 3
+  interval_days: 28
+  price_dec: 69.00
+  price_fathers_day: 72.00
+
+catalogue:
+  subscriber_discount: 0.10
+  shipping_fee_single_bag: 4.95
+  vat_coffee: 0.09
+  vat_equipment: 0.21
+
+retail:
+  orders_per_month: 3500
+  december_multiplier: 2.2
+  black_friday_week_multiplier: 1.6
+  aov_target: 32.0
+  share_new_customer: 0.42
+  share_existing_retail: 0.33
+  share_subscriber: 0.25
+  warmup_retail_customers: 16000
+  bundle_orders: 950
+  refund_rate: 0.011
+  strike_refund_rate: 0.06
+
+delivery:
+  postnl_days: {1: 0.82, 2: 0.18}
+  dhl_days: {2: 0.55, 3: 0.45}
+  strike_delay_days: [3, 7]
+  strike_never_delivered: 0.01
+
+klaviyo:
+  campaign_hour_local: 10
+  open_rate: 0.42
+  click_rate: 0.028
+  order_rate: 0.0035
+  attribution_days: 5
+  flow_rates:
+    welcome: {open: 0.55, click: 0.08}
+    post_purchase: {open: 0.48, click: 0.05}
+    win_back: {open: 0.30, click: 0.03}
+    abandoned_checkout: {open: 0.45, click: 0.10}
+  flow_order_rate_given_click: 0.10
+  abandoned_checkouts_per_month: 700
+  unsubscribe_rate_per_campaign: 0.0012
+
+ads:
+  meta_daily_eur: 1100
+  google_daily_eur: 550
+  multipliers:
+    black_friday_week: 1.8
+    january: 1.3
+    bundle_week: 1.5
+    summer: 0.8
+  meta_cpm_eur: 7.5
+  meta_ctr: 0.011
+  google_cpc_eur: 0.62
+  google_ctr: 0.045
+
+channels:
+  # base share of first orders by channel; paid shares scale with daily ad spend multiplier
+  base_share: {paid_social: 0.30, paid_search: 0.22, email: 0.07, organic: 0.20, referral: 0.08, direct: 0.13}
+
+profiles:
+  # local hour weights for human activity (sign-ups, retail orders, voluntary cancellations)
+  human_hour: [0.8, 0.4, 0.2, 0.15, 0.15, 0.3, 0.9, 2.0, 2.4, 1.6, 1.3, 1.3, 1.8, 1.7, 1.2, 1.1, 1.1, 1.2, 1.4, 1.9, 2.3, 2.2, 1.6, 1.1]
+  # Monday..Sunday (ISO order)
+  human_dow: [1.20, 1.00, 0.95, 0.95, 0.80, 0.85, 1.25]
+  charge_time_local: "05:00"

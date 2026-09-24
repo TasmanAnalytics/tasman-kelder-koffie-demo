@@ -1,0 +1,26 @@
+# Recharge cancellation reasons (code, share, free-text comments)
+reasons:
+  - {code: "too_much_coffee", share: 0.24}
+  - {code: "too_expensive", share: 0.21}
+  - {code: "moving_or_travelling", share: 0.09}
+  - {code: "prefer_to_buy_one_off", share: 0.13}
+  - {code: "taste_not_for_me", share: 0.10}
+  - {code: "switching_brand", share: 0.08}
+  - {code: "delivery_issues", share: 0.05}
+  - {code: "other", share: 0.10}
+comments:
+  - "Ik drink minder koffie sinds ik thuiswerk."
+  - "Te veel zakken in de kast."
+  - "Even pauze nodig, misschien later terug."
+  - "Te duur op dit moment."
+  - "We verhuizen naar het buitenland."
+  - "Liever zelf bestellen wanneer het op is."
+  - "Smaak viel tegen deze keer."
+  - "Ik heb een koffiemachine met capsules gekregen."
+  - "Bezorging duurde te lang."
+  - "Zu teuer geworden."
+  - "Trop de café pour nous deux."
+  - ""
+  - ""
+  - ""
+  - ""

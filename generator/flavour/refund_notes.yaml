@@ -1,0 +1,6 @@
+notes:
+  - {note: "damaged_packaging", share: 0.30}
+  - {note: "wrong_grind", share: 0.22}
+  - {note: "customer_request", share: 0.25}
+  - {note: "missing_item", share: 0.13}
+  - {note: "late_delivery", share: 0.10}

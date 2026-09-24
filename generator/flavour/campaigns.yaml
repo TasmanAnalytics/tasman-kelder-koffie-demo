@@ -1,0 +1,18 @@
+# Weekly Thursday newsletter subject lines. Cycled in order; the 2026-04-09 campaign is fixed.
+fixed:
+  "2026-04-09": {name: "Nieuwe oogst: Kenya Nyeri", subject: "Nieuwe oogst: Kenya Nyeri is binnen"}
+  "2026-06-11": {name: "Vaderdag Bundel", subject: "Voor de koffievader: de Vaderdag Bundel"}
+  "2026-06-18": {name: "Vaderdag laatste kans", subject: "Laatste kans: Vaderdag Bundel op tijd in huis"}
+  "2025-11-27": {name: "Black Friday", subject: "Black Friday: eerste box met 40% korting"}
+  "2025-12-04": {name: "Kerst cadeaubox", subject: "Kerst cadeaubox en cadeau-abonnementen"}
+rotation:
+  - {name: "Brandersnotities", subject: "Brandersnotities: wat we deze week proeven"}
+  - {name: "Zet de perfecte filter", subject: "Drie tips voor een betere filterkoffie"}
+  - {name: "Nieuw in het assortiment", subject: "Nieuw binnen bij Kelder"}
+  - {name: "Achter de schermen", subject: "Een kijkje in onze branderij"}
+  - {name: "Espresso thuis", subject: "Espresso thuis: zo stel je je molen af"}
+  - {name: "Seizoensmelange", subject: "De seizoensmelange is terug"}
+  - {name: "Boerenverhaal", subject: "Van boon tot kop: het verhaal van onze boeren"}
+  - {name: "Koffie en water", subject: "Waarom je water ertoe doet"}
+  - {name: "Weekendrecept", subject: "Weekendrecept: koude koffie"}
+  - {name: "Lezersvraag", subject: "Jullie vroegen, wij antwoorden"}

@@ -1,0 +1,34 @@
+# Written once by hand (with language-model help) and committed. Read at generation time.
+# Real origins, invented lot names. Months are the months a coffee is on sale (1-12).
+single_origins:
+  - {name: "Ethiopia Guji Hambela", origin: Ethiopia, price_250: 16.50, months: [1,2,3,4,5,6,7,8,9,10,11,12]}
+  - {name: "Ethiopia Yirgacheffe Konga", origin: Ethiopia, price_250: 15.50, months: [5,6,7,8,9,10]}
+  - {name: "Colombia Huila La Esperanza", origin: Colombia, price_250: 14.50, months: [1,2,3,4,5,6,7,8,9,10,11,12]}
+  - {name: "Colombia Nariño Buesaco", origin: Colombia, price_250: 15.00, months: [9,10,11,12,1,2]}
+  - {name: "Kenya Nyeri Gatomboya", origin: Kenya, price_250: 16.50, months: [4,5,6,7,8,9]}
+  - {name: "Brazil Cerrado Fazenda Boa Vista", origin: Brazil, price_250: 12.50, months: [1,2,3,4,5,6,7,8,9,10,11,12]}
+  - {name: "Guatemala Huehuetenango El Injerto Bajo", origin: Guatemala, price_250: 14.50, months: [3,4,5,6,7,8,9]}
+  - {name: "Rwanda Nyamasheke Gitesi", origin: Rwanda, price_250: 15.00, months: [6,7,8,9,10,11]}
+  - {name: "Burundi Kayanza Nemba", origin: Burundi, price_250: 15.00, months: [7,8,9,10,11,12]}
+  - {name: "Costa Rica Tarrazú Las Lajas", origin: Costa Rica, price_250: 15.50, months: [2,3,4,5,6]}
+  - {name: "Peru Cajamarca San Ignacio", origin: Peru, price_250: 13.50, months: [8,9,10,11,12,1]}
+  - {name: "Honduras Santa Bárbara El Cedral", origin: Honduras, price_250: 14.00, months: [3,4,5,6,7]}
+  - {name: "Indonesia Sumatra Aceh Gayo", origin: Indonesia, price_250: 14.00, months: [10,11,12,1,2,3]}
+  - {name: "Panama Boquete Finca Lérida", origin: Panama, price_250: 17.50, months: [11,12,1,2]}
+blends:
+  - {name: "Kelder Huismelange", price_250: 12.00}
+  - {name: "Grachtengordel Espresso", price_250: 12.50}
+  - {name: "Zondagochtend Filter", price_250: 12.00}
+decaf:
+  - {name: "Colombia Decaf Sugarcane", price_250: 13.50}
+equipment:
+  - {name: "Kelder Handmolen", sku: "EQ-GRINDER-HAND", price: 69.00, grams: 700}
+  - {name: "Kelder Elektrische Molen", sku: "EQ-GRINDER-ELEC", price: 149.00, grams: 2400}
+  - {name: "Keramische Dripper V60", sku: "EQ-DRIPPER-V60", price: 24.00, grams: 400}
+  - {name: "Papieren Filters (100)", sku: "EQ-FILTERS-100", price: 7.50, grams: 150}
+  - {name: "Digitale Koffieweegschaal", sku: "EQ-SCALE", price: 39.00, grams: 500}
+  - {name: "Kelder Mok", sku: "EQ-MUG", price: 14.00, grams: 350}
+gifts:
+  - {name: "Kerst Cadeaubox", sku: "GIFT-XMAS-BOX", price: 45.00, grams: 900, months: [11,12]}
+  - {name: "Cadeau-abonnement (3 leveringen)", sku: "GIFT-SUB-3", price: 69.00, grams: 0}
+  - {name: "Vaderdag Bundel", sku: "BUNDLE-VADERDAG-2026", price: 49.00, grams: 900}
