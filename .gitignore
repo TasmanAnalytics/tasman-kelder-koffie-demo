@@ -1,0 +1,15 @@
+# data and outputs
+data/
+demo/runs/
+kelder-dbt/target/
+kelder-dbt/dbt_packages/
+kelder-dbt/logs/
+kelder-dbt/.ktx/
+logs/
+build/
+.pytest_cache/
+__pycache__/
+*.pyc
+.venv/
+.env
+.DS_Store
