@@ -222,6 +222,12 @@ def render(cfg: dict, cat: Catalogue, world: WorldResult, com: CommerceResult, r
     reason = np.where(st == "CANCELLED", pd.Series(sid).map(reg.reason_code).to_numpy(),
                       np.where(st == "FAILED", "max_retries_reached", None))
     paused = st == "PAUSED"
+    # the checkout order that created the contract; orders before 2025 exist in Shopify but were never synced
+    lk = order_lookup(com)
+    okeys = lk.reindex(pd.MultiIndex.from_arrays([sid, s.start.to_numpy()])).to_numpy()
+    origin = pd.Series(okeys).map(reg.shopify_order).to_numpy(dtype=float)
+    unsynced = 5_600_000_000_000 + sid * 1_013
+    origin = np.where(np.isnan(origin), unsynced, origin).astype(np.int64)
     out["subscription_contracts"] = fivetran(pd.DataFrame(dict(
         id=kid, customer_id=s.customer_id.map(reg.shopify_customer).to_numpy(), status=st,
         created_at=utc(s.start.to_numpy()), updated_at=utc(upd.astype(np.int64)),
@@ -231,6 +237,7 @@ def render(cfg: dict, cat: Catalogue, world: WorldResult, com: CommerceResult, r
         paused_at=utc(np.where(paused, np.nan_to_num(lp_start, nan=0).astype(np.int64), NEVER)),
         pause_until=local_date(np.where(paused, np.nan_to_num(lp_orig, nan=0).astype(np.int64), NEVER)),
         cancelled_at=utc(cancelled), cancellation_reason=reason, custom_attributes=attrs,
+        origin_order_id=origin,
     )), snap_utc)
 
     # ------------------------------------------------------------------ contract events (webhook log, 2025-01-01 to the freeze)

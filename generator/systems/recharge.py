@@ -38,7 +38,7 @@ def render(cfg: dict, cat: Catalogue, world: WorldResult, com: CommerceResult, r
     snap = snapshot_state(cfg, world)
     migrated = snap[snap.snap_status.isin(["ACTIVE", "PAUSED"])].copy()
     subs = world.subs.set_index("sub_id")
-    native = world.subs[world.subs.start >= freeze_end].copy()
+    native = world.subs[(world.subs.start >= freeze_end) & (world.subs.start < cutoff)].copy()
     rs = pd.concat([migrated.assign(migrated=True), native.assign(migrated=False, snap_status=None)], ignore_index=True)
     rs = rs.sort_values(["migrated", "start", "sub_id"], ascending=[False, True, True], kind="stable").reset_index(drop=True)
     rs["rc_id"] = ids(r, len(rs), 480_000_000, 300)
@@ -106,12 +106,14 @@ def render(cfg: dict, cat: Catalogue, world: WorldResult, com: CommerceResult, r
     mig = rs[rs.migrated]
     ev.append(pd.DataFrame(dict(sub=mig.sub_id, t=stamp, verb="created",
                                 payload=to_json([{"external_contract_id": str(reg.contract[s])} for s in mig.sub_id]))))
+    # paused at the import: the pause that spans the import ends when the subscriber resumes (world restore time)
     art = mig[mig.snap_status == "PAUSED"]
-    art_until = art.sub_id.map(lp.end)
+    art_resume = art.sub_id.map(subs.restore_time)
+    art_orig = art.sub_id.map(subs.orig_until)
     ev.append(pd.DataFrame(dict(sub=art.sub_id, t=stamp, verb="paused",
-                                payload=to_json([{"paused_until": str(np.datetime64(int(e // DAY), "D"))} for e in art_until]))))
-    art_res = art[art_until.to_numpy() < cutoff]
-    ev.append(pd.DataFrame(dict(sub=art_res.sub_id, t=art_res.sub_id.map(lp.end), verb="unpaused", payload=to_json([{}] * len(art_res)))))
+                                payload=to_json([{"paused_until": str(np.datetime64(int(e // DAY), "D"))} for e in art_orig]))))
+    art_res = art[art_resume.to_numpy() < cutoff]
+    ev.append(pd.DataFrame(dict(sub=art_res.sub_id, t=art_res.sub_id.map(subs.restore_time), verb="unpaused", payload=to_json([{}] * len(art_res)))))
     nat = rs[~rs.migrated]
     for verb in ("created", "activated"):
         ev.append(pd.DataFrame(dict(sub=nat.sub_id, t=nat.start, verb=verb, payload=to_json([{"is_gift": bool(g)} for g in nat.is_gift]))))

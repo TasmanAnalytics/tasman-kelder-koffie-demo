@@ -344,7 +344,7 @@ class Commerce:
         k = self.cfg["klaviyo"]
         r = self.r_mail
         spec = yaml.safe_load(open(FLAVOUR / "campaigns.yaml"))
-        prof = customers[customers.consent].reset_index(drop=True)
+        prof = customers[customers.consent].sort_values(["created", "customer_id"], kind="stable").reset_index(drop=True)
         pid = prof.customer_id.to_numpy()
         pcreated = prof.created.to_numpy()
         propensity = r.gamma(3.0, 1 / 3.0, len(prof))
@@ -399,7 +399,8 @@ class Commerce:
         flows.append(("win_back", vcust[vm], at_time_of_day(vc.t.to_numpy()[vm] + 21 * DAY, 10)))
         n_ab = int(k["abandoned_checkouts_per_month"] * ((self.cutoff - self.w0) / (30.44 * DAY)))
         ab_t = np.sort(self.human.sample(r, np.full(n_ab, self.w0), np.full(n_ab, self.cutoff)))
-        ab_c = np.array([pid[r.integers(0, max(1, np.searchsorted(np.sort(pcreated), tt)))] for tt in ab_t])
+        upto = np.searchsorted(pcreated, ab_t)
+        ab_c = pid[np.floor(r.random(n_ab) * np.maximum(upto, 1)).astype(np.int64)]
         flows.append(("abandoned_checkout", ab_c, ab_t + HOUR))
         for fname, cust, t in flows:
             keep = (t >= self.w0) & (t < self.cutoff + 30 * DAY)
