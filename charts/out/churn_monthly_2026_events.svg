@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="864pt" height="486pt" viewBox="0 0 864 486" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-24T15:36:38.360376</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 486 
+L 864 486 
+L 864 0 
+L 0 0 
+z
+" style="fill: #fff9eb"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 69.12 417.96 
+L 838.08 417.96 
+L 838.08 106.92 
+L 69.12 106.92 
+z
+" style="fill: #fff9eb"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 366.507845 417.96 
+L 366.507845 106.92 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #c9ced3"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 434.48221 417.96 
+L 434.48221 106.92 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #c9ced3"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 485.462983 417.96 
+L 485.462983 106.92 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #c9ced3"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 578.927735 417.96 
+L 578.927735 106.92 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #c9ced3"/>
+   </g>
+   <g id="line2d_5">
+    <path d="M 655.398895 417.96 
+L 655.398895 106.92 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #c9ced3"/>
+   </g>
+   <g id="line2d_6">
+    <path d="M 765.857238 417.96 
+L 765.857238 106.92 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #c9ced3"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_7"/>
+     <g id="text_1">
+      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="128.597569" y="435.077187" transform="rotate(-0 128.597569 435.077187)">Jan</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_8"/>
+     <g id="text_2">
+      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="260.297901" y="435.078125" transform="rotate(-0 260.297901 435.078125)">Feb</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_9"/>
+     <g id="text_3">
+      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="379.253039" y="435.077187" transform="rotate(-0 379.253039 435.077187)">Mar</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_10"/>
+     <g id="text_4">
+      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="510.95337" y="435.077187" transform="rotate(-0 510.95337 435.077187)">Apr</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_11"/>
+     <g id="text_5">
+      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="638.405304" y="435.077187" transform="rotate(-0 638.405304 435.077187)">May</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_12"/>
+     <g id="text_6">
+      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="770.105635" y="435.077187" transform="rotate(-0 770.105635 435.077187)">Jun</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_13">
+      <path d="M 69.12 417.96 
+L 838.08 417.96 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_14"/>
+     <g id="text_7">
+      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="422.518594" transform="rotate(-0 61.12 422.518594)">0%</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_15">
+      <path d="M 69.12 358.714286 
+L 838.08 358.714286 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_16"/>
+     <g id="text_8">
+      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="363.272879" transform="rotate(-0 61.12 363.272879)">2%</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_17">
+      <path d="M 69.12 299.468571 
+L 838.08 299.468571 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_18"/>
+     <g id="text_9">
+      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="304.027165" transform="rotate(-0 61.12 304.027165)">4%</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_19">
+      <path d="M 69.12 240.222857 
+L 838.08 240.222857 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_20"/>
+     <g id="text_10">
+      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="244.781451" transform="rotate(-0 61.12 244.781451)">6%</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_21">
+      <path d="M 69.12 180.977143 
+L 838.08 180.977143 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_22"/>
+     <g id="text_11">
+      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="185.535737" transform="rotate(-0 61.12 185.535737)">8%</text>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_23">
+      <path d="M 69.12 121.731429 
+L 838.08 121.731429 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_24"/>
+     <g id="text_12">
+      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="126.290022" transform="rotate(-0 61.12 126.290022)">10%</text>
+     </g>
+    </g>
+    <g id="text_13">
+     <text style="font-size: 11px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="32.804297" y="262.44" transform="rotate(-90 32.804297 262.44)">subscriber churn, as reported</text>
+    </g>
+   </g>
+   <g id="line2d_25">
+    <path d="M 379.253039 320.243081 
+L 379.253039 139.528841 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke: #c9ced3; stroke-width: 1.2; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_26">
+    <path d="M 638.405304 346.234176 
+L 770.105635 364.911387 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke-dasharray: 7.2,4.8; stroke-dashoffset: 0; stroke: #526476; stroke-width: 2.4"/>
+   </g>
+   <g id="line2d_27">
+    <path d="M 578.927735 417.96 
+L 578.927735 106.92 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #526476; stroke-opacity: 0.8"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 69.12 417.96 
+L 69.12 106.92 
+" style="fill: none; stroke: #526476; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 69.12 417.96 
+L 838.08 417.96 
+" style="fill: none; stroke: #526476; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_28">
+    <path d="M 128.597569 317.24821 
+L 260.297901 329.06773 
+L 379.253039 320.243081 
+L 510.95337 334.995264 
+L 638.405304 346.234176 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke: #526476; stroke-width: 2.4; stroke-linecap: square"/>
+    <defs>
+     <path id="m565cdba3da" d="M 0 3.5 
+C 0.928211 3.5 1.81853 3.131218 2.474874 2.474874 
+C 3.131218 1.81853 3.5 0.928211 3.5 0 
+C 3.5 -0.928211 3.131218 -1.81853 2.474874 -2.474874 
+C 1.81853 -3.131218 0.928211 -3.5 0 -3.5 
+C -0.928211 -3.5 -1.81853 -3.131218 -2.474874 -2.474874 
+C -3.131218 -1.81853 -3.5 -0.928211 -3.5 0 
+C -3.5 0.928211 -3.131218 1.81853 -2.474874 2.474874 
+C -1.81853 3.131218 -0.928211 3.5 0 3.5 
+z
+" style="stroke: #526476"/>
+    </defs>
+    <g clip-path="url(#p37944baff2)">
+     <use xlink:href="#m565cdba3da" x="128.597569" y="317.24821" style="fill: #526476; stroke: #526476"/>
+     <use xlink:href="#m565cdba3da" x="260.297901" y="329.06773" style="fill: #526476; stroke: #526476"/>
+     <use xlink:href="#m565cdba3da" x="379.253039" y="320.243081" style="fill: #526476; stroke: #526476"/>
+     <use xlink:href="#m565cdba3da" x="510.95337" y="334.995264" style="fill: #526476; stroke: #526476"/>
+     <use xlink:href="#m565cdba3da" x="638.405304" y="346.234176" style="fill: #526476; stroke: #526476"/>
+    </g>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 13px; font-family: 'Menlo'; text-anchor: start; fill: #a93427" x="389.253039" y="143.528841" transform="rotate(-0 389.253039 143.528841)">9.4% raw</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: start; fill: #90b39d" x="389.253039" y="338.243081" transform="rotate(-0 389.253039 338.243081)">3.3% adjusted</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 11px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="760.105635" y="386.911387" transform="rotate(-0 760.105635 386.911387)">provisional</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 10.5px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="578.927735" y="103.957714" transform="rotate(-0 578.927735 103.957714)">v1 | v2</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 10px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="366.507845" y="98.296856" transform="rotate(-0 366.507845 98.296856)">12 MAR migration</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 10px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="434.48221" y="74.968856" transform="rotate(-0 434.48221 74.968856)">28 MAR promo</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 10px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="485.462983" y="98.296856" transform="rotate(-0 485.462983 98.296856)">9 APR outage</text>
+   </g>
+   <g id="text_21">
+    <text style="font-size: 10px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="578.927735" y="74.968856" transform="rotate(-0 578.927735 74.968856)">1 MAY definition change</text>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 10px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="655.398895" y="98.296856" transform="rotate(-0 655.398895 98.296856)">19 MAY logistics</text>
+   </g>
+   <g id="text_23">
+    <text style="font-size: 10px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="765.857238" y="74.968856" transform="rotate(-0 765.857238 74.968856)">14 JUN promo</text>
+   </g>
+   <g id="line2d_29">
+    <path d="M 770.105635 364.911387 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+    <defs>
+     <path id="m32ab3d8eff" d="M 0 4 
+C 1.060812 4 2.078319 3.578535 2.828427 2.828427 
+C 3.578535 2.078319 4 1.060812 4 0 
+C 4 -1.060812 3.578535 -2.078319 2.828427 -2.828427 
+C 2.078319 -3.578535 1.060812 -4 0 -4 
+C -1.060812 -4 -2.078319 -3.578535 -2.828427 -2.828427 
+C -3.578535 -2.078319 -4 -1.060812 -4 0 
+C -4 1.060812 -3.578535 2.078319 -2.828427 2.828427 
+C -2.078319 3.578535 -1.060812 4 0 4 
+z
+" style="stroke: #526476; stroke-width: 2"/>
+    </defs>
+    <g clip-path="url(#p37944baff2)">
+     <use xlink:href="#m32ab3d8eff" x="770.105635" y="364.911387" style="fill: #fff9eb; stroke: #526476; stroke-width: 2"/>
+    </g>
+   </g>
+   <g id="line2d_30">
+    <path d="M 379.253039 139.528841 
+" clip-path="url(#p37944baff2)" style="fill: none; stroke: #a93427; stroke-width: 1.5; stroke-linecap: square"/>
+    <defs>
+     <path id="m97beb6736c" d="M 0 4.5 
+C 1.193414 4.5 2.338109 4.025852 3.181981 3.181981 
+C 4.025852 2.338109 4.5 1.193414 4.5 0 
+C 4.5 -1.193414 4.025852 -2.338109 3.181981 -3.181981 
+C 2.338109 -4.025852 1.193414 -4.5 0 -4.5 
+C -1.193414 -4.5 -2.338109 -4.025852 -3.181981 -3.181981 
+C -4.025852 -2.338109 -4.5 -1.193414 -4.5 0 
+C -4.5 1.193414 -4.025852 2.338109 -3.181981 3.181981 
+C -2.338109 4.025852 -1.193414 4.5 0 4.5 
+z
+" style="stroke: #a93427"/>
+    </defs>
+    <g clip-path="url(#p37944baff2)">
+     <use xlink:href="#m97beb6736c" x="379.253039" y="139.528841" style="fill: #a93427; stroke: #a93427"/>
+    </g>
+   </g>
+  </g>
+  <g id="text_24">
+   <text style="font-size: 10.5px; font-family: 'Menlo'; text-anchor: start; fill: #526476; opacity: 0.85" x="69.12" y="468.99" transform="rotate(-0 69.12 468.99)">Kelder Coffee warehouse, with-context state · metrics_subscriber_churn_monthly, context.business_events</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p37944baff2">
+   <rect x="69.12" y="106.92" width="768.96" height="311.04"/>
+  </clipPath>
+ </defs>
+</svg>

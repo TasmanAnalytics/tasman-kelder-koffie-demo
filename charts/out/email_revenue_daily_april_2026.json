@@ -1,0 +1,189 @@
+{
+  "unit": "EUR",
+  "series": [
+    {
+      "day": "2026-03-26",
+      "attributed_revenue_eur": 5058.95,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-03-27",
+      "attributed_revenue_eur": 980.9,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-03-28",
+      "attributed_revenue_eur": 138.75,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-03-29",
+      "attributed_revenue_eur": 66.85,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-03-30",
+      "attributed_revenue_eur": 115.75,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-03-31",
+      "attributed_revenue_eur": 19.45,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-01",
+      "attributed_revenue_eur": 0.0,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-02",
+      "attributed_revenue_eur": 5143.35,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-03",
+      "attributed_revenue_eur": 1227.9,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-04",
+      "attributed_revenue_eur": 190.4,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-05",
+      "attributed_revenue_eur": 57.95,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-06",
+      "attributed_revenue_eur": 81.95,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-07",
+      "attributed_revenue_eur": 45.9,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-08",
+      "attributed_revenue_eur": 0.0,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-09",
+      "attributed_revenue_eur": 0.0,
+      "is_incomplete": true
+    },
+    {
+      "day": "2026-04-10",
+      "attributed_revenue_eur": 181.9,
+      "is_incomplete": true
+    },
+    {
+      "day": "2026-04-11",
+      "attributed_revenue_eur": 85.3,
+      "is_incomplete": true
+    },
+    {
+      "day": "2026-04-12",
+      "attributed_revenue_eur": 16.95,
+      "is_incomplete": true
+    },
+    {
+      "day": "2026-04-13",
+      "attributed_revenue_eur": 16.95,
+      "is_incomplete": true
+    },
+    {
+      "day": "2026-04-14",
+      "attributed_revenue_eur": 0.0,
+      "is_incomplete": true
+    },
+    {
+      "day": "2026-04-15",
+      "attributed_revenue_eur": 51.9,
+      "is_incomplete": true
+    },
+    {
+      "day": "2026-04-16",
+      "attributed_revenue_eur": 4229.75,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-17",
+      "attributed_revenue_eur": 1405.95,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-18",
+      "attributed_revenue_eur": 189.6,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-19",
+      "attributed_revenue_eur": 16.95,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-20",
+      "attributed_revenue_eur": 127.4,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-21",
+      "attributed_revenue_eur": 101.75,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-22",
+      "attributed_revenue_eur": 19.45,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-23",
+      "attributed_revenue_eur": 4814.55,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-24",
+      "attributed_revenue_eur": 837.95,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-25",
+      "attributed_revenue_eur": 0.0,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-26",
+      "attributed_revenue_eur": 100.8,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-27",
+      "attributed_revenue_eur": 126.4,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-28",
+      "attributed_revenue_eur": 111.4,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-29",
+      "attributed_revenue_eur": 12.45,
+      "is_incomplete": false
+    },
+    {
+      "day": "2026-04-30",
+      "attributed_revenue_eur": 5223.35,
+      "is_incomplete": false
+    }
+  ],
+  "outage": {
+    "event_date": "2026-04-09",
+    "description": "No Klaviyo events from 06:00 UTC on 9 April to 13:00 UTC on 10 April. The 9 April campaign's results are incomplete."
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "unit": "percent",
+  "series": [
+    {
+      "month": "2025-01-01",
+      "churn_rate_v1": 3.7024,
+      "churn_rate_v2_restated": 3.082,
+      "is_provisional": false
+    },
+    {
+      "month": "2025-02-01",
+      "churn_rate_v1": 3.5007,
+      "churn_rate_v2_restated": 2.8906,
+      "is_provisional": false
+    },
+    {
+      "month": "2025-03-01",
+      "churn_rate_v1": 3.3993,
+      "churn_rate_v2_restated": 2.8742,
+      "is_provisional": false
+    },
+    {
+      "month": "2025-04-01",
+      "churn_rate_v1": 3.2996999999999996,
+      "churn_rate_v2_restated": 2.7498,
+      "is_provisional": false
+    },
+    {
+      "month": "2025-05-01",
+      "churn_rate_v1": 3.3002999999999996,
+      "churn_rate_v2_restated": 2.82,
+      "is_provisional": false
+    },
+    {
+      "month": "2025-06-01",
+      "churn_rate_v1": 3.1981999999999995,
+      "churn_rate_v2_restated": 2.6723,
+      "is_provisional": false
+    },
+    {
+      "month": "2025-07-01",
+      "churn_rate_v1": 3.4006000000000003,
+      "churn_rate_v2_restated": 2.7819,
+      "is_provisional": false
+    },
+    {
+      "month": "2025-08-01",
+      "churn_rate_v1": 3.4005,
+      "churn_rate_v2_restated": 2.8548,
+      "is_provisional": false
+    },
+    {
+      "month": "2025-09-01",
+      "churn_rate_v1": 3.0998,
+      "churn_rate_v2_restated": 2.5485,
+      "is_provisional": false
+    },
+    {
+      "month": "2025-10-01",
+      "churn_rate_v1": 3.0011,
+      "churn_rate_v2_restated": 2.4964,
+      "is_provisional": false
+    },
+    {
+      "month": "2025-11-01",
+      "churn_rate_v1": 2.9982,
+      "churn_rate_v2_restated": 2.4777,
+      "is_provisional": false
+    },
+    {
+      "month": "2025-12-01",
+      "churn_rate_v1": 3.0991999999999997,
+      "churn_rate_v2_restated": 2.5791999999999997,
+      "is_provisional": false
+    },
+    {
+      "month": "2026-01-01",
+      "churn_rate_v1": 3.3998,
+      "churn_rate_v2_restated": 2.8224,
+      "is_provisional": false
+    },
+    {
+      "month": "2026-02-01",
+      "churn_rate_v1": 3.0008,
+      "churn_rate_v2_restated": 2.5548,
+      "is_provisional": false
+    },
+    {
+      "month": "2026-03-01",
+      "churn_rate_v1": 3.2987,
+      "churn_rate_v2_restated": 2.7666,
+      "is_provisional": false
+    },
+    {
+      "month": "2026-04-01",
+      "churn_rate_v1": 2.8007,
+      "churn_rate_v2_restated": 2.3323,
+      "is_provisional": false
+    },
+    {
+      "month": "2026-05-01",
+      "churn_rate_v1": 2.9007,
+      "churn_rate_v2_restated": 2.4213,
+      "is_provisional": false
+    },
+    {
+      "month": "2026-06-01",
+      "churn_rate_v1": 2.8004000000000002,
+      "churn_rate_v2_restated": 1.7908,
+      "is_provisional": true
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "unit": "percent",
+  "series": [
+    {
+      "month": "2026-01-01",
+      "churn_rate_as_reported": 3.3998,
+      "definition_version": "v1",
+      "is_provisional": false
+    },
+    {
+      "month": "2026-02-01",
+      "churn_rate_as_reported": 3.0008,
+      "definition_version": "v1",
+      "is_provisional": false
+    },
+    {
+      "month": "2026-03-01",
+      "churn_rate_as_reported": 3.2987,
+      "definition_version": "v1",
+      "is_provisional": false
+    },
+    {
+      "month": "2026-04-01",
+      "churn_rate_as_reported": 2.8007,
+      "definition_version": "v1",
+      "is_provisional": false
+    },
+    {
+      "month": "2026-05-01",
+      "churn_rate_as_reported": 2.4213,
+      "definition_version": "v2",
+      "is_provisional": false
+    },
+    {
+      "month": "2026-06-01",
+      "churn_rate_as_reported": 1.7908,
+      "definition_version": "v2",
+      "is_provisional": true
+    }
+  ],
+  "march_raw": 9.3992,
+  "events": [
+    {
+      "event_date": "2026-03-12",
+      "event_type": "migration",
+      "title": "Shopify to Recharge billing migration"
+    },
+    {
+      "event_date": "2026-03-28",
+      "event_type": "promo",
+      "title": "Pause-instead-of-cancel campaign"
+    },
+    {
+      "event_date": "2026-04-09",
+      "event_type": "outage",
+      "title": "Fivetran Klaviyo connector down 31h"
+    },
+    {
+      "event_date": "2026-05-01",
+      "event_type": "definition_change",
+      "title": "Churn v2: 30-day dunning grace"
+    },
+    {
+      "event_date": "2026-05-19",
+      "event_type": "logistics",
+      "title": "PostNL courier strike"
+    },
+    {
+      "event_date": "2026-06-14",
+      "event_type": "promo",
+      "title": "Father's Day gift bundle"
+    }
+  ]
+}
