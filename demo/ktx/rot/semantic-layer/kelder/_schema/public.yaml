@@ -1,0 +1,550 @@
+tables:
+  dim_customers:
+    table: dim_customers
+    columns:
+      - name: customer_id
+        type: number
+        descriptions:
+          ai: Unique identifier for each customer record in the system.
+      - name: email
+        type: string
+        descriptions:
+          ai: Customer's email address for communication and account identification.
+      - name: first_name
+        type: string
+        descriptions:
+          ai: Customer's given name as provided during registration.
+      - name: last_name
+        type: string
+        descriptions:
+          ai: Customer's family name as provided during registration.
+      - name: country_code
+        type: string
+        descriptions:
+          ai: Two-letter ISO country code indicating customer's location.
+      - name: country_name
+        type: string
+        descriptions:
+          ai: Full name of the country where customer resides.
+      - name: region
+        type: string
+        descriptions:
+          ai: Geographic business region grouping for the customer's country.
+      - name: created_at
+        type: time
+        descriptions:
+          ai: Timestamp when the customer account was initially created.
+      - name: accepts_marketing
+        type: boolean
+        descriptions:
+          ai: Indicates whether customer opted in to receive marketing communications.
+      - name: first_order_at
+        type: time
+        descriptions:
+          ai: Timestamp of the customer's initial purchase transaction.
+      - name: first_order_channel
+        type: string
+        descriptions:
+          ai: Marketing channel or source that drove the customer's first purchase.
+      - name: web_orders
+        type: number
+        descriptions:
+          ai: Total count of orders placed through web channels.
+      - name: subscriptions
+        type: number
+        descriptions:
+          ai: Total number of subscription products the customer has purchased.
+      - name: is_active_subscriber
+        type: boolean
+        descriptions:
+          ai: Indicates whether customer currently has an active subscription.
+    descriptions:
+      ai: Customer master data including contact information, geographic location, marketing preferences, and purchase behavior summary metrics.
+    joins:
+      - to: fct_orders
+        "on": dim_customers.customer_id = fct_orders.customer_id
+        relationship: one_to_many
+        source: inferred
+      - to: fct_subscriptions
+        "on": dim_customers.customer_id = fct_subscriptions.customer_id
+        relationship: one_to_many
+        source: inferred
+  fct_orders:
+    table: fct_orders
+    columns:
+      - name: order_id
+        type: number
+        descriptions:
+          ai: Unique identifier for each order transaction in the system.
+      - name: order_name
+        type: string
+        descriptions:
+          ai: Human-readable order reference number displayed to customers and staff.
+      - name: customer_id
+        type: number
+        descriptions:
+          ai: Links order to the customer who placed it.
+      - name: created_at
+        type: time
+        descriptions:
+          ai: Timestamp when order was initially created in the system.
+      - name: order_date
+        type: time
+        descriptions:
+          ai: Calendar date of order placement without time component.
+      - name: source_name
+        type: string
+        descriptions:
+          ai: Origin channel indicating how order was generated or initiated.
+      - name: channel
+        type: string
+        descriptions:
+          ai: Marketing or sales channel through which order was acquired.
+      - name: is_subscription_order
+        type: boolean
+        descriptions:
+          ai: Indicates whether order is part of recurring subscription program.
+      - name: is_subscription_first_order
+        type: boolean
+        descriptions:
+          ai: Flags initial order when customer starts new subscription.
+      - name: is_subscription_renewal
+        type: boolean
+        descriptions:
+          ai: Identifies automatic recurring orders from existing subscription contracts.
+      - name: is_gift
+        type: boolean
+        descriptions:
+          ai: Marks orders purchased as gifts for other recipients.
+      - name: contains_bundle
+        type: boolean
+        descriptions:
+          ai: Indicates order includes product bundles or multi-item packages.
+      - name: items
+        type: number
+        descriptions:
+          ai: Total quantity of individual items included in order.
+      - name: subtotal_price_eur
+        type: number
+        descriptions:
+          ai: Sum of item prices before discounts and taxes applied.
+      - name: total_discounts_eur
+        type: number
+        descriptions:
+          ai: Total value of promotional discounts and reductions applied.
+      - name: total_tax_eur
+        type: number
+        descriptions:
+          ai: Sum of all tax amounts charged on order.
+      - name: total_price_eur
+        type: number
+        descriptions:
+          ai: Final amount customer paid including discounts, taxes, and fees.
+      - name: is_refunded
+        type: boolean
+        descriptions:
+          ai: Indicates whether order has been fully or partially refunded.
+      - name: refunded_eur
+        type: number
+        descriptions:
+          ai: Total monetary amount returned to customer through refunds.
+      - name: first_refunded_at
+        type: time
+        descriptions:
+          ai: Timestamp of initial refund transaction for this order.
+      - name: carrier
+        type: string
+        descriptions:
+          ai: Shipping company responsible for delivering the order.
+      - name: shipped_at
+        type: time
+        descriptions:
+          ai: Timestamp when order was dispatched from warehouse or fulfillment center.
+      - name: delivered_at
+        type: time
+        descriptions:
+          ai: Timestamp when carrier confirmed successful delivery to customer.
+      - name: has_failed_delivery
+        type: boolean
+        descriptions:
+          ai: Flags orders with unsuccessful delivery attempts or logistics failures.
+      - name: delivery_days
+        type: number
+        descriptions:
+          ai: Number of days between shipment and successful delivery completion.
+    descriptions:
+      ai: Comprehensive order transaction records capturing customer purchases, subscription details, pricing, discounts, refunds, and fulfillment logistics with delivery tracking.
+    joins:
+      - to: dim_customers
+        "on": fct_orders.customer_id = dim_customers.customer_id
+        relationship: many_to_one
+        source: inferred
+  fct_subscription_events:
+    table: fct_subscription_events
+    columns:
+      - name: subscription_event_id
+        type: string
+        descriptions:
+          ai: Unique identifier for each individual subscription lifecycle event occurrence.
+      - name: subscription_key
+        type: string
+        descriptions:
+          ai: Business identifier linking event to specific customer subscription account.
+      - name: event_type
+        type: string
+        descriptions:
+          ai: Category of subscription lifecycle action such as started, cancelled, or recovered.
+      - name: occurred_at
+        type: time
+        descriptions:
+          ai: Precise timestamp when subscription event took place in local timezone.
+      - name: event_month
+        type: time
+        descriptions:
+          ai: Calendar month of event occurrence for time-based aggregation and reporting.
+      - name: source
+        type: string
+        descriptions:
+          ai: System or channel that generated or recorded the subscription event.
+      - name: cancellation_reason
+        type: string
+        descriptions:
+          ai: Customer-provided or system-determined explanation for subscription termination.
+      - name: is_voluntary_cancellation
+        type: boolean
+        descriptions:
+          ai: Indicates whether customer actively chose to cancel versus involuntary termination.
+      - name: billing_cycle_date
+        type: time
+        descriptions:
+          ai: Scheduled date for recurring subscription payment processing.
+      - name: recovered_at
+        type: time
+        descriptions:
+          ai: Timestamp when previously cancelled subscription was reactivated by customer.
+      - name: is_recovered_within_30_days
+        type: boolean
+        descriptions:
+          ai: Flag indicating subscription reactivation occurred within thirty days of cancellation.
+      - name: is_gift
+        type: boolean
+        descriptions:
+          ai: Identifies subscription purchased as gift for another recipient.
+      - name: is_migration_artifact
+        type: boolean
+        descriptions:
+          ai: Marks events created during data migration rather than actual customer actions.
+    descriptions:
+      ai: Records lifecycle events for customer subscriptions including starts, cancellations, recoveries, and associated metadata for subscription analytics.
+    joins:
+      - to: fct_subscriptions
+        "on": fct_subscription_events.subscription_key = fct_subscriptions.subscription_key
+        relationship: many_to_one
+        source: inferred
+  fct_subscriptions:
+    table: fct_subscriptions
+    columns:
+      - name: subscription_key
+        type: string
+        descriptions:
+          ai: Unique identifier combining origin system prefix and contract identifier for each subscription instance.
+      - name: customer_id
+        type: number
+        descriptions:
+          ai: Foreign key linking subscription to customer record in customer dimension table.
+      - name: origin_system
+        type: string
+        descriptions:
+          ai: Source platform where subscription was created, either Shopify or Recharge system.
+      - name: shopify_contract_id
+        type: number
+        descriptions:
+          ai: Native Shopify subscription contract identifier for cross-system reconciliation and API operations.
+      - name: recharge_subscription_id
+        type: number
+        descriptions:
+          ai: Native Recharge subscription identifier for legacy system integration and data migration.
+      - name: started_at
+        type: time
+        descriptions:
+          ai: Timestamp when customer initiated subscription, including timezone for accurate temporal analysis.
+      - name: started_date
+        type: time
+        descriptions:
+          ai: Calendar date subscription began, used for cohort analysis and reporting aggregations.
+      - name: churned_at
+        type: time
+        descriptions:
+          ai: Timestamp when customer permanently cancelled subscription without continuation or replacement.
+      - name: ended_at
+        type: time
+        descriptions:
+          ai: Timestamp when subscription terminated, regardless of reason including cancellation or replacement.
+      - name: status
+        type: string
+        descriptions:
+          ai: Current lifecycle state of subscription such as active, paused, cancelled, or expired.
+      - name: cancellation_reason
+        type: string
+        descriptions:
+          ai: Customer-provided or system-recorded explanation for why subscription was terminated or cancelled.
+      - name: is_gift
+        type: boolean
+        descriptions:
+          ai: Indicates whether subscription was purchased as gift for another recipient versus self-use.
+      - name: interval_days
+        type: number
+        descriptions:
+          ai: Number of days between recurring deliveries, defining subscription billing and fulfillment frequency.
+      - name: quantity
+        type: number
+        descriptions:
+          ai: Number of product units included in each recurring subscription delivery or billing cycle.
+      - name: variant_id
+        type: number
+        descriptions:
+          ai: Product variant identifier specifying exact SKU configuration like roast type and package size.
+      - name: sku
+        type: string
+        descriptions:
+          ai: Stock keeping unit code identifying specific product variant with attributes like origin and grind.
+      - name: product_title
+        type: string
+        descriptions:
+          ai: Human-readable name of coffee product included in subscription for customer communication and reporting.
+      - name: price_eur
+        type: number
+        descriptions:
+          ai: Per-delivery charge in euros for subscription order based on quantity and product pricing.
+      - name: mrr_eur
+        type: number
+        descriptions:
+          ai: Monthly recurring revenue normalized to 30-day period regardless of actual delivery interval frequency.
+      - name: payment_method
+        type: string
+        descriptions:
+          ai: Customer payment type such as credit card, mandate, or other billing instrument used.
+      - name: origin_order_id
+        type: number
+        descriptions:
+          ai: Initial order identifier that created subscription, linking to first transaction in order history.
+      - name: first_order_channel
+        type: string
+        descriptions:
+          ai: Marketing channel or source attribution for original order that initiated this subscription relationship.
+      - name: is_migration_artifact
+        type: boolean
+        descriptions:
+          ai: Flags subscriptions created during system migration rather than organic customer signup for data quality.
+      - name: is_legacy_pause_restore
+        type: boolean
+        descriptions:
+          ai: Indicates subscription resulted from restoring previously paused legacy subscription during platform transition.
+      - name: continues_subscription_key
+        type: string
+        descriptions:
+          ai: References prior subscription that this one replaces, maintaining continuity through product or plan changes.
+    descriptions:
+      ai: Tracks recurring coffee subscription contracts with customer details, product information, billing frequency, revenue metrics, and lifecycle status across Shopify and Recharge platforms.
+    joins:
+      - to: fct_subscription_events
+        "on": fct_subscriptions.subscription_key = fct_subscription_events.subscription_key
+        relationship: one_to_many
+        source: inferred
+      - to: fct_subscriptions
+        "on": fct_subscriptions.continues_subscription_key = fct_subscriptions.subscription_key
+        relationship: many_to_one
+        source: inferred
+      - to: fct_subscriptions
+        "on": fct_subscriptions.subscription_key = fct_subscriptions.continues_subscription_key
+        relationship: one_to_many
+        source: inferred
+      - to: dim_customers
+        "on": fct_subscriptions.customer_id = dim_customers.customer_id
+        relationship: many_to_one
+        source: inferred
+  metrics_cac_monthly:
+    table: metrics_cac_monthly
+    columns:
+      - name: month
+        type: time
+        descriptions:
+          ai: First day of the month for which acquisition metrics are aggregated and reported.
+      - name: channel
+        type: string
+        descriptions:
+          ai: Marketing channel type used for customer acquisition such as paid search or paid social.
+      - name: platform
+        type: string
+        descriptions:
+          ai: Advertising platform where campaigns ran such as Google or Meta.
+      - name: ad_spend_eur
+        type: number
+        descriptions:
+          ai: Total advertising expenditure in euros invested during the month for the channel and platform.
+      - name: new_subscribers
+        type: number
+        descriptions:
+          ai: Count of new subscribers acquired through the channel and platform during the month.
+      - name: cac_eur
+        type: number
+        descriptions:
+          ai: Customer acquisition cost in euros calculated by dividing ad spend by new subscribers acquired.
+    descriptions:
+      ai: Monthly customer acquisition cost metrics tracking advertising spend, new subscriber counts, and calculated CAC across marketing channels and platforms.
+  metrics_email_attribution_daily:
+    table: metrics_email_attribution_daily
+    columns:
+      - name: day
+        type: time
+        descriptions:
+          ai: Calendar date for which email metrics are aggregated and reported.
+      - name: is_incomplete
+        type: boolean
+        descriptions:
+          ai: Flag indicating whether data collection for this day is still in progress or incomplete.
+      - name: emails_received
+        type: number
+        descriptions:
+          ai: Total count of emails successfully delivered to recipient inboxes.
+      - name: emails_opened
+        type: number
+        descriptions:
+          ai: Number of delivered emails that were opened by recipients.
+      - name: emails_clicked
+        type: number
+        descriptions:
+          ai: Count of emails where recipients clicked on links within the message.
+      - name: placed_orders
+        type: number
+        descriptions:
+          ai: Total orders placed by customers on this day regardless of email interaction.
+      - name: placed_order_revenue_eur
+        type: number
+        descriptions:
+          ai: Total revenue in euros from all orders placed on this day.
+      - name: attributed_orders
+        type: number
+        descriptions:
+          ai: Orders directly attributed to email campaign interactions through attribution modeling.
+      - name: attributed_revenue_eur
+        type: number
+        descriptions:
+          ai: Revenue in euros from orders attributed to email marketing touchpoints.
+    descriptions:
+      ai: Daily email marketing performance metrics tracking delivery, engagement, and revenue attribution from email campaigns to customer orders.
+  metrics_new_subscribers_monthly:
+    table: metrics_new_subscribers_monthly
+    columns:
+      - name: month
+        type: time
+        descriptions:
+          ai: First day of the calendar month for which subscriber metrics are aggregated.
+      - name: new_subscribers
+        type: number
+        descriptions:
+          ai: Total count of all new subscribers acquired during the month regardless of payment status.
+      - name: new_subscribers_paid
+        type: number
+        descriptions:
+          ai: Count of new subscribers who started with a paid subscription plan during the month.
+      - name: new_subscribers_unpaid
+        type: number
+        descriptions:
+          ai: Count of new subscribers who started with a free or trial subscription during the month.
+      - name: new_subscribers_without_web_order
+        type: number
+        descriptions:
+          ai: Count of new subscribers acquired through non-web channels without associated online purchase transactions.
+    descriptions:
+      ai: Monthly aggregation tracking total new subscriber acquisitions segmented by payment status and web order presence.
+  metrics_pause_rate_monthly:
+    table: metrics_pause_rate_monthly
+    columns:
+      - name: month
+        type: time
+        descriptions:
+          ai: First day of the calendar month for which pause metrics are aggregated and reported.
+      - name: base_subscribers
+        type: number
+        descriptions:
+          ai: Total count of active subscribers eligible to pause at the beginning of the month.
+      - name: paused_at_month_start
+        type: number
+        descriptions:
+          ai: Number of subscribers already in paused status when the month began.
+      - name: pauses_started
+        type: number
+        descriptions:
+          ai: Count of new subscription pauses initiated by subscribers during this specific month.
+      - name: pause_rate
+        type: number
+        descriptions:
+          ai: Ratio of new pauses started to base subscribers, indicating monthly pause adoption percentage.
+      - name: paused_share
+        type: number
+        descriptions:
+          ai: Proportion of total subscribers in paused status relative to the base subscriber population.
+    descriptions:
+      ai: Monthly subscription pause metrics tracking active subscribers, pause activity, and calculated rates for subscription management analysis.
+  metrics_subscriber_churn_monthly:
+    table: metrics_subscriber_churn_monthly
+    columns:
+      - name: month
+        type: time
+        descriptions:
+          ai: Calendar month for which churn metrics are calculated and reported.
+      - name: definition_version_as_reported
+        type: string
+        descriptions:
+          ai: Churn calculation methodology version used when metrics were originally reported.
+      - name: base_subscribers
+        type: number
+        descriptions:
+          ai: Total active subscribers at month start eligible for churn measurement.
+      - name: churned_subscribers
+        type: number
+        descriptions:
+          ai: Count of subscribers who cancelled or left during the month.
+      - name: churn_rate_as_reported
+        type: number
+        descriptions:
+          ai: Percentage of base subscribers who churned using reported definition version.
+      - name: base_subscribers_raw
+        type: number
+        descriptions:
+          ai: Unprocessed count of starting subscribers before any adjustments or corrections.
+      - name: churned_subscribers_raw
+        type: number
+        descriptions:
+          ai: Unprocessed count of churned subscribers before any adjustments or corrections.
+      - name: churn_rate_as_reported_raw
+        type: number
+        descriptions:
+          ai: Unprocessed churn percentage before any adjustments or corrections applied.
+      - name: churned_subscribers_v1
+        type: number
+        descriptions:
+          ai: Churned subscriber count calculated using version 1 methodology.
+      - name: churn_rate_v1
+        type: number
+        descriptions:
+          ai: Churn percentage calculated using version 1 methodology.
+      - name: base_subscribers_v2_restated
+        type: number
+        descriptions:
+          ai: Starting subscriber count recalculated using version 2 methodology for historical comparison.
+      - name: churned_subscribers_v2_restated
+        type: number
+        descriptions:
+          ai: Churned subscriber count recalculated using version 2 methodology for historical comparison.
+      - name: churn_rate_v2_restated
+        type: number
+        descriptions:
+          ai: Churn percentage recalculated using version 2 methodology for historical comparison.
+      - name: is_provisional
+        type: boolean
+        descriptions:
+          ai: Indicates whether metrics are preliminary and subject to revision.
+    descriptions:
+      ai: Monthly subscriber churn metrics tracking base subscribers, churned counts, and rates across different calculation versions and restatements.

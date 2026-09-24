@@ -1,0 +1,22 @@
+name: metrics_pause_rate_monthly
+descriptions:
+  user: Pauses per month. Pause rate is pauses started in the month over the base at the start of the month.
+column_overrides:
+  - name: month
+    descriptions:
+      user: "First day of the month. dbt: unique, not null"
+  - name: base_subscribers
+    descriptions:
+      user: Base at the start of the month, as in churn.
+  - name: paused_at_month_start
+    descriptions:
+      user: Base subscriptions paused at the start of the month.
+  - name: pauses_started
+    descriptions:
+      user: Pauses started in the month.
+  - name: pause_rate
+    descriptions:
+      user: pauses_started / base_subscribers.
+  - name: paused_share
+    descriptions:
+      user: paused_at_month_start / base_subscribers.

@@ -1,0 +1,46 @@
+name: metrics_subscriber_churn_monthly
+descriptions:
+  user: "Governed monthly subscriber churn. Base: subscriptions active or paused at 00:00 Amsterdam time on the first of the month, excluding gift subscriptions. Churned: voluntary cancellations in the month plus failed payments, counted per the definition version. Migration artefacts are excluded (decision 0007); the _raw columns include them. Caveat: v1 before May 2026, v2 from May (decision 0009, context.metric_changelog). The as-reported series changes definition on 1 May 2026; use churn_rate_v2_restated for comparisons across that date. The latest month is provisional (is_provisional): v2 does not count failures younger than 30 days yet, so it will be revised upward."
+column_overrides:
+  - name: month
+    descriptions:
+      user: "First day of the month. dbt: unique, not null"
+  - name: definition_version_as_reported
+    descriptions:
+      user: Churn definition used for the as-reported series in this month, v1 or v2.
+  - name: base_subscribers
+    descriptions:
+      user: Subscriptions active or paused at the start of the month, excluding gifts. Adjusted.
+  - name: churned_subscribers
+    descriptions:
+      user: Churned subscriptions, as reported (v1 before May 2026, v2 from May). Adjusted.
+  - name: churn_rate_as_reported
+    descriptions:
+      user: churned_subscribers / base_subscribers. The as-reported number. Adjusted.
+  - name: base_subscribers_raw
+    descriptions:
+      user: Base with migration artefacts treated as cancelled, as in Recharge exports.
+  - name: churned_subscribers_raw
+    descriptions:
+      user: As-reported churned count including migration artefacts.
+  - name: churn_rate_as_reported_raw
+    descriptions:
+      user: As-reported churn including migration artefacts. For finance reconciliation against Recharge exports only; never report it without the adjusted rate.
+  - name: churned_subscribers_v1
+    descriptions:
+      user: Churned under v1 for every month. Adjusted.
+  - name: churn_rate_v1
+    descriptions:
+      user: v1 churn for every month. Adjusted.
+  - name: base_subscribers_v2_restated
+    descriptions:
+      user: Base for the restated v2 series. Adjusted.
+  - name: churned_subscribers_v2_restated
+    descriptions:
+      user: Churned under v2 for every month. Adjusted.
+  - name: churn_rate_v2_restated
+    descriptions:
+      user: v2 churn for every month. Adjusted. Use for like-for-like comparisons across 1 May 2026.
+  - name: is_provisional
+    descriptions:
+      user: True for the latest month. v2 churn for it will be revised upward as failed payments pass 30 days.

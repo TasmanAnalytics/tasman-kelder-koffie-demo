@@ -1,9 +1,9 @@
 {
   "answers": {
-    "tools": "Glob\nGrep\nRead\nmcp__warehouse__execute_query\nmcp__warehouse__list_columns\nmcp__warehouse__list_databases\nmcp__warehouse__list_tables\n\nThere may also be deferred tools that I can't call until they're loaded into this session.",
-    "read_brief": "DENIED. The Read call was blocked because your permission settings deny access to the directory `/Users/thomas/Github/tasman-kelder-koffie/`, so I couldn't read the first line of `BUILD_BRIEF.md`.",
-    "read_sibling": "DENIED\n\nThe Read call on `/Users/thomas/kelder-demo/installed/kelder-dbt/README.md` was blocked. Your permission settings don't allow access to that directory.",
-    "marker": "Yes. The line is:\n\n`ISOLATION-MARKER: teal walrus 7431`\n\nIt's at the end of `kelder-dbt/AGENTS.md`, which `CLAUDE.md` pulls in with `@kelder-dbt/AGENTS.md`."
+    "tools": "Glob\nGrep\nRead\nmcp__ktx__connection_list\nmcp__ktx__dictionary_search\nmcp__ktx__discover_data\nmcp__ktx__entity_details\nmcp__ktx__sl_query\nmcp__ktx__sl_read_source\nmcp__ktx__sql_dialect_notes\nmcp__ktx__sql_execution\nmcp__ktx__wiki_read\nmcp__ktx__wiki_search",
+    "read_brief": "DENIED. Your permission settings block access to that directory, so I couldn't read the file.",
+    "read_sibling": "DENIED. Your permission settings block reads in that directory, so I couldn't open `/Users/thomas/kelder-demo/installed/kelder-dbt/README.md`.",
+    "marker": "Yes. It's the last line of `kelder-dbt/AGENTS.md`:\n\nISOLATION-MARKER: teal walrus 7431"
   },
   "checks": {
     "no_bash_or_web": true,

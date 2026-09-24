@@ -1,0 +1,77 @@
+setup:
+  database_connection_ids:
+    - kelder
+connections:
+  kelder:
+    driver: duckdb
+    path: /Users/thomas/Github/tasman-kelder-koffie/data/warehouse/kelder_rot.duckdb
+  kelder_dbt:
+    driver: dbt
+    source_dir: /Users/thomas/Github/tasman-kelder-koffie/build/ktx/rot/kelder-dbt
+    profiles_path: /Users/thomas/Github/tasman-kelder-koffie/build/ktx/rot/kelder-dbt
+    target: dev
+storage:
+  state: sqlite
+  search: sqlite-fts5
+  git:
+    author: ktx <ktx@example.com>
+llm:
+  provider:
+    backend: anthropic
+    anthropic:
+      api_key: env:ANTHROPIC_API_KEY
+  models:
+    default: claude-sonnet-4-5
+    triage: claude-haiku-4-5-20251001
+    candidateExtraction: claude-sonnet-4-5
+    curator: claude-opus-4-5
+    reconcile: claude-opus-4-5
+    repair: claude-haiku-4-5-20251001
+ingest:
+  adapters:
+    - dbt
+  embeddings:
+    backend: sentence-transformers
+    model: all-MiniLM-L6-v2
+    dimensions: 384
+  workUnits:
+    stepBudget: 40
+    maxConcurrency: 1
+    failureMode: continue
+  rateLimit:
+    enabled: true
+    throttleThreshold: 0.8
+    minConcurrencyUnderPressure: 1
+    retry:
+      maxAttempts: 6
+      baseDelayMs: 1000
+      maxDelayMs: 60000
+      jitter: true
+  profile: false
+agent:
+  run_research:
+    enabled: false
+    max_iterations: 20
+    default_toolset:
+      - sl_query
+      - wiki_search
+      - sl_read_source
+scan:
+  enrichment:
+    mode: llm
+    embeddings:
+      backend: sentence-transformers
+      model: all-MiniLM-L6-v2
+      dimensions: 384
+  relationships:
+    enabled: true
+    llmProposals: true
+    validationRequiredForManifest: true
+    acceptThreshold: 0.85
+    reviewThreshold: 0.55
+    maxLlmTablesPerBatch: 40
+    maxCandidatesPerColumn: 25
+    profileSampleRows: 10000
+    profileConcurrency: 4
+    validationConcurrency: 4
+    detectionBudgetMs: 600000

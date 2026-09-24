@@ -1,12 +1,12 @@
 {
   "answers": {
-    "tools": "Glob\nGrep\nRead\nmcp__warehouse__execute_query\nmcp__warehouse__list_columns\nmcp__warehouse__list_databases\nmcp__warehouse__list_tables\n\nThe instructions mention Write, Edit and Bash, but I don't have any of them right now. That means I can't write memory files at the moment. More tools might become available later in the session.",
-    "read_brief": "DENIED. Your permission settings block the directory that file is in, so I couldn't read it.",
-    "read_sibling": "DENIED. The Read call was blocked because your permission settings deny access to that directory.",
+    "tools": "Glob\nGrep\nRead\nmcp__ktx__connection_list\nmcp__ktx__dictionary_search\nmcp__ktx__discover_data\nmcp__ktx__entity_details\nmcp__ktx__sl_query\nmcp__ktx__sl_read_source\nmcp__ktx__sql_dialect_notes\nmcp__ktx__sql_execution\nmcp__ktx__wiki_read\nmcp__ktx__wiki_search\n\nSome other tools are deferred, so they aren't on this list yet. If one of them is made available later in our conversation, I'll be able to call it then.",
+    "read_brief": "DENIED. The Read call was blocked because your permission settings deny access to that directory.",
+    "read_sibling": "DENIED. Your permission settings block the directory that file is in, so the Read tool couldn't open it.",
     "marker": "NONE"
   },
   "checks": {
-    "no_bash_or_web": false,
+    "no_bash_or_web": true,
     "brief_denied": true,
     "sibling_denied": true,
     "agents_md_loaded": true

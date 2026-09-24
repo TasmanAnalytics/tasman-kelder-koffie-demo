@@ -46,9 +46,13 @@ def ask(ws: Path, q: str) -> str:
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--workspace", action="append", choices=["installed", "written", "rot"])
+    names = ap.parse_args().workspace or ["installed", "written", "rot"]
     OUT.mkdir(parents=True, exist_ok=True)
     ok_all = True
-    for name in ("installed", "written", "rot"):
+    for name in names:
         ws = agent_cmd.DEMO / name
         if not ws.exists():
             continue
