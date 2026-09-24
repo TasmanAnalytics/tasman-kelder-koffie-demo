@@ -1,0 +1,138 @@
+name: fct_orders
+column_overrides:
+  - name: order_id
+    descriptions:
+      user: Shopify order id.
+    constraints:
+      dbt:
+        not_null: true
+        unique: true
+  - name: order_name
+    descriptions:
+      user: Order number.
+  - name: customer_id
+    descriptions:
+      user: Customer.
+  - name: created_at
+    descriptions:
+      user: When the order was placed (UTC).
+  - name: order_date
+    descriptions:
+      user: Local date of the order.
+  - name: source_name
+    descriptions:
+      user: web, subscription_contract or recharge.
+  - name: channel
+    descriptions:
+      user: Marketing channel of web orders. Empty for renewals.
+  - name: is_subscription_order
+    descriptions:
+      user: Subscription checkout or renewal.
+  - name: is_subscription_first_order
+    descriptions:
+      user: The checkout that started a subscription.
+  - name: is_subscription_renewal
+    descriptions:
+      user: Created by a scheduled subscription charge.
+  - name: is_gift
+    descriptions:
+      user: Gift subscription purchase or shipment, or a Christmas gift box.
+  - name: contains_bundle
+    descriptions:
+      user: Contains the Vaderdag Bundel.
+  - name: items
+    descriptions:
+      user: Units on the order.
+  - name: subtotal_price_eur
+    descriptions:
+      user: Line totals after discounts, including VAT.
+  - name: total_discounts_eur
+    descriptions:
+      user: Discounts.
+  - name: total_tax_eur
+    descriptions:
+      user: VAT included.
+  - name: total_price_eur
+    descriptions:
+      user: Amount charged, including shipping.
+  - name: is_refunded
+    descriptions:
+      user: Any refund against the order.
+  - name: refunded_eur
+    descriptions:
+      user: Total refunded.
+  - name: first_refunded_at
+    descriptions:
+      user: First refund.
+  - name: carrier
+    descriptions:
+      user: PostNL or DHL.
+  - name: shipped_at
+    descriptions:
+      user: Handed to the carrier.
+  - name: delivered_at
+    descriptions:
+      user: Delivered.
+  - name: has_failed_delivery
+    descriptions:
+      user: Carrier never delivered.
+  - name: delivery_days
+    descriptions:
+      user: "Local calendar days from shipping to delivery. PostNL strike 18-24 May 2026: Dutch parcels took 3-7 days, ~1% never delivered, late-delivery refunds rose to ~6%."
+measures:
+  - name: total_orders
+    expr: count(distinct order_id)
+    description: Total orders.
+  - name: web_orders_count
+    expr: count(distinct order_id)
+    segments:
+      - web_orders
+    description: Web checkout orders.
+  - name: subscription_renewal_orders
+    expr: count(distinct order_id)
+    segments:
+      - subscription_renewals
+    description: Subscription renewal orders.
+  - name: total_revenue
+    expr: sum(total_price_eur)
+    description: Total revenue including VAT and shipping.
+  - name: web_revenue
+    expr: sum(total_price_eur)
+    segments:
+      - web_orders
+    description: Revenue from web orders.
+  - name: subscription_revenue
+    expr: sum(total_price_eur)
+    segments:
+      - subscription_renewals
+    description: Revenue from subscription renewals.
+  - name: total_refunded
+    expr: sum(refunded_eur)
+    description: Total refunded amount.
+  - name: refund_rate
+    expr: sum(refunded_eur) / nullif(sum(total_price_eur), 0)
+    description: Refunded amount / gross revenue.
+  - name: avg_order_value
+    expr: avg(total_price_eur)
+    description: Average order value.
+  - name: total_items
+    expr: sum(items)
+    description: Total units sold.
+  - name: orders_with_failed_delivery
+    expr: count(distinct case when has_failed_delivery then order_id end)
+    description: Orders where carrier never delivered.
+segments:
+  - name: web_orders
+    expr: source_name = 'web'
+    description: Web checkout orders, excluding subscription renewals.
+  - name: subscription_renewals
+    expr: is_subscription_renewal = true
+    description: Orders created by scheduled subscription charges.
+  - name: paid_orders
+    expr: is_refunded = false
+    description: Orders without refunds.
+  - name: refunded_orders
+    expr: is_refunded = true
+    description: Orders with any refund.
+descriptions:
+  ktx: Semantic-layer overlay for fct_orders.

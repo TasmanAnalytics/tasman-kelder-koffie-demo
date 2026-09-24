@@ -1,0 +1,132 @@
+name: fct_subscriptions
+column_overrides:
+  - name: subscription_key
+    descriptions:
+      user: Stable subscription key.
+    constraints:
+      dbt:
+        not_null: true
+        unique: true
+  - name: customer_id
+    descriptions:
+      user: Customer.
+  - name: origin_system
+    descriptions:
+      user: shopify or recharge.
+  - name: shopify_contract_id
+    descriptions:
+      user: Shopify contract id, if any.
+  - name: recharge_subscription_id
+    descriptions:
+      user: Recharge subscription id, if any.
+  - name: started_at
+    descriptions:
+      user: When the subscription started.
+  - name: started_date
+    descriptions:
+      user: Local (Amsterdam) date the subscription started.
+  - name: churned_at
+    descriptions:
+      user: Timestamp the subscription entered a terminal cancelled state. 2026-03-12 Recharge backfill wrote churned_at for ~1,900 paused subscriptions; these carry is_migration_artifact = true and are excluded from churn metrics.
+  - name: ended_at
+    descriptions:
+      user: When the subscription ended (cancelled or expired).
+  - name: status
+    descriptions:
+      user: Unified subscription status. Shopify and Recharge use different source values; unified in int_subscriptions_unified. Current status only.
+  - name: cancellation_reason
+    descriptions:
+      user: Reason, for cancelled subscriptions.
+  - name: is_gift
+    descriptions:
+      user: Prepaid gift subscription.
+  - name: interval_days
+    descriptions:
+      user: Days between shipments.
+  - name: quantity
+    descriptions:
+      user: Bags per shipment.
+  - name: variant_id
+    descriptions:
+      user: Coffee variant.
+  - name: sku
+    descriptions:
+      user: Coffee SKU.
+  - name: product_title
+    descriptions:
+      user: Coffee name.
+  - name: price_eur
+    descriptions:
+      user: Price per shipment.
+  - name: mrr_eur
+    descriptions:
+      user: MRR attributed to the subscription (price per shipment normalised to a month, active subscriptions only). Zero for gift subscriptions by design.
+  - name: payment_method
+    descriptions:
+      user: Payment method, where known.
+  - name: origin_order_id
+    descriptions:
+      user: Checkout order that started the subscription.
+  - name: first_order_channel
+    descriptions:
+      user: Channel of that checkout order.
+  - name: is_migration_artifact
+    descriptions:
+      user: True for subscriptions that were paused at the last Shopify sync and arrived in Recharge as cancelled at 2026-03-12 00:00:00 UTC with no reason. They were not cancelled. Excluded from churn metrics.
+  - name: is_legacy_pause_restore
+    descriptions:
+      user: True for Recharge subscriptions re-created by operations for a customer whose pause was wiped by the migration. Restores are continuations, not new subscribers. Exclude from new subscriber counts and acquisition metrics.
+  - name: continues_subscription_key
+    descriptions:
+      user: For restores, the key of the original subscription they continue.
+measures:
+  - name: total_subscriptions
+    expr: count(distinct subscription_key)
+    description: Total subscriptions.
+  - name: active_subscriptions
+    expr: count(distinct subscription_key)
+    segments:
+      - active
+    description: Active subscriptions.
+  - name: paused_subscriptions
+    expr: count(distinct subscription_key)
+    segments:
+      - paused
+    description: Paused subscriptions.
+  - name: cancelled_subscriptions
+    expr: count(distinct subscription_key)
+    segments:
+      - cancelled
+    description: Cancelled subscriptions.
+  - name: total_mrr
+    expr: sum(mrr_eur)
+    description: Total MRR from active subscriptions.
+  - name: new_subscriptions
+    expr: count(distinct subscription_key)
+    segments:
+      - non_gift_non_restore
+    description: New subscriptions excluding gifts and restores.
+segments:
+  - name: active
+    expr: status = 'active'
+    description: Active subscriptions.
+  - name: paused
+    expr: status = 'paused'
+    description: Paused subscriptions.
+  - name: cancelled
+    expr: status = 'cancelled'
+    description: Cancelled subscriptions.
+  - name: non_gift
+    expr: is_gift = false
+    description: Excludes prepaid gift subscriptions.
+  - name: non_migration_artifact
+    expr: is_migration_artifact = false
+    description: Excludes migration artifacts from 2026-03-12 backfill.
+  - name: non_restore
+    expr: is_legacy_pause_restore = false
+    description: Excludes legacy pause restores.
+  - name: non_gift_non_restore
+    expr: is_gift = false and is_legacy_pause_restore = false
+    description: Excludes gifts and restores for new subscriber counts.
+descriptions:
+  ktx: Semantic-layer overlay for fct_subscriptions.

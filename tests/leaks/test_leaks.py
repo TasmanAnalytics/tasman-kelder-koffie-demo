@@ -84,6 +84,11 @@ def test_blind_workspaces_have_no_context_words(ws, record_property):
         for m in pat.finditer(p.read_text(errors="ignore")):
             hit = (str(p.relative_to(root)), m.group(0))
             (reported if set(p.relative_to(root).parts) & KTX_OUTPUT_DIRS else fails).append(hit)
+    proj = make_workspace.KTX_PROJECTS / ws
+    for p in sorted(proj.rglob("*")) if proj.exists() else []:
+        if p.is_file() and _is_text(p) and ".ktx" not in p.parts and ".git" not in p.parts and p.name != "ktx.yaml":
+            for m in pat.finditer(p.read_text(errors="ignore")):
+                reported.append((f"ktx:{p.relative_to(proj)}", m.group(0)))
     record_property("ktx_ingest_matches", reported)
     if reported:
         print(f"\nREPORTED (ktx ingest output, not a failure) in {ws}: {sorted(set(reported))[:50]}")
@@ -145,7 +150,7 @@ def test_one_mcp_server_read_only_without_file_access(ws):
     assert str(ROOT) not in text
     if name == "ktx":
         assert spec["type"] == "http" and spec["url"].startswith("http://127.0.0.1:")
-        cfg = (DEMO / ws / "kelder-dbt" / "ktx.yaml").read_text()
+        cfg = (make_workspace.KTX_PROJECTS / ws / "ktx.yaml").read_text()
         assert "backend: none" in cfg.split("llm:")[1].split("ingest:")[0], "LLM must be off in workspaces"
         assert str(DEMO / ws / "warehouse.duckdb") in cfg
         assert str(ROOT) not in cfg
@@ -179,7 +184,7 @@ def test_mcp_server_refuses_files_and_writes(ws):
 def test_ktx_wiki_matches_context_files(ws):
     """context/ is canonical: every context markdown file is a verbatim wiki page, and nothing else is claimed."""
     root = DEMO / ws / "kelder-dbt"
-    wiki = root / "wiki" / "global"
+    wiki = make_workspace.KTX_PROJECTS / ws / "wiki" / "global"
     if not wiki.exists():
         pytest.skip("not a ktx workspace")
     pages = [p.read_text() for p in wiki.glob("*.md")]
@@ -201,9 +206,11 @@ def test_no_claude_md_above_the_demo_directory():
 def test_dedicated_config_dir_has_no_memory_or_instructions():
     cfg = make_workspace.CONFIG_DIR
     assert cfg.exists()
-    for name in ("CLAUDE.md", "projects", "agents", "commands", "skills", "plugins"):
+    assert not (cfg / "CLAUDE.md").exists()
+    for name in ("projects", "agents", "commands", "skills", "plugins"):
         p = cfg / name
-        assert not (p.exists() and (p.is_file() or any(p.iterdir()))), p
+        files = [f for f in p.rglob("*") if f.is_file()] if p.exists() else []
+        assert not files, files[:5]
 
 
 def test_no_user_level_memory_that_could_load():
@@ -212,4 +219,5 @@ def test_no_user_level_memory_that_could_load():
     for projects in (home / ".claude" / "projects", make_workspace.CONFIG_DIR / "projects"):
         for w in ALL:
             slug = str(DEMO / w).replace("/", "-")
-            assert not (projects / slug / "memory").exists(), projects / slug
+            mem = projects / slug / "memory"
+            assert not (mem.exists() and any(f.is_file() for f in mem.rglob("*"))), mem

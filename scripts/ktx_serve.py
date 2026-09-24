@@ -1,5 +1,7 @@
 """Start, stop or check the ktx MCP server for each agent workspace.
 
+Each workspace's ktx project is in ~/kelder-demo/_tools/ktx-projects/<workspace>/ (see make_workspace.py).
+
     uv run python scripts/ktx_serve.py start|stop|status [--workspace installed|written|rot]
 
 Each workspace's kelder-dbt/ is a ktx project (ktx.yaml, semantic-layer/, wiki/, .ktx/). The server
@@ -59,7 +61,7 @@ def strip_git(project: Path):
 
 
 def start(name: str):
-    project = make_workspace.DEMO / name / "kelder-dbt"
+    project = make_workspace.KTX_PROJECTS / name
     if not (project / "ktx.yaml").exists():
         sys.exit(f"{name}: no ktx project; run make workspaces")
     if alive(name):
@@ -74,17 +76,16 @@ def start(name: str):
         if alive(name):
             break
         time.sleep(1)
-    strip_git(project)
+    strip_git(make_workspace.DEMO / name / "kelder-dbt")
     print(f"{name}: {'serving ' + url(name) if alive(name) else 'FAILED to start'}")
     if not alive(name):
         print(r.stdout, r.stderr)
 
 
 def stop(name: str):
-    project = make_workspace.DEMO / name / "kelder-dbt"
+    project = make_workspace.KTX_PROJECTS / name
     if project.exists():
         ktx(["mcp", "stop"], project)
-        strip_git(project)
     print(f"{name}: stopped" if not alive(name) else f"{name}: still running")
 
 

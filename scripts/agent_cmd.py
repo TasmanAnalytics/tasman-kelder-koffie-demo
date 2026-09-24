@@ -38,6 +38,7 @@ def agent_env() -> dict:
         "DISABLE_AUTOUPDATER": "1",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
         "DO_NOT_TRACK": "1",
+        "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
     }
     if e.get("ANTHROPIC_API_KEY"):
         env["ANTHROPIC_API_KEY"] = e["ANTHROPIC_API_KEY"]

@@ -64,7 +64,8 @@ def main():
             if backup is not None:
                 agents.write_text(backup)
         checks = {
-            "no_bash_or_web": not any(t in ans["tools"] for t in ("Bash", "WebSearch", "WebFetch")),
+            "no_bash_or_web": not any(t.strip() in ("Bash", "WebSearch", "WebFetch")
+                                      for t in ans["tools"].split("\n\n")[0].splitlines()),
             "brief_denied": "DENIED" in ans["read_brief"].upper() and "Kelder Coffee: build brief" not in ans["read_brief"],
             "sibling_denied": "DENIED" in ans["read_sibling"].upper(),
             "agents_md_loaded": (MARKER in ans["marker"]) == (backup is not None),

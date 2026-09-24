@@ -15,7 +15,7 @@ from contextlib import asynccontextmanager
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
-from mcp.client.streamable_http import streamablehttp_client
+from mcp.client.streamable_http import streamable_http_client
 
 PROBES = {
     "plain_query": "select count(*) as n from information_schema.tables",
@@ -31,8 +31,8 @@ PROBES = {
 @asynccontextmanager
 async def _connect(spec: dict):
     if spec.get("type") == "http":
-        async with streamablehttp_client(spec["url"]) as (read, write, _):
-            yield read, write
+        async with streamable_http_client(spec["url"]) as streams:
+            yield streams[0], streams[1]
     else:
         env = dict(spec.get("env") or {}, PATH="/usr/bin:/bin")
         params = StdioServerParameters(command=spec["command"], args=spec.get("args", []), env=env)

@@ -1,0 +1,25 @@
+name: metrics_cac_monthly
+descriptions:
+  user: Monthly customer acquisition cost for paid channels.
+column_overrides:
+  - name: month
+    descriptions:
+      user: First day of the month.
+    constraints:
+      dbt:
+        not_null: true
+  - name: channel
+    descriptions:
+      user: paid_social or paid_search.
+  - name: platform
+    descriptions:
+      user: meta or google.
+  - name: ad_spend_eur
+    descriptions:
+      user: Spend on the platform in the month.
+  - name: new_subscribers
+    descriptions:
+      user: New subscriptions (not gifts) whose first order came through the channel.
+  - name: cac_eur
+    descriptions:
+      user: ad_spend_eur / new_subscribers.

@@ -30,6 +30,10 @@ SERVER_NAME = "warehouse"  # fallback server name
 KTX_TOOLS = ["connection_list", "wiki_search", "wiki_read", "sl_read_source", "sl_query", "entity_details",
              "dictionary_search", "discover_data", "sql_execution", "sql_dialect_notes"]
 KTX_PORTS = {"installed": 7801, "written": 7802, "rot": 7803}
+# ktx 0.16 git-inits its project directory, and a workspace must not contain .git, so each
+# workspace's ktx project lives beside it (outside the agent's reach); ktx reads the workspace's
+# kelder-dbt/ and warehouse from there and serves the semantic layer and wiki over MCP.
+KTX_PROJECTS = TOOLS / "ktx-projects"
 FALLBACK_TOOLS = ["execute_query", "list_tables", "list_columns", "list_databases"]
 # never copied into a workspace even though they are part of the Kelder repo at that state
 EXCLUDE = {".pr", "target", "logs", "dbt_packages", ".ktx", ".user.yml", ".git"}
@@ -97,6 +101,7 @@ def settings(ws: Path, server: str = SERVER_NAME) -> dict:
         "enableAllProjectMcpServers": False,
         "enabledMcpjsonServers": [server],
         "includeCoAuthoredBy": False,
+        "autoMemoryEnabled": False,
         "cleanupPeriodDays": 30,
     }
 
@@ -119,9 +124,13 @@ def make(name: str, launcher: Path, server: str = "ktx") -> Path:
         stored = ROOT / "demo" / "ktx" / state
         if not stored.exists():
             sys.exit(f"no ktx ingest output for {state}: run scripts/ktx_build.py {state}")
+        proj = KTX_PROJECTS / name
+        if proj.exists():
+            shutil.rmtree(proj)
+        proj.mkdir(parents=True)
         for d in ("semantic-layer", "wiki"):
-            shutil.copytree(stored / d, ws / "kelder-dbt" / d)
-        (ws / "kelder-dbt" / "ktx.yaml").write_text(ktx_config(ws, state))
+            shutil.copytree(stored / d, proj / d)
+        (proj / "ktx.yaml").write_text(ktx_config(ws, state))
         mcp = {"mcpServers": {"ktx": {"type": "http", "url": f"http://127.0.0.1:{KTX_PORTS[name]}/mcp"}}}
     else:
         mcp = mcp_config(ws, launcher)

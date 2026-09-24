@@ -1,0 +1,101 @@
+name: fct_subscription_events
+column_overrides:
+  - name: subscription_event_id
+    descriptions:
+      user: Surrogate key.
+    constraints:
+      dbt:
+        not_null: true
+        unique: true
+  - name: subscription_key
+    descriptions:
+      user: Subscription.
+  - name: event_type
+    descriptions:
+      user: started, paused, resumed, cancelled, expired, payment_failed or payment_recovered.
+  - name: occurred_at
+    descriptions:
+      user: When it happened.
+  - name: event_month
+    descriptions:
+      user: Local month.
+  - name: source
+    descriptions:
+      user: Origin of the event.
+  - name: cancellation_reason
+    descriptions:
+      user: For cancelled events.
+  - name: is_voluntary_cancellation
+    descriptions:
+      user: Customer-initiated cancellation.
+  - name: billing_cycle_date
+    descriptions:
+      user: For payment_failed events.
+  - name: recovered_at
+    descriptions:
+      user: For recovered payment_failed events.
+  - name: is_recovered_within_30_days
+    descriptions:
+      user: For payment_failed events.
+  - name: is_gift
+    descriptions:
+      user: Gift subscription event.
+  - name: is_migration_artifact
+    descriptions:
+      user: True for the cancellation events written by the 2026-03-12 migration. They did not happen.
+measures:
+  - name: total_events
+    expr: count(*)
+    description: Total subscription events.
+  - name: started_events
+    expr: count(*)
+    segments:
+      - started
+    description: Subscription starts.
+  - name: cancelled_events
+    expr: count(*)
+    segments:
+      - cancelled
+    description: Cancellations.
+  - name: voluntary_cancellations
+    expr: count(*)
+    segments:
+      - voluntary_cancellation
+    description: Customer-initiated cancellations.
+  - name: payment_failed_events
+    expr: count(*)
+    segments:
+      - payment_failed
+    description: Payment failures.
+  - name: payment_recovered_events
+    expr: count(*)
+    segments:
+      - payment_recovered
+    description: Payment recoveries.
+segments:
+  - name: started
+    expr: event_type = 'started'
+    description: Subscription start events.
+  - name: cancelled
+    expr: event_type = 'cancelled'
+    description: Cancellation events.
+  - name: paused
+    expr: event_type = 'paused'
+    description: Pause events.
+  - name: resumed
+    expr: event_type = 'resumed'
+    description: Resume events.
+  - name: payment_failed
+    expr: event_type = 'payment_failed'
+    description: Payment failure events.
+  - name: payment_recovered
+    expr: event_type = 'payment_recovered'
+    description: Payment recovery events.
+  - name: voluntary_cancellation
+    expr: is_voluntary_cancellation = true
+    description: Customer-initiated cancellations.
+  - name: non_migration_artifact
+    expr: is_migration_artifact = false
+    description: Excludes migration artifact events.
+descriptions:
+  ktx: Semantic-layer overlay for fct_subscription_events.

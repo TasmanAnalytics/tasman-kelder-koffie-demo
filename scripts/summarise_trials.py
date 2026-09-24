@@ -134,6 +134,14 @@ def main():
         n = sum(c.values())
         top = c.most_common(1)[0][0]
         lines.append(f"| {ws} | {pid} | {n} | {c['A']} | {c['B']} | {c['C']} | {c['D']} | {top} | {labelled[(ws, pid)]}/{n} |")
+    superseded = sorted(RUNS.glob("_superseded*/*/*/*.json"))
+    if superseded:
+        lines += ["", "## Superseded runs (kept, not counted)", ""]
+        for p in superseded:
+            rec = json.loads(p.read_text())
+            answer = next((m.get("result", "") for m in reversed(rec["messages"]) if m.get("type") == "result"), "") or ""
+            lines.append(f"- `{p.relative_to(ROOT)}`: {rec['workspace']} / {rec['prompt_id']}, proposed class "
+                         f"{propose(rec['prompt_id'], answer, f)}. Reason: see `{p.parts[-4]}/README.md`.")
     lines += ["", "## Class definitions", ""]
     for pid, d in CLASSES.items():
         lines.append(f"- **{pid}**: " + "; ".join(f"{k} {v}" for k, v in d.items()))
