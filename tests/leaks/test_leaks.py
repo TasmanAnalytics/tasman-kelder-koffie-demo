@@ -103,8 +103,9 @@ def test_blind_warehouse_has_no_context_layer(ws):
 @pytest.mark.parametrize("ws", BLIND)
 def test_blind_workspaces_have_no_agents_md(ws):
     root = DEMO / ws
-    for name in ("AGENTS.md", "CLAUDE.md", "context", ".github"):
+    for name in ("AGENTS.md", "CLAUDE.md", ".github"):
         assert not list(root.rglob(name)), name
+    assert not (root / "kelder-dbt" / "context").exists()
 
 
 @pytest.mark.parametrize("ws", [w for w in ("written", "rot") if w in PRESENT])
@@ -119,10 +120,10 @@ def test_settings_deny_web_and_bash(ws):
     s = json.loads((DEMO / ws / ".claude" / "settings.json").read_text())
     perms = s["permissions"]
     allow = perms.get("allow", [])
-    for tool in ("Bash", "WebSearch", "WebFetch"):
+    for tool in ("Bash", "WebSearch", "WebFetch"):  # noqa
         assert tool in perms["deny"], tool
         assert not any(a == tool or a.startswith(tool + "(") for a in allow), tool
-    assert set(allow) <= {"Read", "Grep", "Glob"} | {a for a in allow if a.startswith("mcp__warehouse__")}
+    assert set(allow) <= {"Read", "Grep", "Glob"} | {a for a in allow if a.startswith(("mcp__warehouse__", "mcp__ktx__"))}
     assert perms.get("defaultMode") in ("dontAsk", "default")
     assert not s.get("enableAllProjectMcpServers", False)
     # other workspaces and the build repository are not readable
@@ -131,27 +132,60 @@ def test_settings_deny_web_and_bash(ws):
     assert f"Read(/{ROOT.parent}/**)" in perms["deny"]
 
 
+def _server(ws):
+    cfg = json.loads((DEMO / ws / ".mcp.json").read_text())["mcpServers"]
+    assert len(cfg) == 1, cfg
+    return next(iter(cfg.items()))
+
+
 @pytest.mark.parametrize("ws", PRESENT)
 def test_one_mcp_server_read_only_without_file_access(ws):
-    path = DEMO / ws / ".mcp.json"
-    cfg = json.loads(path.read_text())["mcpServers"]
-    assert list(cfg) == ["warehouse"]
-    args = cfg["warehouse"]["args"]
-    assert "--read-write" not in args
-    assert "--no-ephemeral-connections" in args
-    assert any("enable_external_access = false" in a for a in args)
-    assert str(DEMO / ws / "warehouse.duckdb") in args
-    assert str(ROOT) not in path.read_text()
+    name, spec = _server(ws)
+    text = (DEMO / ws / ".mcp.json").read_text()
+    assert str(ROOT) not in text
+    if name == "ktx":
+        assert spec["type"] == "http" and spec["url"].startswith("http://127.0.0.1:")
+        cfg = (DEMO / ws / "kelder-dbt" / "ktx.yaml").read_text()
+        assert "backend: none" in cfg.split("llm:")[1].split("ingest:")[0], "LLM must be off in workspaces"
+        assert str(DEMO / ws / "warehouse.duckdb") in cfg
+        assert str(ROOT) not in cfg
+        for other in [w for w in ALL if w != ws]:
+            assert str(DEMO / other) not in cfg
+        patched = (make_workspace.DEMO / "_tools" / "npm" / "node_modules" / "@kaelio" / "ktx" / "dist" / "connectors" / "duckdb" / "connector.js").read_text()
+        assert "enable_external_access: 'false'" in patched
+    else:
+        args = spec["args"]
+        assert "--read-write" not in args and "--no-ephemeral-connections" in args
+        assert any("enable_external_access = false" in a for a in args)
+        assert str(DEMO / ws / "warehouse.duckdb") in args
 
 
 @pytest.mark.parametrize("ws", PRESENT)
 def test_mcp_server_refuses_files_and_writes(ws):
-    r = mcp_probe.probe(DEMO / ws / ".mcp.json")
-    assert r["tools"] == ["execute_query", "list_columns", "list_databases", "list_tables"]
+    name, _ = _server(ws)
+    try:
+        r = mcp_probe.probe(DEMO / ws / ".mcp.json")
+    except Exception as e:  # noqa: BLE001
+        pytest.fail(f"{ws}: MCP server not reachable ({e}); for ktx run scripts/ktx_serve.py start")
+    expected = sorted(make_workspace.KTX_TOOLS) if name == "ktx" else sorted(make_workspace.FALLBACK_TOOLS)
+    assert r["tools"] == expected, r["tools"]
     p = r["probes"]
-    assert not p["plain_query"]["is_error"]
+    assert not p["plain_query"]["is_error"], p["plain_query"]
     for key in ("read_local_file", "read_text_file", "glob_files", "attach_other_db", "write_table", "change_setting"):
         assert p[key]["is_error"], (key, p[key]["text"])
+
+
+@pytest.mark.parametrize("ws", [w for w in ("written", "rot") if w in PRESENT])
+def test_ktx_wiki_matches_context_files(ws):
+    """context/ is canonical: every context markdown file is a verbatim wiki page, and nothing else is claimed."""
+    root = DEMO / ws / "kelder-dbt"
+    wiki = root / "wiki" / "global"
+    if not wiki.exists():
+        pytest.skip("not a ktx workspace")
+    pages = [p.read_text() for p in wiki.glob("*.md")]
+    for md in sorted((root / "context").rglob("*.md")):
+        body = md.read_text().strip()
+        assert any(body in page for page in pages), f"{md.relative_to(root)} missing from wiki/global"
 
 
 def test_no_claude_md_above_the_demo_directory():

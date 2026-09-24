@@ -1,0 +1,137 @@
+$ ktx setup --no-input --yes --skip-llm --skip-embeddings --database duckdb --database-connection-id kelder --database-url /Users/thomas/Github/tasman-kelder-koffie/data/warehouse/kelder_before.duckdb --source dbt --source-connection-id kelder_dbt --source-path /Users/thomas/Github/tasman-kelder-koffie/build/ktx/before/kelder-dbt --source-profiles-path /Users/thomas/Github/tasman-kelder-koffie/build/ktx/before/kelder-dbt --source-target dev --source-warehouse-connection-id kelder
+ktx setup
+
+📚 Docs:
+https://docs.kaelio.com/ktx
+│  Project: /Users/thomas/Github/tasman-kelder-koffie/build/ktx/before/project
+│  LLM setup skipped.
+│  Embeddings setup skipped.
+◇  Testing kelder
+│  ✓ Connection test passed
+│  Driver: DuckDB
+│
+◇  Building schema context for kelder
+│  Running database scan…
+│
+◇  Schema context complete for kelder
+│  Changes: 9 new tables
+│
+◇  Database ready
+│  kelder · DuckDB · schema context complete
+│
+│  Context source kelder_dbt saved. It will be built during the context build step.
+│  Runtime setup skipped.
+
+Project status:
+ktx project: /Users/thomas/Github/tasman-kelder-koffie/build/ktx/before/project
+Project ready: yes
+LLM ready: no
+Embeddings ready: no
+Databases configured: yes (kelder)
+Context sources configured: yes (kelder_dbt)
+ktx context built: no
+Agent integration ready: no
+
+What you can do next:
+  Finish setup first.
+  $ ktx setup          Resume configuration and validation
+  $ ktx status         Check which setup steps still need attention
+
+Community:
+Questions or feedback? Join the ktx Slack: https://ktx.sh/slack
+
+[38;2;255;138;76m◐[39m  Validating dbt source…
+[38;2;255;138;76m◇[39m  dbt source validated
+
+$ ktx ingest --all --yes --plain
+Ingest finished
+
+Source         Database schema  Query history  Source ingest  Memory update
+kelder         done             skipped        skipped        skipped
+kelder_dbt     skipped          skipped        done           done
+
+Project: /Users/thomas/Github/tasman-kelder-koffie/build/ktx/before/project
+[1/2] kelder · database schema
+[38;2;255;138;76m◐[39m  Installing ktx Python runtime (local-embeddings) with uv...
+[38;2;255;138;76m◇[39m  ktx Python runtime ready: /Users/thomas/Github/tasman-kelder-koffie/build/ktx/runtime/0.16.0
+[38;2;255;138;76m◐[39m  Starting ktx embedding daemon (first run downloads the model)…
+[38;2;255;138;76m◇[39m  Started ktx daemon: http://127.0.0.1:53204
+  [5%] Preparing database ingest
+  [15%] Reading database schema
+  [55%] Semantic layer comparison found 0 changes across 9 tables
+  [70%] Writing schema context
+  [82%] Detecting relationships
+  [83%] Loaded schema snapshot with 9 tables
+  [84%] Generating descriptions 1/9 (dim_customers, 14 cols)
+  [85%] Generating descriptions 2/9 (fct_orders, 25 cols)
+  [86%] Generating descriptions 3/9 (fct_subscription_events, 12 cols)
+  [87%] Generating descriptions 4/9 (fct_subscriptions, 21 cols)
+  [88%] Generating descriptions 6/9 (metrics_email_attribution_daily, 8 cols)
+  [89%] Generating descriptions 7/9 (metrics_new_subscribers_monthly, 5 cols)
+  [90%] Generating descriptions 8/9 (metrics_pause_rate_monthly, 6 cols)
+  [91%] Generating descriptions 9/9 (metrics_subscriber_churn_monthly, 4 cols)
+  [93%] Building embeddings 1/2 batches
+  [95%] Building embeddings 2/2 batches
+  [96%] Profiling table 2/9
+  [97%] Profiling table 4/9
+  [98%] Profiling table 6/9
+  [99%] Profiling table 8/9
+  [100%] Enrichment complete
+  done
+[2/2] kelder_dbt · source ingest
+  [5%] Fetching source files for kelder_dbt/dbt
+  [15%] Fetched 56 source files from dbt
+  [25%] Wrote raw snapshot 2026-09-24-141553-local-mufm71nr with 56 files
+  [35%] Computed source diff +56/~0/-0/=0
+  [45%] Planned 1 task
+  [55%] Processing 1/1 tasks: dbt-all
+  [80%] Processed 1/1 tasks
+  [83%] Integrated 1/1 patches
+  [84%] Reconciling results
+  [85%] Reconciling results · 1 action
+  [88%] Repairing wiki semantic-layer references
+  [89%] Running final artifact gates
+  [90%] Validating provenance rows
+  [91%] Saving changes
+  [95%] Recording history
+  [97%] Wrapping up
+  [98%] Created ingest report 566b735a-7289-4c6a-aded-75718ccd6a09
+  [100%] Ingest completed
+  done
+
+$ ktx admin reindex
+reindex	scopes=2	scanned=19	updated=0	deleted=0	embeddings=0	duration_ms=48
+
+Project: /Users/thomas/Github/tasman-kelder-koffie/build/ktx/before/project
+wiki/global	scanned=10	updated=0	deleted=0	embeddings=0	duration_ms=6
+sl/kelder	scanned=9	updated=0	deleted=0	embeddings=0	duration_ms=35
+
+$ ktx status
+ktx status · project (~/Github/tasman-kelder-koffie/build/ktx/before/project)
+
+  LLM           anthropic · claude-sonnet-4-5  ✓ key set (env)
+  Embeddings    sentence-transformers · all-MiniLM-L6-v2 (384d)  ✓ managed local embeddings daemon
+  Storage       sqlite (state) · sqlite-fts5 (search)
+  Config        ✓ ktx.yaml schema valid
+
+  Connections (2)
+    ✓ kelder       duckdb   path: /Users/thomas/Github/tasman-kelder-koffie/data/warehouse/kelder_before.duckdb
+    ⚠ kelder_dbt   dbt      repoUrl not set
+                            → Rerun `ktx setup`
+
+  Pipeline
+    Adapters         dbt
+    Enrichment       llm mode · relationships on, LLM proposals, validation required
+    Research agent   disabled
+
+  Local data
+    Ingest           2 completed runs
+      kelder   live-database   last 6 minutes ago
+    Wiki             GLOBAL=10 (10 embedded)
+    Semantic layer   kelder   9 sources (9 embedded) · 0 dictionary values
+    Disk             db=1.51 MiB  ·  cache=1.35 MiB  ·  raw-sources=75 files (1.27 MiB)
+
+Partially ready — 1 connection need configuration.  Next: ktx setup (0.18s)
+
+Project: /Users/thomas/Github/tasman-kelder-koffie/build/ktx/before/project
+

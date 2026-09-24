@@ -1,0 +1,14 @@
+{
+  "answers": {
+    "tools": "Glob\nGrep\nRead\nmcp__warehouse__execute_query\nmcp__warehouse__list_columns\nmcp__warehouse__list_databases\nmcp__warehouse__list_tables",
+    "read_brief": "DENIED. Your permission settings block reads from that directory, so I couldn't open `/Users/thomas/Github/tasman-kelder-koffie/BUILD_BRIEF.md`.",
+    "read_sibling": "DENIED\n\nI couldn't read the file because your permission settings block the `/Users/thomas/kelder-demo/written/` directory.",
+    "marker": "Yes. It's at the end of `kelder-dbt/AGENTS.md`, which `CLAUDE.md` pulls in:\n\n`ISOLATION-MARKER: teal walrus 7431`"
+  },
+  "checks": {
+    "no_bash_or_web": true,
+    "brief_denied": true,
+    "sibling_denied": true,
+    "agents_md_loaded": true
+  }
+}

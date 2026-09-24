@@ -1,0 +1,50 @@
+name: dim_customers
+descriptions:
+  user: One row per Shopify customer, with first web order and subscription summary.
+column_overrides:
+  - name: customer_id
+    descriptions:
+      user: Shopify customer id.
+    constraints:
+      dbt:
+        not_null: true
+        unique: true
+  - name: email
+    descriptions:
+      user: Email address.
+  - name: first_name
+    descriptions:
+      user: First name.
+  - name: last_name
+    descriptions:
+      user: Last name.
+  - name: country_code
+    descriptions:
+      user: Country code.
+  - name: country_name
+    descriptions:
+      user: Country name.
+  - name: region
+    descriptions:
+      user: Reporting region (Benelux, DACH, Other EU).
+  - name: created_at
+    descriptions:
+      user: When the customer record was created.
+  - name: accepts_marketing
+    descriptions:
+      user: Marketing consent.
+  - name: first_order_at
+    descriptions:
+      user: First web order.
+  - name: first_order_channel
+    descriptions:
+      user: Channel of the first web order.
+  - name: web_orders
+    descriptions:
+      user: Number of web orders (excludes subscription renewals).
+  - name: subscriptions
+    descriptions:
+      user: Number of subscriptions the customer has had.
+  - name: is_active_subscriber
+    descriptions:
+      user: Has an active or paused non-gift subscription now.

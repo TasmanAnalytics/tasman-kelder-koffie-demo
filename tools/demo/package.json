@@ -1,0 +1,10 @@
+{
+  "name": "kelder-demo-tools",
+  "private": true,
+  "description": "Pinned agent tooling for the Kelder demo workspaces (not a workspace).",
+  "dependencies": {
+    "@anthropic-ai/claude-code": "2.1.281",
+    "@kaelio/ktx": "0.16.0",
+    "node": "22.23.3"
+  }
+}

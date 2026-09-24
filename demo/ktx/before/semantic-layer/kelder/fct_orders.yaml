@@ -1,0 +1,83 @@
+name: fct_orders
+descriptions:
+  user: One row per Shopify order, with channel, subscription and gift flags, refunds and delivery.
+column_overrides:
+  - name: order_id
+    descriptions:
+      user: Shopify order id.
+    constraints:
+      dbt:
+        not_null: true
+        unique: true
+  - name: order_name
+    descriptions:
+      user: Order number.
+  - name: customer_id
+    descriptions:
+      user: Customer.
+  - name: created_at
+    descriptions:
+      user: When the order was placed (UTC).
+  - name: order_date
+    descriptions:
+      user: Local date of the order.
+  - name: source_name
+    descriptions:
+      user: web, subscription_contract or recharge.
+  - name: channel
+    descriptions:
+      user: Marketing channel of web orders. Empty for renewals.
+  - name: is_subscription_order
+    descriptions:
+      user: Subscription checkout or renewal.
+  - name: is_subscription_first_order
+    descriptions:
+      user: The checkout that started a subscription.
+  - name: is_subscription_renewal
+    descriptions:
+      user: Created by a scheduled subscription charge.
+  - name: is_gift
+    descriptions:
+      user: Gift subscription purchase or shipment, or a Christmas gift box.
+  - name: contains_bundle
+    descriptions:
+      user: Contains the Vaderdag Bundel.
+  - name: items
+    descriptions:
+      user: Units on the order.
+  - name: subtotal_price_eur
+    descriptions:
+      user: Line totals after discounts, including VAT.
+  - name: total_discounts_eur
+    descriptions:
+      user: Discounts.
+  - name: total_tax_eur
+    descriptions:
+      user: VAT included.
+  - name: total_price_eur
+    descriptions:
+      user: Amount charged, including shipping.
+  - name: is_refunded
+    descriptions:
+      user: Any refund against the order.
+  - name: refunded_eur
+    descriptions:
+      user: Total refunded.
+  - name: first_refunded_at
+    descriptions:
+      user: First refund.
+  - name: carrier
+    descriptions:
+      user: PostNL or DHL.
+  - name: shipped_at
+    descriptions:
+      user: Handed to the carrier.
+  - name: delivered_at
+    descriptions:
+      user: Delivered.
+  - name: has_failed_delivery
+    descriptions:
+      user: Carrier never delivered.
+  - name: delivery_days
+    descriptions:
+      user: Local calendar days from shipping to delivery.

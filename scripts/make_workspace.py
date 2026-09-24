@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import stat
 import sys
@@ -25,7 +26,11 @@ DEMO = Path(os.environ.get("KELDER_DEMO_DIR", Path.home() / "kelder-demo"))
 TOOLS = DEMO / "_tools"
 CONFIG_DIR = DEMO / ".claude-config"
 WORKSPACES = {"installed": "before", "written": "with_context", "rot": "rot"}
-SERVER_NAME = "warehouse"
+SERVER_NAME = "warehouse"  # fallback server name
+KTX_TOOLS = ["connection_list", "wiki_search", "wiki_read", "sl_read_source", "sl_query", "entity_details",
+             "dictionary_search", "discover_data", "sql_execution", "sql_dialect_notes"]
+KTX_PORTS = {"installed": 7801, "written": 7802, "rot": 7803}
+FALLBACK_TOOLS = ["execute_query", "list_tables", "list_columns", "list_databases"]
 # never copied into a workspace even though they are part of the Kelder repo at that state
 EXCLUDE = {".pr", "target", "logs", "dbt_packages", ".ktx", ".user.yml", ".git"}
 
@@ -59,7 +64,23 @@ def mcp_config(ws: Path, launcher: Path) -> dict:
     }}}
 
 
-def settings(ws: Path) -> dict:
+def allowed_mcp_tools(server: str) -> list[str]:
+    names = KTX_TOOLS if server == "ktx" else FALLBACK_TOOLS
+    return [f"mcp__{server}__{t}" for t in names]
+
+
+def ktx_config(ws: Path, state: str) -> str:
+    """The stored ingest config, pointed at this workspace only, with the LLM off (read-only tools)."""
+    s = (ROOT / "demo" / "ktx" / state / "ktx.yaml").read_text()
+    s = re.sub(r"(\n    path: ).*", rf"\g<1>{ws / 'warehouse.duckdb'}", s)
+    s = re.sub(r"(\n    source_dir: ).*", rf"\g<1>{ws / 'kelder-dbt'}", s)
+    s = re.sub(r"(\n    profiles_path: ).*", rf"\g<1>{ws / 'kelder-dbt'}", s)
+    s = re.sub(r"llm:\n  provider:\n    backend: anthropic\n    anthropic:\n      api_key: env:ANTHROPIC_API_KEY\n  models:\n(?:    .*\n)+",
+               "llm:\n  provider:\n    backend: none\n  models: {}\n", s)
+    return s
+
+
+def settings(ws: Path, server: str = SERVER_NAME) -> dict:
     home = Path.home()
     others = [DEMO / n for n in WORKSPACES if DEMO / n != ws] + [DEMO / "bare"]
     outside = [ROOT.parent, Path("/private/tmp"), Path("/tmp"), home / ".claude", home / "Documents", home / "Desktop",
@@ -68,20 +89,19 @@ def settings(ws: Path) -> dict:
     deny_paths += [f"Read(/{home / '.claude.json'})"]
     return {
         "permissions": {
-            "allow": ["Read", "Grep", "Glob", f"mcp__{SERVER_NAME}__execute_query", f"mcp__{SERVER_NAME}__list_tables",
-                      f"mcp__{SERVER_NAME}__list_columns", f"mcp__{SERVER_NAME}__list_databases"],
+            "allow": ["Read", "Grep", "Glob", *allowed_mcp_tools(server)],
             "deny": ["Bash", "WebSearch", "WebFetch", "Edit", "Write", "NotebookEdit", "Task", "Agent", "Skill",
                      "SlashCommand", *deny_paths],
             "defaultMode": "dontAsk",
         },
         "enableAllProjectMcpServers": False,
-        "enabledMcpjsonServers": [SERVER_NAME],
+        "enabledMcpjsonServers": [server],
         "includeCoAuthoredBy": False,
         "cleanupPeriodDays": 30,
     }
 
 
-def make(name: str, launcher: Path) -> Path:
+def make(name: str, launcher: Path, server: str = "ktx") -> Path:
     state = WORKSPACES[name]
     src = ROOT / "build" / state / "kelder-dbt"
     db = ROOT / "data" / "warehouse" / f"kelder_{state}.duckdb"
@@ -94,8 +114,18 @@ def make(name: str, launcher: Path) -> Path:
     shutil.copytree(src, ws / "kelder-dbt", ignore=lambda d, names: [n for n in names if n in EXCLUDE])
     shutil.copyfile(db, ws / "warehouse.duckdb")
     (ws / ".claude").mkdir()
-    (ws / ".claude" / "settings.json").write_text(json.dumps(settings(ws), indent=2) + "\n")
-    (ws / ".mcp.json").write_text(json.dumps(mcp_config(ws, launcher), indent=2) + "\n")
+    (ws / ".claude" / "settings.json").write_text(json.dumps(settings(ws, server), indent=2) + "\n")
+    if server == "ktx":
+        stored = ROOT / "demo" / "ktx" / state
+        if not stored.exists():
+            sys.exit(f"no ktx ingest output for {state}: run scripts/ktx_build.py {state}")
+        for d in ("semantic-layer", "wiki"):
+            shutil.copytree(stored / d, ws / "kelder-dbt" / d)
+        (ws / "kelder-dbt" / "ktx.yaml").write_text(ktx_config(ws, state))
+        mcp = {"mcpServers": {"ktx": {"type": "http", "url": f"http://127.0.0.1:{KTX_PORTS[name]}/mcp"}}}
+    else:
+        mcp = mcp_config(ws, launcher)
+    (ws / ".mcp.json").write_text(json.dumps(mcp, indent=2) + "\n")
     if (ws / "kelder-dbt" / "AGENTS.md").exists():
         (ws / "CLAUDE.md").write_text("@kelder-dbt/AGENTS.md\n")
     print(f"workspace {name}: {ws} (state {state})")
@@ -106,13 +136,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--name", choices=sorted(WORKSPACES))
     ap.add_argument("--all", action="store_true")
+    ap.add_argument("--server", choices=["ktx", "fallback"], default="ktx")
     a = ap.parse_args()
     if not (a.all or a.name):
         ap.error("--all or --name")
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     launcher = server_launcher()
     for n in (sorted(WORKSPACES) if a.all else [a.name]):
-        make(n, launcher)
+        make(n, launcher, a.server)
 
 
 if __name__ == "__main__":

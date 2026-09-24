@@ -1,0 +1,32 @@
+name: metrics_email_attribution_daily
+descriptions:
+  user: "Daily email activity and email-attributed revenue: Klaviyo Placed Order value where the same profile clicked an email within the five days before the order."
+column_overrides:
+  - name: day
+    descriptions:
+      user: Local date.
+    constraints:
+      dbt:
+        not_null: true
+        unique: true
+  - name: emails_received
+    descriptions:
+      user: Received Email events.
+  - name: emails_opened
+    descriptions:
+      user: Opened Email events.
+  - name: emails_clicked
+    descriptions:
+      user: Clicked Email events.
+  - name: placed_orders
+    descriptions:
+      user: Placed Order events.
+  - name: placed_order_revenue_eur
+    descriptions:
+      user: Value of Placed Order events.
+  - name: attributed_orders
+    descriptions:
+      user: Placed Orders with a click in the previous five days.
+  - name: attributed_revenue_eur
+    descriptions:
+      user: Email-attributed revenue.

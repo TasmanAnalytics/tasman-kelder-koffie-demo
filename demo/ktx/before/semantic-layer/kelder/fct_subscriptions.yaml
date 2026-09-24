@@ -1,0 +1,71 @@
+name: fct_subscriptions
+descriptions:
+  user: One row per subscription key, with status, churn timestamp, MRR and acquisition channel.
+column_overrides:
+  - name: subscription_key
+    descriptions:
+      user: Stable subscription key.
+    constraints:
+      dbt:
+        not_null: true
+        unique: true
+  - name: customer_id
+    descriptions:
+      user: Customer.
+  - name: origin_system
+    descriptions:
+      user: shopify or recharge.
+  - name: shopify_contract_id
+    descriptions:
+      user: Shopify contract id, if any.
+  - name: recharge_subscription_id
+    descriptions:
+      user: Recharge subscription id, if any.
+  - name: started_at
+    descriptions:
+      user: When the subscription started.
+  - name: churned_at
+    descriptions:
+      user: Timestamp the subscription entered a terminal cancelled state.
+  - name: ended_at
+    descriptions:
+      user: When the subscription ended (cancelled or expired).
+  - name: status
+    descriptions:
+      user: "Unified subscription status: active, paused, cancelled, expired."
+  - name: cancellation_reason
+    descriptions:
+      user: Reason, for cancelled subscriptions.
+  - name: is_gift
+    descriptions:
+      user: Prepaid gift subscription.
+  - name: interval_days
+    descriptions:
+      user: Days between shipments.
+  - name: quantity
+    descriptions:
+      user: Bags per shipment.
+  - name: variant_id
+    descriptions:
+      user: Coffee variant.
+  - name: sku
+    descriptions:
+      user: Coffee SKU.
+  - name: product_title
+    descriptions:
+      user: Coffee name.
+  - name: price_eur
+    descriptions:
+      user: Price per shipment.
+  - name: mrr_eur
+    descriptions:
+      user: MRR attributed to the subscription (price per shipment normalised to a month, active subscriptions only).
+  - name: payment_method
+    descriptions:
+      user: Payment method, where known.
+  - name: origin_order_id
+    descriptions:
+      user: Checkout order that started the subscription.
+  - name: first_order_channel
+    descriptions:
+      user: Channel of that checkout order.

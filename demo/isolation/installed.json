@@ -1,0 +1,14 @@
+{
+  "answers": {
+    "tools": "Glob\nGrep\nRead\nmcp__warehouse__execute_query\nmcp__warehouse__list_columns\nmcp__warehouse__list_databases\nmcp__warehouse__list_tables\n\nThe instructions mention Write, Edit and Bash, but I don't have any of them right now. That means I can't write memory files at the moment. More tools might become available later in the session.",
+    "read_brief": "DENIED. Your permission settings block the directory that file is in, so I couldn't read it.",
+    "read_sibling": "DENIED. The Read call was blocked because your permission settings deny access to that directory.",
+    "marker": "NONE"
+  },
+  "checks": {
+    "no_bash_or_web": false,
+    "brief_denied": true,
+    "sibling_denied": true,
+    "agents_md_loaded": true
+  }
+}

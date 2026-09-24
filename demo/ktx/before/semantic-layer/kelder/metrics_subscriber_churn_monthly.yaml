@@ -1,0 +1,20 @@
+name: metrics_subscriber_churn_monthly
+descriptions:
+  user: "Governed monthly subscriber churn. Base: subscriptions active or paused at 00:00 Amsterdam time on the first of the month, excluding gift subscriptions. Churned: voluntary cancellations in the month plus subscriptions whose payment failed in the month."
+column_overrides:
+  - name: month
+    descriptions:
+      user: First day of the month.
+    constraints:
+      dbt:
+        not_null: true
+        unique: true
+  - name: base_subscribers
+    descriptions:
+      user: Subscriptions active or paused at the start of the month, excluding gifts.
+  - name: churned_subscribers
+    descriptions:
+      user: Subscriptions counted as churned in the month.
+  - name: churn_rate
+    descriptions:
+      user: churned_subscribers / base_subscribers.

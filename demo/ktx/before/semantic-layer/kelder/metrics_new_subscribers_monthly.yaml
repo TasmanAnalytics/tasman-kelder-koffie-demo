@@ -1,0 +1,23 @@
+name: metrics_new_subscribers_monthly
+descriptions:
+  user: New subscriptions started per month, excluding gift subscriptions.
+column_overrides:
+  - name: month
+    descriptions:
+      user: First day of the month.
+    constraints:
+      dbt:
+        not_null: true
+        unique: true
+  - name: new_subscribers
+    descriptions:
+      user: Subscriptions started in the month, excluding gifts.
+  - name: new_subscribers_paid
+    descriptions:
+      user: Of which the first order came through paid social or paid search.
+  - name: new_subscribers_unpaid
+    descriptions:
+      user: Of which the first order came through another channel.
+  - name: new_subscribers_without_web_order
+    descriptions:
+      user: Of which no web checkout order is linked.

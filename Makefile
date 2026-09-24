@@ -7,9 +7,9 @@ WORKSPACE ?= installed
 PROMPTS ?= all
 N ?= 3
 
-.PHONY: all generate load build build-all test test-data test-truth test-dbt check freeze-verified charts workspaces leak-check trials summary context-files clean
+.PHONY: index all generate load build build-all test test-data test-truth test-dbt check freeze-verified charts workspaces leak-check trials summary context-files clean
 
-all: generate load build-all test charts
+all: generate load build-all test charts index
 
 generate:
 	$(PY) -m generator.generate
@@ -60,3 +60,6 @@ context-files:
 
 clean:
 	rm -rf build data/warehouse/kelder_{before,with_context,rot,dev}.duckdb
+
+index:
+	$(PY) scripts/render_index.py

@@ -1,90 +1,107 @@
 # Kelder Coffee: a data context layer demo
 
-Evidence for the talk "Building a data context layer to fix your AI analytics" (Thomas in't Veld,
-Tasman Analytics, Compass AI & Tech Summit, 1 October 2026). Kelder Coffee is a fictional
-Amsterdam coffee subscription company from Tasman's article "How to Build a Context Layer
-(Because You Cannot Buy One)", July 2026.
+> Evidence for **"Building a data context layer to fix your AI analytics"**, by Thomas in't Veld
+> (Tasman Analytics), Compass AI & Tech Summit, Budapest, 1 October 2026.
 
-The repository holds a deterministic data generator, a DuckDB warehouse modelled with dbt in three
-states, agent workspaces, a trial harness and the slide charts. `BUILD_BRIEF.md` is the full
-specification; `BUILD_LOG.md` records every deviation and judgement call.
+**Start here: open [`index.html`](index.html)** (or run `make index` first). It is a one-page map of
+the evidence, the numbers, the commands and the files. Every number on it is read from the build.
 
-## What is where
+Kelder Coffee is a fictional Amsterdam coffee subscription company from Tasman's July 2026 article
+*How to Build a Context Layer (Because You Cannot Buy One)*. Its warehouse is well modelled. Six
+things happened in the first half of 2026 that nobody wrote down, and an AI agent explains them
+wrongly, with confidence. Write the context down and the agent gets them right. Then one ordinary
+commit makes that written context false, and only a forcing function in CI notices.
 
-| Path | What |
+| Claim | Evidence in this repo |
 |---|---|
-| `generator/` | World simulation, source-system rendering (Shopify, Recharge, Klaviyo, ads), incidents, truth DB. All parameters and the seed are in `config.yaml`. |
-| `loader/load_raw.py` | Parquet into `data/warehouse/kelder_raw.duckdb` (`raw_*` schemas, Fivetran columns). |
-| `kelder-dbt/` | Kelder's own analytics repository. Its three states are git references (below). |
-| `scripts/` | Build a state from a git ref, checks, workspaces, trials, recordings. |
-| `tests/` | Targets, realism, incidents, determinism, warehouse truth, verified queries, leak check. |
-| `charts/` | `render.py` and the rendered charts (`charts/out/`: SVG, PNG 2400x1350, JSON of the values). |
-| `demo/` | Prompts, trial runs (git-ignored), labels, selected answers. |
-| `thinking/` | Working notes and design decisions. Builder-only. |
-| `data/` | Generated data and warehouses (git-ignored). |
+| 1. Agents on a good warehouse still explain numbers wrongly | `installed` workspace; `charts/out/cancellations_by_hour_feb_mar_2026`; trials |
+| 2. Writing the context down fixes most of it | `kelder-dbt/` at `kelder/with-context`; `written` workspace; `charts/out/churn_monthly_2026_events` |
+| 3. Written context decays | the `kelder/rot` commit; `rot` workspace; `charts/out/yoy_like_for_like_written_vs_rot` |
+| 4. Forcing functions catch the decay | `make check STATE=rot PR_BODY=kelder-dbt/.pr/rot.md`; `.github/workflows/ci.yml` |
 
-## The three states of `kelder-dbt/`
-
-| State | Git reference | What it is |
-|---|---|---|
-| before-context | tag `kelder/before-context` | A competent, documented dbt project with no context layer. March 2026 churn reads 9.4%. |
-| with-context | tag `kelder/with-context` | The article's end state: caveats, `context.business_events`, `context.metric_changelog`, decision records, glossary, quirks, verified queries, `AGENTS.md`, pull request template. |
-| rot | tag and branch `kelder/rot` | One commit on top of with-context ("Fix churn logic") that points the restated churn series at the unadjusted events. Every piece of context still claims otherwise. |
-
-`git log --oneline -- kelder-dbt/` shows Kelder's own history (author Sanne de Vries, backdated
-January to June 2026). `scripts/build_state.py <state>` extracts `kelder-dbt/` at the reference with
-`git archive` and builds that state's warehouse with the current generator, loader and tests.
-
-## Reproduce everything
-
-Requirements: macOS or Linux, [uv](https://docs.astral.sh/uv/), git. Python 3.12 and every package
-are pinned in `uv.lock`.
+## Quick start
 
 ```
 uv sync
-make all          # generate, load, build all three states, run the tests, render the charts
+make all                 # generate data, load, build all three states, run the tests, render charts and index.html
 ```
 
-Individual steps:
+About three minutes on a recent MacBook. Needs [uv](https://docs.astral.sh/uv/) and git; Python 3.12
+and every package are pinned in `uv.lock`.
+
+## How it fits together
 
 ```
-make generate                 # data/raw/*.parquet, data/truth/kelder_truth.duckdb, data/profile_report.md
-make load                     # data/warehouse/kelder_raw.duckdb
-make build STATE=with_context # or before, rot
-make test                     # data and warehouse tests
-make check STATE=rot PR_BODY=kelder-dbt/.pr/rot.md   # verified queries + context capture check, as CI runs them
-make charts
+generator/  ──► data/raw/*.parquet ──► loader/ ──► kelder_raw.duckdb ──► dbt build (per state) ──► kelder_<state>.duckdb
+   │                                                                                                   │
+   └──► data/truth/kelder_truth.duckdb   (hidden ground truth: builder tests only)                     ▼
+                                                                          ~/kelder-demo/<workspace>/ (agent sees only this)
 ```
 
-`make check` compares verified-query results with pinned answers in `tests/verified/expected/`.
-They are written by `make freeze-verified APPROVED_BY="..."`, which refuses unless every truth test
-passes. Never re-freeze to make a failing check pass.
+- **Generator** (`generator/`): simulates every customer and subscription from launch (April 2023) to
+  August 2026, pinned so monthly churn hits the calibration targets exactly. It renders the world
+  through Shopify, Recharge, Klaviyo and the ad platforms, then applies the incidents as logged
+  transformations. Deterministic from the seed in `generator/config.yaml`; no language model is involved.
+- **Truth** (`data/truth/kelder_truth.duckdb`): what really happened. The with-context warehouse must
+  equal it exactly, numerator and denominator. It never reaches a warehouse or a workspace.
+- **Kelder's repo** (`kelder-dbt/`): a normal dbt project in three states, all git references:
 
-## Agent workspaces
+| State | Reference | What changes |
+|---|---|---|
+| before-context | tag `kelder/before-context` | Competent, documented, no context layer. March 2026 churn reads 9.4%. |
+| with-context | tag `kelder/with-context` | Caveats, `context.business_events`, `context.metric_changelog`, decision records, glossary, quirks, verified queries, `AGENTS.md`, pull request template. |
+| rot | tag and branch `kelder/rot` | One commit, "Fix churn logic", points the restated series at the unadjusted events. The context is unchanged. |
+
+`git log --oneline -- kelder-dbt/` reads as Kelder's own history (Sanne de Vries, January to June 2026).
+
+## Everyday commands
+
+| Command | Does |
+|---|---|
+| `make generate` | Parquet, truth DB, `data/profile_report.md` |
+| `make load` | `data/warehouse/kelder_raw.duckdb` |
+| `make build STATE=with_context` | one state (`before`, `with_context`, `rot`) from its git reference |
+| `make test` | targets, realism, incidents, determinism, truth, verified queries |
+| `make check STATE=rot PR_BODY=kelder-dbt/.pr/rot.md` | what CI runs: verified queries against pinned answers, plus the context capture check |
+| `make freeze-verified APPROVED_BY="..."` | pin verified answers from with-context; refuses unless the truth tests pass |
+| `make charts` / `make index` | slide charts / the start page |
+
+Never re-freeze verified answers to make a failing check pass. Each freeze is logged in `BUILD_LOG.md`.
+
+## Agents
+
+The agent tooling is pinned and installed outside the repo, never globally:
 
 ```
-make workspaces   # ~/kelder-demo/{installed,written,rot}
-make leak-check   # fails if any workspace could see the answer
+tools/demo/setup.sh      # ~/kelder-demo/_tools/npm: Claude Code 2.1.281, ktx 0.16.0 (read-only patch), Node 22
 ```
 
-Each workspace holds only what a Kelder employee's agent would see: `kelder-dbt/` at one state (no
-`.git`), a copy of that state's warehouse, one MCP server serving it read-only with file-system
-access disabled, and settings that allow only Read, Grep, Glob and the warehouse tools. Agents run
-with a dedicated Claude Code configuration directory, so no personal memory, instructions or MCP
-servers load. The launch command for trials and recordings is defined once, in
-`scripts/agent_cmd.py`.
-
-Trials (need `ANTHROPIC_API_KEY` in `.env`; see `.env.example`):
+Context is served to agents by **ktx**, Kaelio's open-source context layer. Each state was ingested
+once (`scripts/ktx_build.py <state>`), and the output is stored in `demo/ktx/<state>/`. Ingest uses a
+language model, so it is never regenerated casually. `demo/selected/ingest_before_summary.md`
+describes what ktx derived from the before-context state without any written context.
 
 ```
-uv run python scripts/verify_isolation.py        # dry runs: tools, denied reads, AGENTS.md loads
-make trials WORKSPACE=installed PROMPTS=all N=3
-make summary                                     # demo/trial_summary.md and demo/labels/labels.csv
+make workspaces                                   # ~/kelder-demo/{installed,written,rot}
+uv run python scripts/ktx_serve.py start          # one ktx MCP server per workspace, 127.0.0.1 only
+make leak-check                                   # fails if any workspace could see the answer
+uv run python scripts/verify_isolation.py         # dry runs: tools, denied reads, AGENTS.md loads
+make trials WORKSPACE=installed N=3               # needs ANTHROPIC_API_KEY in .env (see .env.example)
+make summary                                      # demo/trial_summary.md and demo/labels/labels.csv
+scripts/demo_terminal.sh side-by-side             # clip 1; `rot` for clip 2
 ```
 
-Recordings: `scripts/demo_terminal.sh setup`, then `side-by-side` (clip 1) or `rot` (clip 2).
+Isolation, enforced and tested:
 
-## Honesty rules
+- The workspaces contain only Kelder's repo at one state, a warehouse copy and the ktx project. There is no truth DB, generator, brief, git history or pinned answers.
+- The agent can use only Read, Grep, Glob and the ktx tools. Bash, web search and web fetch are removed. Reads of the build repo and of sibling workspaces are denied.
+- SQL is read-only, and DuckDB file access is disabled, so `read_csv('/etc/hosts')` fails. The leak check probes this live.
+- Runs use a dedicated Claude Code configuration directory and only project settings. No personal memory, instructions or MCP servers load.
+- The model is pinned (`KELDER_MODEL`, default `claude-opus-5-5`). Every transcript is kept in `demo/runs/`.
 
-The generator never calls a language model. The truth database never reaches a warehouse or a
-workspace. Every trial run is kept and counted. See `BUILD_BRIEF.md` section 9.3.
+## Where to read more
+
+- [`BUILD_BRIEF.md`](BUILD_BRIEF.md): the full specification.
+- [`BUILD_LOG.md`](BUILD_LOG.md): every deviation, judgement call and checkpoint.
+- [`data/profile_report.md`](data/profile_report.md): a ten-minute sniff test of the generated data.
+- [`thinking/`](thinking/): design notes (generator, git history, ktx findings).

@@ -1,0 +1,44 @@
+name: fct_subscription_events
+descriptions:
+  user: Subscription events from int_subscription_events, one row per event.
+column_overrides:
+  - name: subscription_event_id
+    descriptions:
+      user: Surrogate key.
+    constraints:
+      dbt:
+        not_null: true
+        unique: true
+  - name: subscription_key
+    descriptions:
+      user: Subscription.
+  - name: event_type
+    descriptions:
+      user: started, paused, resumed, cancelled, expired, payment_failed or payment_recovered.
+  - name: occurred_at
+    descriptions:
+      user: When it happened.
+  - name: event_month
+    descriptions:
+      user: Local month.
+  - name: source
+    descriptions:
+      user: Origin of the event.
+  - name: cancellation_reason
+    descriptions:
+      user: For cancelled events.
+  - name: is_voluntary_cancellation
+    descriptions:
+      user: Customer-initiated cancellation.
+  - name: billing_cycle_date
+    descriptions:
+      user: For payment_failed events.
+  - name: recovered_at
+    descriptions:
+      user: For recovered payment_failed events.
+  - name: is_recovered_within_30_days
+    descriptions:
+      user: For payment_failed events.
+  - name: is_gift
+    descriptions:
+      user: Gift subscription event.

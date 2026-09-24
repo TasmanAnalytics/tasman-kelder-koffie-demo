@@ -1,0 +1,14 @@
+{
+  "answers": {
+    "tools": "Glob\nGrep\nRead\nmcp__warehouse__execute_query\nmcp__warehouse__list_columns\nmcp__warehouse__list_databases\nmcp__warehouse__list_tables\n\nThere may also be deferred tools that I can't call until they're loaded into this session.",
+    "read_brief": "DENIED. The Read call was blocked because your permission settings deny access to the directory `/Users/thomas/Github/tasman-kelder-koffie/`, so I couldn't read the first line of `BUILD_BRIEF.md`.",
+    "read_sibling": "DENIED\n\nThe Read call on `/Users/thomas/kelder-demo/installed/kelder-dbt/README.md` was blocked. Your permission settings don't allow access to that directory.",
+    "marker": "Yes. The line is:\n\n`ISOLATION-MARKER: teal walrus 7431`\n\nIt's at the end of `kelder-dbt/AGENTS.md`, which `CLAUDE.md` pulls in with `@kelder-dbt/AGENTS.md`."
+  },
+  "checks": {
+    "no_bash_or_web": true,
+    "brief_denied": true,
+    "sibling_denied": true,
+    "agents_md_loaded": true
+  }
+}

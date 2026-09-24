@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kelder context layer</title><style>
+@font-face { font-family: "EB Garamond"; src: url("charts/fonts/EBGaramond[wght].ttf") format("truetype"); font-weight: 400 800; }
+@font-face { font-family: "Roboto Mono"; src: url("charts/fonts/RobotoMono[wght].ttf") format("truetype"); font-weight: 100 700; }
+:root {
+  --cream: #fff9eb; --paper: #fffdf6; --slate: #526476; --ink: #34414e; --sage: #90b39d; --brick: #a93427;
+  --line: #e7e0cf; --soft: #f5eedd; --muted: #7d8a97;
+  --serif: "EB Garamond", Georgia, serif; --mono: "Roboto Mono", Menlo, monospace;
+  --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; overflow-x: hidden; background: var(--cream); color: var(--ink); font: 16px/1.6 var(--sans); }
+a { color: var(--slate); text-decoration-color: var(--sage); text-underline-offset: 3px; }
+a:hover { color: var(--brick); }
+code, .mono { font-family: var(--mono); font-size: .88em; }
+code { background: var(--soft); padding: .1em .35em; border-radius: 4px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+nav { position: sticky; top: 0; z-index: 10; background: rgba(255,249,235,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+nav .wrap { display: flex; gap: 22px; align-items: center; height: 54px; overflow-x: auto; scrollbar-width: none; }
+nav .wrap::-webkit-scrollbar { display: none; }
+nav .brand { font-family: var(--serif); font-size: 21px; color: var(--slate); font-weight: 600; white-space: nowrap; margin-right: auto; text-decoration: none; }
+nav a:not(.brand) { font-family: var(--mono); font-size: 12.5px; text-decoration: none; letter-spacing: .02em; white-space: nowrap; }
+header { padding: 72px 0 40px; }
+.kicker { font-family: var(--mono); font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(40px, 6vw, 66px); line-height: 1.02; color: var(--slate); margin: 14px 0 18px; letter-spacing: -.01em; }
+h1 em { color: var(--brick); font-style: italic; }
+.lede { font-size: 19px; max-width: 760px; color: var(--ink); }
+h2 { font-family: var(--serif); font-weight: 500; font-size: 36px; color: var(--slate); margin: 0 0 8px; }
+h3 { font-family: var(--serif); font-weight: 600; font-size: 22px; color: var(--slate); margin: 0 0 6px; }
+section { padding: 56px 0; border-top: 1px solid var(--line); }
+.sub { color: var(--muted); margin: 0 0 28px; max-width: 760px; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 36px; }
+.stat { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 18px 18px 14px; }
+.stat .v { font-family: var(--serif); font-size: 40px; line-height: 1; color: var(--slate); }
+.stat .v.brick { color: var(--brick); } .stat .v.sage { color: #5f8a6f; }
+.stat .l { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-top: 8px; letter-spacing: .02em; }
+.claims { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.claim { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+.claim img { width: 100%; display: block; border-bottom: 1px solid var(--line); background: var(--cream); }
+.claim .body { padding: 18px 20px 20px; }
+.claim .n { font-family: var(--mono); font-size: 12px; color: var(--brick); letter-spacing: .1em; }
+.claim p { margin: 6px 0 10px; }
+.links { font-family: var(--mono); font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.steps { counter-reset: step; display: grid; gap: 12px; }
+.step { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 14px; align-items: start; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.step::before { counter-increment: step; content: counter(step); font-family: var(--serif); font-size: 26px; color: var(--sage); line-height: 1; padding-top: 4px; }
+.step h4 { margin: 0 0 4px; font-size: 16px; color: var(--slate); }
+.step p { margin: 0 0 8px; color: var(--ink); font-size: 14.5px; }
+pre.cmd { position: relative; margin: 0; background: var(--slate); color: var(--cream); border-radius: 8px; padding: 11px 76px 11px 14px; font: 13px/1.55 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+pre.cmd button { position: absolute; top: 7px; right: 7px; font: 11px var(--mono); background: transparent; color: var(--cream); border: 1px solid rgba(255,249,235,.4); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+pre.cmd button:hover { background: rgba(255,249,235,.12); }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+.card .ref { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+table.data { width: 100%; border-collapse: collapse; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; font-size: 14.5px; }
+table.data th { text-align: left; font: 500 11.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--soft); padding: 10px 12px; }
+table.data td { padding: 9px 12px; border-top: 1px solid var(--line); }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.ok { color: #5f8a6f; font-weight: 700; } .bad { color: var(--brick); font-weight: 700; }
+.cls-A { color: #5f8a6f; } .cls-C { color: var(--brick); }
+.tag { font: 11.5px var(--mono); padding: 2px 8px; border-radius: 99px; background: var(--soft); color: var(--slate); }
+.tag-written { background: #e3eee6; } .tag-rot { background: #f3dfdb; color: var(--brick); }
+pre.diff { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; font: 13px/1.55 var(--mono); overflow-x: auto; margin: 0; }
+pre.diff .add { color: #2f6b45; background: #e3eee6; display: block; }
+pre.diff .del { color: var(--brick); background: #f6e3df; display: block; }
+pre.diff .hunk { color: var(--muted); display: block; }
+.tree { font: 13.5px/1.9 var(--mono); columns: 2; column-gap: 40px; }
+.tree div { break-inside: avoid; }
+.tree a { text-decoration: none; }
+.tree span { color: var(--muted); font-family: var(--sans); font-size: 13.5px; }
+.muted { color: var(--muted); } .small { font-size: 13px; }
+footer { padding: 40px 0 70px; border-top: 1px solid var(--line); font: 12.5px var(--mono); color: var(--muted); }
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 28px; align-items: start; }
+@media (max-width: 860px) {
+  .stats { grid-template-columns: repeat(2, 1fr); } .claims, .grid3, .two { grid-template-columns: minmax(0, 1fr); }
+  .wrap { padding: 0 16px; } table.data { font-size: 13px; } table.data td, table.data th { padding: 8px; }
+  .numbers-table { overflow-x: auto; }
+  .tree { columns: 1; } header { padding-top: 44px; }
+}
+</style></head>
+<body>
+<nav><div class="wrap"><a class="brand" href="#">Kelder Coffee</a>
+<a href="#claims">claims</a><a href="#numbers">numbers</a><a href="#start">start here</a><a href="#states">states</a><a href="#rot">rot</a><a href="#trials">trials</a><a href="#map">map</a></div></nav>
+<header><div class="wrap">
+<div class="kicker">Tasman Analytics · Compass AI &amp; Tech Summit · Budapest · 1 October 2026</div>
+<h1>Building a data context layer to <em>fix</em> your AI analytics</h1>
+<p class="lede">The evidence behind the talk. Kelder Coffee is a fictional Amsterdam coffee subscription company with a well-modelled warehouse, six events nobody wrote down, and an agent that explains them wrongly with total confidence, until the context is written down. Then one ordinary commit makes that context false.</p>
+<div class="stats"><div class='stat'><div class='v brick'>9.4%</div><div class='l'>March 2026 churn, raw</div></div><div class='stat'><div class='v sage'>3.3%</div><div class='l'>March 2026 churn, adjusted</div></div><div class='stat'><div class='v '>1,903</div><div class='l'>paused subscriptions imported as cancelled</div></div><div class='stat'><div class='v '>1,768</div><div class='l'>new subscribers June 2026, 188 restores excluded</div></div></div>
+</div></header>
+
+<section id="claims"><div class="wrap"><h2>Four claims, four pieces of evidence</h2>
+<p class="sub">Every chart reads only from a warehouse state, never from the hidden truth, so each one is evidence about what an agent could see.</p>
+<div class="claims"><article class='claim'><img src='charts/out/cancellations_by_hour_feb_mar_2026.png' alt='cancellations_by_hour_feb_mar_2026' loading='lazy'><div class='body'><div class='n'>CLAIM 01</div>
+        <h3>Agents on a good warehouse still explain numbers wrongly</h3><p>The before-context warehouse is well modelled and fully documented, yet 2,053 March cancellations share one midnight UTC timestamp. Without the reason written down, an agent reads it as customers leaving.</p><div class='links'><span class='muted'>installed workspace</span><a href='demo/selected/ingest_before_summary.md'>ingest_before_summary.md</a></div></div></article><article class='claim'><img src='charts/out/churn_monthly_2026_events.png' alt='churn_monthly_2026_events' loading='lazy'><div class='body'><div class='n'>CLAIM 02</div>
+        <h3>Writing the context down fixes most of it</h3><p>Caveats, <code>context.business_events</code>, decision records and verified queries turn 9.4% into 3.3%, with the reason attached. The model is the same.</p><div class='links'><a href='kelder-dbt/AGENTS.md'>AGENTS.md</a><a href='kelder-dbt/context/decisions/0007-recharge-migration-churn-artifacts.md'>0007</a><a href='kelder-dbt/context/verified_queries.yml'>verified_queries.yml</a></div></div></article><article class='claim'><img src='charts/out/yoy_like_for_like_written_vs_rot.png' alt='yoy_like_for_like_written_vs_rot' loading='lazy'><div class='body'><div class='n'>CLAIM 03</div>
+        <h3>Written context decays</h3><p>One commit, “Fix churn logic”, points the restated series at the unadjusted events. The like-for-like comparison flips from 2.45% vs 2.85% (improved) to 3.50% (worse), while every caveat still says the artefacts are excluded.</p><div class='links'><a href='#rot'>rot diff</a><span class='muted'>rot workspace</span></div></div></article><article class='claim'><img src='charts/out/churn_v1_vs_v2_restated.png' alt='churn_v1_vs_v2_restated' loading='lazy'><div class='body'><div class='n'>CLAIM 04</div>
+        <h3>Forcing functions catch the decay</h3><p>The pull request template asks for the metric impact; CI runs the verified queries against pinned answers. On the rot commit, the like-for-like query and the capture check fail, and the March query still passes.</p><div class='links'><a href='#start'>make check</a><a href='.github/pull_request_template.md'>pull request template</a><a href='.github/workflows/ci.yml'>ci.yml</a></div></div></article></div></div></section>
+
+<section id="numbers"><div class="wrap two"><div><h2>Numbers that must reconcile</h2>
+<p class="sub">Asserted by tests against the generated data. Read live from <code>data/truth/kelder_truth.duckdb</code>.</p>
+<div class="numbers-table"><table class="data"><thead><tr><th>Target</th><th>Expected</th><th>Achieved</th></tr></thead><tbody><tr><td>base 2025 01 01</td><td class='mono'>20000 +/- 300</td><td class='mono num'>19,987 <span class='ok'>✓</span></td></tr><tr><td>base 2026 03 01</td><td class='mono'>31200 +/- 150</td><td class='mono num'>31,194 <span class='ok'>✓</span></td></tr><tr><td>migration artefacts</td><td class='mono'>1880..1920</td><td class='mono num'>1,903 <span class='ok'>✓</span></td></tr><tr><td>march 2026 v1 raw</td><td class='mono'>0.0937..0.0943</td><td class='mono num'>0.0940 <span class='ok'>✓</span></td></tr><tr><td>march 2026 v1 adjusted</td><td class='mono'>0.0327..0.0333</td><td class='mono num'>0.0330 <span class='ok'>✓</span></td></tr><tr><td>mean v1 adjusted 2025 09 to 2026 02</td><td class='mono'>rounds to 3.1%</td><td class='mono num'>0.0310 <span class='ok'>✓</span></td></tr><tr><td>queued genuine cancellations</td><td class='mono'>120..180</td><td class='mono num'>142 <span class='ok'>✓</span></td></tr><tr><td>v1 minus v2 restated q1 2026 pp</td><td class='mono'>0.4..0.7</td><td class='mono num'>0.5185 <span class='ok'>✓</span></td></tr><tr><td>as reported may below april</td><td class='mono'>May v2 &lt; April v1</td><td class='mono num'>-0.0038 <span class='ok'>✓</span></td></tr><tr><td>restated v2 h1 improvement pp</td><td class='mono'>0.3..0.8</td><td class='mono num'>0.4001 <span class='ok'>✓</span></td></tr><tr><td>monthly v1 adjusted churn, Jan 2025 to Jun 2026</td><td class='mono'>each ±0.02 pp</td><td class='mono num'>18/18 <span class='ok'>✓</span></td></tr></tbody></table></div></div>
+<div><h2>The core fact</h2><p>On 12 March 2026 Kelder migrated billing from Shopify to Recharge. About 1,903 paused subscriptions were written as cancelled. March churn is <b style="color:var(--brick)">9.4%</b> raw and <b style="color:#5f8a6f">3.3%</b> adjusted. Anyone quoting the raw number is wrong.</p>
+<p class="small muted">Findable in the <code>churned_at</code> caveat, <code>context.business_events</code>, decision 0007, the March verified query and <code>AGENTS.md</code>, and checked by <code>tests/truth/test_context_files.py</code>.</p>
+<h3 style="margin-top:28px">Also in the data</h3>
+<p class="small">Email-attributed revenue for April 2026 reads €24,418 because of a 31-hour Klaviyo gap. From May the churn definition gives failed payments 30 days' grace. A PostNL strike hit parcels shipped 18 to 24 May. The Father's Day bundle ran 14 to 21 June. 1,619 wiped pauses came back as “new” Recharge subscriptions.</p></div></div></section>
+
+<section id="start"><div class="wrap"><h2>Start here</h2><p class="sub">Everything runs locally. Requirements: uv and git; the agent tooling (pinned Claude Code, ktx, Node 22) installs into <code>~/kelder-demo/_tools</code> with <code>tools/demo/setup.sh</code>.</p>
+<div class="steps"><div class='step'><div><h4>Build everything from scratch</h4><p>Generate the data, load the warehouse, build the three states, run the tests, render the charts. Takes about three minutes.</p><pre class='cmd' data-cmd='uv sync &amp;&amp; make all'>uv sync &amp;&amp; make all</pre></div></div><div class='step'><div><h4>Run the checks CI runs</h4><p>Verified queries against pinned answers, and the context capture check on the rot pull request body. Red on purpose.</p><pre class='cmd' data-cmd='make check STATE=rot PR_BODY=kelder-dbt/.pr/rot.md'>make check STATE=rot PR_BODY=kelder-dbt/.pr/rot.md</pre></div></div><div class='step'><div><h4>Create the agent workspaces</h4><p>installed, written and rot under ~/kelder-demo, each with its own ktx project and warehouse copy. Then start their ktx servers.</p><pre class='cmd' data-cmd='make workspaces &amp;&amp; uv run python scripts/ktx_serve.py start'>make workspaces &amp;&amp; uv run python scripts/ktx_serve.py start</pre></div></div><div class='step'><div><h4>Prove the isolation</h4><p>Leak check across every workspace, then dry runs that confirm the tools, the denied reads and that AGENTS.md loads.</p><pre class='cmd' data-cmd='make leak-check &amp;&amp; uv run python scripts/verify_isolation.py'>make leak-check &amp;&amp; uv run python scripts/verify_isolation.py</pre></div></div><div class='step'><div><h4>Run trials</h4><p>Same question, fresh session, pinned model, every transcript kept. Start with three runs per question.</p><pre class='cmd' data-cmd='make trials WORKSPACE=installed N=3 &amp;&amp; make summary'>make trials WORKSPACE=installed N=3 &amp;&amp; make summary</pre></div></div><div class='step'><div><h4>Record the clips</h4><p>Clip one: installed and written side by side. Clip two: the rot diff, the rot agent, then the failing check.</p><pre class='cmd' data-cmd='scripts/demo_terminal.sh side-by-side'>scripts/demo_terminal.sh side-by-side</pre></div></div></div></div></section>
+
+<section id="states"><div class="wrap"><h2>Three states of one repository</h2>
+<p class="sub"><code>git log --oneline -- kelder-dbt/</code> reads as Kelder's own history, from January to June 2026. Each state is a git reference; <code>scripts/build_state.py</code> builds any of them into its own warehouse.</p>
+<div class="grid3"><div class='card'><div class='ref'>kelder/before-context · abf6778</div><h3>before-context</h3>
+        <p class='small'>A competent dbt project with no context layer. March reads 9.4% and restores count as new subscribers.</p><div class='links'><span class='tag tag-installed'>~/kelder-demo/installed</span></div></div><div class='card'><div class='ref'>kelder/with-context · 4bf8952</div><h3>with-context</h3>
+        <p class='small'>The article&#x27;s end state: caveats, business events, metric changelog, decision records, verified queries, AGENTS.md, PR template.</p><div class='links'><span class='tag tag-written'>~/kelder-demo/written</span></div></div><div class='card'><div class='ref'>kelder/rot · 64ed94f</div><h3>rot</h3>
+        <p class='small'>One commit on top of with-context that breaks the restated series. Every piece of context still claims otherwise.</p><div class='links'><span class='tag tag-rot'>~/kelder-demo/rot</span></div></div></div></div></section>
+
+<section id="rot"><div class="wrap two"><div><h2>The rot commit</h2>
+<p class="sub">“Fix churn logic”, by Sanne, 26 June 2026. The pull request body has no box ticked and one line under “What changed”: <i>Simplify churn model, consolidate v1 and v2 CTEs.</i></p>
+<pre class="diff"><span class='hunk'>@@ -78,12 +78,6 @@ as_reported as (</span>
+<span class=''>     from series_adjusted</span>
+<span class=''> ),</span>
+<span class=''> </span>
+<span class='del'>-restated_v2 as (</span>
+<span class='del'>-    select month, base_subscribers, churned_v2</span>
+<span class='del'>-    from series_adjusted</span>
+<span class='del'>-),</span>
+<span class='del'>-</span>
+<span class=''> -- As reported, artefacts included: for reconciliation against Recharge exports only.</span>
+<span class=''> as_reported_raw as (</span>
+<span class=''>     select</span>
+<span class='hunk'>@@ -110,7 +104,7 @@ select</span>
+<span class=''>     m.is_latest_month as is_provisional</span>
+<span class=''> from months as m</span>
+<span class=''> join as_reported as r using (month)</span>
+<span class='del'>-join restated_v2 as v2 using (month)</span>
+<span class='add'>+join series_unadjusted as v2 using (month)</span>
+<span class=''> join as_reported_raw as raw using (month)</span>
+<span class=''> join series_adjusted as a using (month)</span>
+<span class=''> order by m.month</span></pre></div>
+<div><h2>What catches it</h2><p>Not the dbt tests: they all pass. The verified query for the like-for-like comparison fails against its pinned answer, and the capture check fails because a metrics model changed with no metric-impact box ticked.</p>
+<pre class='cmd' data-cmd='make check STATE=rot PR_BODY=kelder-dbt/.pr/rot.md'>make check STATE=rot PR_BODY=kelder-dbt/.pr/rot.md</pre>
+<p class="small muted" style="margin-top:12px">Pinned answers live in <code>tests/verified/expected/</code>, outside every workspace. They are frozen only with Thomas's approval, and every freeze is logged.</p></div></div></section>
+
+<section id="trials"><div class="wrap"><h2>Trials</h2><p class="sub">The same six questions, many times, in each workspace, on one pinned model. Honesty rules: every run is kept and counted, and the recorded take shows the most common outcome.</p>
+<p class="muted">No trials yet. Run <code>make trials</code>, then <code>make summary</code>.</p>
+<h3 style="margin-top:28px">Selected answers for slides</h3><div class="tree"><div><a href='demo/selected/ingest_before_summary.md'>ingest_before_summary.md</a></div></div></div></section>
+
+<section id="map"><div class="wrap"><h2>Where things are</h2><div class="tree"><div><a href='BUILD_BRIEF.md'>BUILD_BRIEF.md</a> <span>the specification</span></div><div><a href='BUILD_LOG.md'>BUILD_LOG.md</a> <span>every deviation and judgement call</span></div><div><a href='README.md'>README.md</a> <span>how to reproduce</span></div><div><a href='generator/'>generator/</a> <span>world simulation, source systems, incidents, truth</span></div><div><a href='generator/config.yaml'>generator/config.yaml</a> <span>every parameter and the seed</span></div><div><a href='loader/load_raw.py'>loader/load_raw.py</a> <span>Parquet into raw_* schemas</span></div><div><a href='kelder-dbt/'>kelder-dbt/</a> <span>Kelder&#x27;s analytics repo (three states)</span></div><div><a href='kelder-dbt/context/'>kelder-dbt/context/</a> <span>decisions, glossary, quirks, verified queries</span></div><div><a href='scripts/'>scripts/</a> <span>build states, checks, workspaces, trials</span></div><div><a href='tests/'>tests/</a> <span>targets, realism, incidents, truth, leaks</span></div><div><a href='charts/out/'>charts/out/</a> <span>slide charts: SVG, PNG, JSON</span></div><div><a href='demo/'>demo/</a> <span>prompts, trials, labels, selected answers</span></div><div><a href='demo/ktx/'>demo/ktx/</a> <span>stored ktx ingest output per state</span></div><div><a href='data/profile_report.md'>data/profile_report.md</a> <span>ten-minute sniff test of the data</span></div><div><a href='thinking/'>thinking/</a> <span>design notes</span></div></div></div></section>
+
+<footer><div class="wrap">Generated 24 September 2026, 16:27 from commit 0370330 by <code>scripts/render_index.py</code>. Every number on this page is read from build outputs.</div></footer>
+<script>
+document.querySelectorAll('pre.cmd').forEach(pre => {
+  const b = document.createElement('button'); b.textContent = 'copy';
+  b.onclick = () => { navigator.clipboard.writeText(pre.dataset.cmd || pre.innerText.replace(/copy$/, '').trim()); b.textContent = 'copied'; setTimeout(() => b.textContent = 'copy', 1400); };
+  pre.appendChild(b);
+});
+</script></body></html>

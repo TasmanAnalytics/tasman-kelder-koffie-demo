@@ -1,0 +1,19 @@
+{
+  "state": "before",
+  "ktx_version": "@kaelio/ktx 0.16.0",
+  "models": {
+    "default": "claude-sonnet-4-5",
+    "triage": "claude-haiku-4-5-20251001",
+    "candidateExtraction": "claude-sonnet-4-5",
+    "curator": "claude-opus-4-5",
+    "reconcile": "claude-opus-4-5",
+    "repair": "claude-haiku-4-5-20251001"
+  },
+  "embeddings": "sentence-transformers all-MiniLM-L6-v2 (384)",
+  "enrichment": "llm",
+  "started": "2026-09-24T16:14:29",
+  "finished": "2026-09-24T16:20:32",
+  "ingest_exit_code": 0,
+  "wiki_verbatim": [],
+  "status": "ktx status \u00b7 project (~/Github/tasman-kelder-koffie/build/ktx/before/project)\n\n  LLM           anthropic \u00b7 claude-sonnet-4-5  \u2713 key set (env)\n  Embeddings    sentence-transformers \u00b7 all-MiniLM-L6-v2 (384d)  \u2713 managed local embeddings daemon\n  Storage       sqlite (state) \u00b7 sqlite-fts5 (search)\n  Config        \u2713 ktx.yaml schema valid\n\n  Connections (2)\n    \u2713 kelder       duckdb   path: /Users/thomas/Github/tasman-kelder-koffie/data/warehouse/kelder_before.duckdb\n    \u26a0 kelder_dbt   dbt      repoUrl not set\n                            \u2192 Rerun `ktx setup`\n\n  Pipeline\n    Adapters         dbt\n    Enrichment       llm mode \u00b7 relationships on, LLM proposals, validation required\n    Research agent   disabled\n\n  Local data\n    Ingest           2 completed runs\n      kelder   live-database   last 6 minutes ago\n    Wiki             GLOBAL=10 (10 embedded)\n    Semantic layer   kelder   9 sources (9 embedded) \u00b7 0 dictionary values\n    Disk             db=1.51 MiB  \u00b7  cache=1.35 MiB  \u00b7  raw-sources=75 files (1.27 MiB)\n\nPartially ready \u2014 1 connection need configuration.  Next: ktx setup (0.18s)\n"
+}
