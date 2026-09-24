@@ -65,6 +65,12 @@ def run_one(workspace: str, pid: str, prompt: str) -> dict:
             msgs.append(json.loads(l))
         except json.JSONDecodeError:
             msgs.append({"type": "unparsed", "text": l})
+    # Claude Code spills large tool results under <config>/projects/<workspace>/<session>/; they are in the
+    # transcript already, so clear them so no later run can ever see an earlier one's files
+    spill = Path(agent_cmd.agent_env()["CLAUDE_CONFIG_DIR"]) / "projects" / str(ws).replace("/", "-")
+    if spill.exists():
+        import shutil
+        shutil.rmtree(spill)
     record = {"workspace": workspace, "prompt_id": pid, "prompt": prompt, "run": i, "model": agent_cmd.model(),
               "command": cmd, "elapsed_s": round(time.time() - t0, 1), "stderr": err[-4000:], "messages": msgs}
     (out_dir / f"{i}.json").write_text(json.dumps(record, indent=2, ensure_ascii=False))

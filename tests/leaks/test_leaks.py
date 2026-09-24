@@ -207,10 +207,14 @@ def test_dedicated_config_dir_has_no_memory_or_instructions():
     cfg = make_workspace.CONFIG_DIR
     assert cfg.exists()
     assert not (cfg / "CLAUDE.md").exists()
-    for name in ("projects", "agents", "commands", "skills", "plugins"):
+    for name in ("agents", "commands", "skills", "plugins"):
         p = cfg / name
         files = [f for f in p.rglob("*") if f.is_file()] if p.exists() else []
         assert not files, files[:5]
+    # per-session spill files (large tool results) are transient and never loaded; memory would be
+    projects = cfg / "projects"
+    mem = [f for f in projects.rglob("*") if f.is_file() and ("memory" in f.parts or f.name == "CLAUDE.md")] if projects.exists() else []
+    assert not mem, mem[:5]
 
 
 def test_no_user_level_memory_that_could_load():
