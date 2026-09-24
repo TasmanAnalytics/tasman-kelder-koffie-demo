@@ -70,6 +70,7 @@ class WorldResult:
     dunning: pd.DataFrame
     monthly: pd.DataFrame
     artefacts: pd.DataFrame
+    freeze_log: pd.DataFrame
     params: dict = field(default_factory=dict)
 
 
@@ -138,6 +139,7 @@ class SubscriptionWorld:
         self.cancels = Log("sub", "t", "reason", "queued")
         self.dunning = Log("sub", "t0", "recovered", "rec_day", "t_end")
         self.monthly = []
+        self.freeze_log = []
 
         # dates
         self.freeze_start = ts(self.d["freeze_start_local"])
@@ -169,14 +171,18 @@ class SubscriptionWorld:
 
     # ------------------------------------------------------------------ helpers
 
-    def shift(self, t):
+    def shift(self, t, subs=None, what="charge"):
         """Charges and retries due during the billing freeze run at the first 05:00 after it."""
         t = np.asarray(t, dtype=np.int64)
         in_freeze = (t >= self.freeze_start) & (t < self.freeze_end)
-        return np.where(in_freeze, next_time_of_day(np.full_like(t, self.freeze_end), 5), t)
+        out = np.where(in_freeze, next_time_of_day(np.full_like(t, self.freeze_end), 5), t)
+        if subs is not None and in_freeze.any():
+            subs = np.broadcast_to(np.asarray(subs), t.shape)
+            self.freeze_log.append(pd.DataFrame(dict(sub=subs[in_freeze], nominal=t[in_freeze], actual=out[in_freeze], what=what)))
+        return out
 
-    def charge_time(self, t):
-        return self.shift(next_time_of_day(t, 5))
+    def charge_time(self, t, subs=None):
+        return self.shift(next_time_of_day(t, 5), subs)
 
     def tenure_hazard(self, idx, M0):
         age_days = np.maximum(0, M0 - self.start[idx]) / DAY
@@ -246,7 +252,7 @@ class SubscriptionWorld:
         self.promo[idx] = key in self.cfg["acquisition"]["promo_cohort_months"]
         self.gift[idx] = gift
         self.status[idx] = ACTIVE
-        self.next_charge[idx] = self.charge_time(at_time_of_day(starts, 0) + self.interval[idx] * DAY)
+        self.next_charge[idx] = self.charge_time(at_time_of_day(starts, 0) + self.interval[idx] * DAY, idx)
         self.last_charge[idx] = starts
         self.charges.add(sub=idx, t=starts, kind=np.full(n, K_FIRST if not gift else K_GIFT))
         return idx
@@ -260,8 +266,8 @@ class SubscriptionWorld:
         self.interval[idx] = gi
         self.price[idx] = 0.0
         # prepaid: shipment 1 with the purchase, then two more at 05:00 every four weeks, then expired
-        s2 = self.charge_time(at_time_of_day(starts, 0) + gi * DAY)
-        s3 = self.charge_time(at_time_of_day(s2, 0) + gi * DAY)
+        s2 = self.charge_time(at_time_of_day(starts, 0) + gi * DAY, idx)
+        s3 = self.charge_time(at_time_of_day(s2, 0) + gi * DAY, idx)
         self.charges.add(sub=np.concatenate([idx, idx]), t=np.concatenate([s2, s3]), kind=np.full(2 * n, K_GIFT))
         self.term[idx] = s3 + 60
         self.term_reason[idx] = R_EXPIRED
@@ -348,7 +354,7 @@ class SubscriptionWorld:
         resume = np.flatnonzero((st == PAUSED) & (self.pause_end[:n0] < M1))
         rt = self.pause_end[resume]
         self.status[resume] = ACTIVE
-        self.next_charge[resume] = self.charge_time(rt)
+        self.next_charge[resume] = self.charge_time(rt, resume)
         resume_t = np.full(n0, -NEVER, dtype=np.int64)
         resume_t[resume] = rt
 
@@ -358,7 +364,11 @@ class SubscriptionWorld:
         if key[5:] == "11":
             bf_day = ts(f"{key[:4]}-11-{str(self._black_friday_dom(int(key[:4]))).zfill(2)}")
             boost = lambda day, _: np.where((day >= bf_day - 4 * DAY) & (day < bf_day + 4 * DAY), 3.0, 1.0) / 3.0
-        starts = np.sort(self.human.sample(self.r_acq, np.full(n_new, M0), np.full(n_new, M1), day_boost=boost))
+        starts = self.human.sample(self.r_acq, np.full(n_new, M0), np.full(n_new, M1), day_boost=boost)
+        # subscription checkout was switched off during the billing freeze; those sign-ups came in after it
+        in_freeze = (starts >= self.freeze_start) & (starts < self.freeze_end)
+        starts[in_freeze] = self.freeze_end + (starts[in_freeze] - self.freeze_start) // 2
+        starts = np.sort(starts)
         new_idx = self.add_subscriptions(starts, key)
         if key == "2025-12":
             self.add_gifts(self.cfg["gifts"]["dec_2025_count"], M0, ts("2025-12-24"), key)
@@ -387,7 +397,7 @@ class SubscriptionWorld:
         for k in range(4):
             ok = (nc < M1) & (a < M1)
             sched[ok, k] = nc[ok]
-            nc[ok] = self.shift(at_time_of_day(nc[ok], 5) + self.interval[:n1][ok] * DAY)
+            nc[ok] = self.shift(at_time_of_day(nc[ok], 5) + self.interval[:n1][ok] * DAY)  # calendar only
         n_sched = (sched < NEVER).sum(axis=1)
         nc0 = self.next_charge[:n1].copy()
         failed = np.zeros(n1, dtype=bool)
@@ -495,15 +505,15 @@ class SubscriptionWorld:
         n = len(idx)
         rec = self.r_fail.random(n) < self.prec[self.method[idx]]
         rd = np.array(w["retry_days"])[self.r_fail.choice(len(w["retry_days"]), size=n, p=np.array(w["recovery_day_weights"]))]
-        t_rec = self.shift(t0 + rd * DAY)
-        t_can = self.shift(t0 + w["unrecovered_cancel_day"] * DAY)
+        t_rec = self.shift(t0 + rd * DAY, np.where(rec, idx, -1), "retry")
+        t_can = self.shift(t0 + w["unrecovered_cancel_day"] * DAY, np.where(~rec, idx, -1), "cancel")
         t_end = np.where(rec, t_rec, t_can)
         self.dun_until[idx] = t_end
         self.dunning.add(sub=idx, t0=t0, recovered=rec, rec_day=np.where(rec, rd, -1), t_end=t_end)
         r_idx = idx[rec]
         self.charges.add(sub=r_idx, t=t_rec[rec], kind=np.full(len(r_idx), K_RECOVERY))
         self.last_charge[r_idx] = t_rec[rec]
-        self.next_charge[r_idx] = self.shift(at_time_of_day(t_rec[rec], 5) + self.interval[r_idx] * DAY)
+        self.next_charge[r_idx] = self.shift(at_time_of_day(t_rec[rec], 5) + self.interval[r_idx] * DAY, r_idx)
         u_idx = idx[~rec]
         self.term[u_idx] = t_can[~rec]
         self.term_reason[u_idx] = R_MAX_RETRIES
@@ -606,7 +616,7 @@ class SubscriptionWorld:
             i = np.flatnonzero(ok)
             self.charges.add(sub=i, t=nc[i], kind=np.full(len(i), K_RECURRING))
             self.last_charge[i] = nc[i]
-            nc[i] = self.shift(at_time_of_day(nc[i], 5) + self.interval[i] * DAY)
+            nc[i] = self.shift(at_time_of_day(nc[i], 5) + self.interval[i] * DAY, i)
         return nc
 
     def _run_charges(self, M0, M1, a, event_t, n1, nc0, failed):
@@ -648,5 +658,6 @@ class SubscriptionWorld:
             subs=subs, customers=customers, charges=self.charges.frame().sort_values(["t", "sub"], kind="stable").reset_index(drop=True),
             pauses=pauses, cancels=self.cancels.frame(), dunning=self.dunning.frame(), monthly=pd.DataFrame(self.monthly),
             artefacts=subs[subs.artefact][["sub_id", "orig_until", "restore_time"]].reset_index(drop=True),
+            freeze_log=(pd.concat(self.freeze_log, ignore_index=True) if self.freeze_log else pd.DataFrame(columns=["sub", "nominal", "actual", "what"])),
             params=dict(warmup_scale=self.warmup_scale, main_scale=self.main_scale, required_artefacts=self.required_artefacts),
         )
