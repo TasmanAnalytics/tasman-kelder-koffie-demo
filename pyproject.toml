@@ -20,4 +20,4 @@ dependencies = [
 [tool.pytest.ini_options]
 pythonpath = [".", "tests"]
 testpaths = ["tests"]
-markers = ["slow: takes more than a few seconds"]
+markers = ["slow: takes more than a few seconds", "frozen: needs frozen verified results"]

@@ -1,18 +1,14 @@
-# Progress
+# Progress (2026-09-24, end of first session)
 
-## Done (2026-09-24)
-- Scaffold, uv env, git.
-- ktx smoke test (subagent): see ktx_findings.md. Blocked on an LLM key for ingest.
-- Generator complete: world, commerce, Shopify/Recharge/Klaviyo/ads rendering, incidents with manifest, truth DB, profile report.
-  `uv run python -m generator.generate` ~55 s. All targets pass.
-- Tests: targets (28+), realism (9), incidents (12, diff clean vs damaged == manifest), determinism (hash equality).
+Done: generator + tests; loader; kelder-dbt three states with in-universe history; truth tests (exact);
+verified queries + capture check + make check + freeze script (not frozen); CI workflow; workspaces +
+leak check (fallback MCP, live probes); charts (fallback fonts); trial harness, summariser, isolation dry
+run, demo_terminal.sh; README; make all = 3 min.
 
-## Next
-- loader/load_raw.py -> kelder_raw.duckdb
-- kelder-dbt before-context, then with-context, then rot; in-universe commits as Sanne.
-- scripts/build_state.py, Makefile.
-- truth tests on the warehouse; verified queries; capture check; CI.
-- Workspaces, leak check, MCP server (own read-only DuckDB server with external access off?), charts.
+Blocked on Thomas: API key, AGENTS.md rewrite, freeze approval, font download, tmux, ktx decision, GitHub.
 
-## Dev tips
-- KELDER_BUILD_CACHE=<scratchpad>/build.pkl caches the in-memory build for the incident tests.
+When AGENTS.md arrives:
+1. Commit it in-universe as Sanne (date 2026-06-19 or 20) on top of C10 -> rewrite: easiest is to
+   amend history: new commit after C10, move tag kelder/with-context to it, cherry-pick rot commit on top
+   with its original dates (GIT_*_DATE env), move kelder/rot tag + branch.
+2. make build-all, make workspaces, make leak-check, verify_isolation.py, then N=3 trials.

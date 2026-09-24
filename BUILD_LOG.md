@@ -36,14 +36,30 @@ Newest checkpoint at the bottom of each section.
 | 2026-09-24 | Verified | `verified_queries.yml` names the adjustment and the fact behind it, but contains no numbers. `AGENTS.md` states the core fact without the 9.4% and 3.3% figures, which live in decision 0007 (verbatim). | Keeps expected results out of workspaces. |
 | 2026-09-24 | Verified | Expected results are NOT frozen yet. The check tooling was exercised against a scratch copy in the session scratchpad, not `tests/verified/expected/`. | Freezing needs Thomas's go-ahead. |
 | 2026-09-24 | AGENTS.md | Draft written (62 lines, `kelder-dbt/AGENTS.md`, committed in C10). It must be rewritten by Thomas before any trial. | Brief 6.3. |
+| 2026-09-24 | Serving | Trials and recordings use the fallback server for now: MotherDuck's `mcp-server-motherduck==1.0.8`, pinned in the project environment. It serves each workspace's DuckDB file read-only on one persistent connection (`--no-ephemeral-connections`), with `SET enable_external_access = false; SET lock_configuration = true` and FastMCP's update check off. The leak check probes each server live: plain queries work; `read_csv`, `read_text`, `glob`, `ATTACH`, writes and setting changes are refused. | ktx ingest is blocked on an LLM key, and ktx's `sql_execution` can read local files. Upstream gotcha: in the default ephemeral mode the server skips `--init-sql` for query connections, so `read_csv('/etc/hosts')` works. |
+| 2026-09-24 | Isolation | Agents run with `--tools Read,Grep,Glob`, `--mcp-config <workspace>/.mcp.json --strict-mcp-config`, `--setting-sources project`, `--permission-mode dontAsk`, `--disable-slash-commands`, `--no-session-persistence`, a dedicated `CLAUDE_CONFIG_DIR` (`~/kelder-demo/.claude-config`) and a scrubbed environment (`scripts/agent_cmd.py`). A free dry run without credentials shows the init message lists exactly Glob, Grep, Read and the four warehouse tools, with the MCP server connected and no skills or plugins. Claude Code 2.1.25. | Brief section 8. `CLAUDE_CONFIG_DIR` may only redirect credentials, so user-level settings and MCP servers are also excluded by flags, and the leak check asserts there is no `~/.claude/CLAUDE.md` and no auto-memory for the workspaces. |
+| 2026-09-24 | Workspaces | `kelder-dbt/.pr/` is not copied into workspaces. `written/` and `rot/` get a root `CLAUDE.md` containing only `@kelder-dbt/AGENTS.md`, because Claude Code reads AGENTS.md only from the working directory upwards and the agent runs from the workspace root. The `bare` workspace is not built. | The PR body is not normally part of a repository. `bare` is cut 4, and under the fallback it would be identical to `installed`. |
+| 2026-09-24 | Charts | Charts are rendered with fallback fonts (Georgia, Menlo, Helvetica Neue) until EB Garamond and Roboto Mono are in `charts/fonts/`. Event labels are `<date> <event_type>`, read from `context.business_events`. The 9 April point in the email chart is a brick marker, because the bar is EUR 0. | Downloading the fonts needs Thomas's go-ahead. `business_events` has no short-label column. |
 | 2026-09-24 | Working notes | A `thinking/` folder holds design notes and decisions. It is builder-only and never reaches a workspace. | Requested by Thomas. |
 
-## Open questions
+## Open questions (waiting for Thomas)
 
-- tmux is not installed; `scripts/demo_terminal.sh side-by-side` needs it. Installing it (`brew install tmux`) is a global install and needs Thomas's approval.
-- No `ANTHROPIC_API_KEY` in the environment. Trials need either a key in `.env` or a Claude Code login inside the dedicated configuration directory.
+1. `ANTHROPIC_API_KEY` in `.env`: needed for trials, for `scripts/verify_isolation.py`, and for ktx ingest.
+2. `AGENTS.md`: rewrite `kelder-dbt/AGENTS.md` by hand (draft at tag `kelder/with-context`). The rewrite then gets committed in-universe before the with-context tag, and the rot commit is replayed on top.
+3. Freeze verified results: `make freeze-verified APPROVED_BY="Thomas, <date>"`. Until then `make check` reports "no frozen expected result" and two verified tests skip.
+4. Download EB Garamond and Roboto Mono (Google Fonts, OFL, about 1 to 2 MB) into `charts/fonts/`.
+5. `brew install tmux` for the side-by-side clip.
+6. ktx or the fallback for trials. ktx needs Node 22 (local install), an LLM key for ingest, and a fix for file reads through `sql_execution`.
+7. A private GitHub repository and a pull request from `kelder/rot` for the red-check screenshot. Nothing has been pushed.
 
 ## Checkpoints
+
+### 2026-09-24, workspaces, leak check, charts, harness
+
+- `make all` on the current checkout takes 3 minutes. All tests pass: 52 data, 26 truth and verified (3 skipped until the freeze), 23 leak.
+- Workspaces `installed`, `written` and `rot` are in `~/kelder-demo/`, and the leak check passes, including live MCP probes.
+- Five charts are in `charts/out/` (SVG, 2400x1350 PNG, JSON).
+- Trial harness, summariser, isolation dry run and terminal script are written. No trial has run: there are no credentials, and AGENTS.md is still a draft.
 
 ### 2026-09-24, generator, warehouse states and checks
 
