@@ -66,6 +66,17 @@ Newest checkpoint at the bottom of each section.
 
 ## Checkpoints
 
+### 2026-09-24, ktx wired and trials at N=3
+
+- All three workspaces serve ktx. Leak check 25/25; isolation dry runs pass (tools, denied reads, AGENTS.md loads only in written and rot).
+- 45 runs (installed 18, written 18, rot 9) on `claude-opus-5-5`: $7.80 in total. The projected full matrix at N=10 is about $39 (EUR 34), under the EUR 50 threshold.
+- Reviewed reading (Thomas to confirm in `demo/labels/labels.csv`):
+  - installed found the anomaly, the definition change, the Klaviyo gap and the restores by detective work, but gave 2.8% as the board number in 3/3 runs (the truth is 3.3%);
+  - written was right on all six questions in about a third of the turns;
+  - rot caught the rot commit itself in 3/3 like-for-like runs.
+- This weakens the strong form of claims 1 and 3. Reported plainly in the narrative doc and in `TALK_FLOW.md`. Nothing was changed to push results.
+- The automatic class heuristic is unreliable (for example, it labels rot's bug-catching answers B). Reviewed readings are in the labels notes column.
+
 ### 2026-09-24, workspaces, leak check, charts, harness
 
 - `make all` on the current checkout takes 3 minutes. All tests pass: 52 data, 26 truth and verified (3 skipped until the freeze), 23 leak.

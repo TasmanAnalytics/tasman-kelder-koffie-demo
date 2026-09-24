@@ -101,6 +101,8 @@ Isolation, enforced and tested:
 
 ## Where to read more
 
+- [`TALK_FLOW.md`](TALK_FLOW.md): the talk's flow, numbers and trial findings in one file.
+
 - [`BUILD_BRIEF.md`](BUILD_BRIEF.md): the full specification.
 - [`BUILD_LOG.md`](BUILD_LOG.md): every deviation, judgement call and checkpoint.
 - [`data/profile_report.md`](data/profile_report.md): a ten-minute sniff test of the generated data.
