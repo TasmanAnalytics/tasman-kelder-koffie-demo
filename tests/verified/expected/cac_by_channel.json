@@ -1,0 +1,25 @@
+{
+  "columns": [
+    "channel",
+    "ad_spend_eur",
+    "new_subscribers",
+    "cac_eur"
+  ],
+  "id": "cac_by_channel",
+  "ref": "4bf89527787fd6524edcd1e72048de05d50ac027",
+  "rows": [
+    [
+      "paid_search",
+      107128.42000000001,
+      2187,
+      48.98
+    ],
+    [
+      "paid_social",
+      215003.7,
+      2944,
+      73.03
+    ]
+  ],
+  "state": "with_context"
+}

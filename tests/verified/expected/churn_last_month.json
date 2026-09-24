@@ -1,0 +1,23 @@
+{
+  "columns": [
+    "month",
+    "definition_version_as_reported",
+    "base_subscribers",
+    "churned_subscribers",
+    "churn_rate_as_reported",
+    "is_provisional"
+  ],
+  "id": "churn_last_month",
+  "ref": "4bf89527787fd6524edcd1e72048de05d50ac027",
+  "rows": [
+    [
+      "2026-06-01",
+      "v2",
+      33281,
+      596,
+      0.017908,
+      true
+    ]
+  ],
+  "state": "with_context"
+}

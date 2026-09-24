@@ -1,0 +1,27 @@
+{
+  "columns": [
+    "month",
+    "churn_rate_adjusted",
+    "churn_rate_raw",
+    "churned_adjusted",
+    "churned_raw",
+    "migration_artifacts",
+    "adjustment",
+    "source_link"
+  ],
+  "id": "churn_march_2026",
+  "ref": "4bf89527787fd6524edcd1e72048de05d50ac027",
+  "rows": [
+    [
+      "2026-03-01",
+      0.032987,
+      0.093992,
+      1029,
+      2932,
+      1903,
+      "Shopify to Recharge billing migration",
+      "context/decisions/0007"
+    ]
+  ],
+  "state": "with_context"
+}

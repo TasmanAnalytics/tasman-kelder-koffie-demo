@@ -71,3 +71,5 @@ Newest checkpoint at the bottom of each section.
 - Truth tests: 16 of 16 pass. With-context equals the truth exactly for base, v1, restated v2 as of 1 July, as-reported, new subscribers, pause starts, paused counts, daily email attribution and flag counts. Before-context shows 9.4% for March and counts restores as new.
   In rot, March restated v2 jumps 6.1 pp, the H1 comparison flips to "worse", and the as-reported series is unchanged.
 - Check tooling: `make check STATE=rot PR_BODY=kelder-dbt/.pr/rot.md` fails `churn_yoy_like_for_like` and the capture check (0 boxes ticked); the other six verified queries pass. This ran against scratch expected results, because the real freeze is pending.
+
+- 2026-09-24 16:04 Froze verified results for 7 queries from kelder/with-context (4bf8952778). Approved by: Thomas in chat, 2026-09-24.

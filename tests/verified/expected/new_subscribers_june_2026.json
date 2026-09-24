@@ -1,0 +1,17 @@
+{
+  "columns": [
+    "new_subscribers",
+    "restores_excluded",
+    "gift_subscriptions_excluded"
+  ],
+  "id": "new_subscribers_june_2026",
+  "ref": "4bf89527787fd6524edcd1e72048de05d50ac027",
+  "rows": [
+    [
+      1768,
+      188,
+      450
+    ]
+  ],
+  "state": "with_context"
+}

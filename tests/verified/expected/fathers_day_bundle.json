@@ -1,0 +1,21 @@
+{
+  "columns": [
+    "bundle_orders",
+    "bundle_order_revenue_eur",
+    "bundle_order_aov_eur",
+    "bundle_orders_from_new_customers",
+    "gift_subscriptions_sold"
+  ],
+  "id": "fathers_day_bundle",
+  "ref": "4bf89527787fd6524edcd1e72048de05d50ac027",
+  "rows": [
+    [
+      950,
+      54386.5,
+      57.25,
+      629,
+      450
+    ]
+  ],
+  "state": "with_context"
+}

@@ -1,0 +1,19 @@
+{
+  "columns": [
+    "h1_2025_churn_rate_v2",
+    "h1_2026_churn_rate_v2",
+    "change_in_churn_rate",
+    "provisional_month"
+  ],
+  "id": "churn_yoy_like_for_like",
+  "ref": "4bf89527787fd6524edcd1e72048de05d50ac027",
+  "rows": [
+    [
+      0.028481500000000003,
+      0.02448033333333333,
+      -0.004001166666666674,
+      "2026-06-01"
+    ]
+  ],
+  "state": "with_context"
+}

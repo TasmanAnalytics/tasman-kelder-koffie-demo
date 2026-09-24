@@ -1,0 +1,17 @@
+{
+  "columns": [
+    "attributed_revenue_eur",
+    "incomplete_days",
+    "missing_data"
+  ],
+  "id": "email_revenue_april_2026",
+  "ref": "4bf89527787fd6524edcd1e72048de05d50ac027",
+  "rows": [
+    [
+      24418.2,
+      7,
+      "No Klaviyo events from 06:00 UTC on 9 April to 13:00 UTC on 10 April. The 9 April campaign's results are incomplete."
+    ]
+  ],
+  "state": "with_context"
+}

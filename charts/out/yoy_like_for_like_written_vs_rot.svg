@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2026-09-24T15:42:44.007910</dc:date>
+    <dc:date>2026-09-24T16:04:45.952443</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -43,103 +43,103 @@ z
      <g id="line2d_1">
       <path d="M 69.12 417.96 
 L 838.08 417.96 
-" clip-path="url(#p4086c607d9)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+" clip-path="url(#p17d349809f)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
      </g>
      <g id="line2d_2"/>
      <g id="text_1">
-      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="422.518594" transform="rotate(-0 61.12 422.518594)">0%</text>
+      <text style="font-size: 12px; font-family: 'Roboto Mono'; text-anchor: end; fill: #526476" x="61.12" y="424.247109" transform="rotate(-0 61.12 424.247109)">0%</text>
      </g>
     </g>
     <g id="ytick_2">
      <g id="line2d_3">
       <path d="M 69.12 376.979126 
 L 838.08 376.979126 
-" clip-path="url(#p4086c607d9)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+" clip-path="url(#p17d349809f)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
      </g>
      <g id="line2d_4"/>
      <g id="text_2">
-      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="381.53772" transform="rotate(-0 61.12 381.53772)">0.5%</text>
+      <text style="font-size: 12px; font-family: 'Roboto Mono'; text-anchor: end; fill: #526476" x="61.12" y="383.266236" transform="rotate(-0 61.12 383.266236)">0.5%</text>
      </g>
     </g>
     <g id="ytick_3">
      <g id="line2d_5">
       <path d="M 69.12 335.998252 
 L 838.08 335.998252 
-" clip-path="url(#p4086c607d9)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+" clip-path="url(#p17d349809f)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
      </g>
      <g id="line2d_6"/>
      <g id="text_3">
-      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="340.556846" transform="rotate(-0 61.12 340.556846)">1%</text>
+      <text style="font-size: 12px; font-family: 'Roboto Mono'; text-anchor: end; fill: #526476" x="61.12" y="342.285362" transform="rotate(-0 61.12 342.285362)">1%</text>
      </g>
     </g>
     <g id="ytick_4">
      <g id="line2d_7">
       <path d="M 69.12 295.017378 
 L 838.08 295.017378 
-" clip-path="url(#p4086c607d9)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+" clip-path="url(#p17d349809f)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
      </g>
      <g id="line2d_8"/>
      <g id="text_4">
-      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="299.575972" transform="rotate(-0 61.12 299.575972)">1.5%</text>
+      <text style="font-size: 12px; font-family: 'Roboto Mono'; text-anchor: end; fill: #526476" x="61.12" y="301.304488" transform="rotate(-0 61.12 301.304488)">1.5%</text>
      </g>
     </g>
     <g id="ytick_5">
      <g id="line2d_9">
       <path d="M 69.12 254.036505 
 L 838.08 254.036505 
-" clip-path="url(#p4086c607d9)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+" clip-path="url(#p17d349809f)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
      </g>
      <g id="line2d_10"/>
      <g id="text_5">
-      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="258.595098" transform="rotate(-0 61.12 258.595098)">2%</text>
+      <text style="font-size: 12px; font-family: 'Roboto Mono'; text-anchor: end; fill: #526476" x="61.12" y="260.323614" transform="rotate(-0 61.12 260.323614)">2%</text>
      </g>
     </g>
     <g id="ytick_6">
      <g id="line2d_11">
       <path d="M 69.12 213.055631 
 L 838.08 213.055631 
-" clip-path="url(#p4086c607d9)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+" clip-path="url(#p17d349809f)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
      </g>
      <g id="line2d_12"/>
      <g id="text_6">
-      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="217.614224" transform="rotate(-0 61.12 217.614224)">2.5%</text>
+      <text style="font-size: 12px; font-family: 'Roboto Mono'; text-anchor: end; fill: #526476" x="61.12" y="219.34274" transform="rotate(-0 61.12 219.34274)">2.5%</text>
      </g>
     </g>
     <g id="ytick_7">
      <g id="line2d_13">
       <path d="M 69.12 172.074757 
 L 838.08 172.074757 
-" clip-path="url(#p4086c607d9)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+" clip-path="url(#p17d349809f)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
      </g>
      <g id="line2d_14"/>
      <g id="text_7">
-      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="176.633351" transform="rotate(-0 61.12 176.633351)">3%</text>
+      <text style="font-size: 12px; font-family: 'Roboto Mono'; text-anchor: end; fill: #526476" x="61.12" y="178.361866" transform="rotate(-0 61.12 178.361866)">3%</text>
      </g>
     </g>
     <g id="ytick_8">
      <g id="line2d_15">
       <path d="M 69.12 131.093883 
 L 838.08 131.093883 
-" clip-path="url(#p4086c607d9)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+" clip-path="url(#p17d349809f)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
      </g>
      <g id="line2d_16"/>
      <g id="text_8">
-      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="135.652477" transform="rotate(-0 61.12 135.652477)">3.5%</text>
+      <text style="font-size: 12px; font-family: 'Roboto Mono'; text-anchor: end; fill: #526476" x="61.12" y="137.380992" transform="rotate(-0 61.12 137.380992)">3.5%</text>
      </g>
     </g>
     <g id="ytick_9">
      <g id="line2d_17">
       <path d="M 69.12 90.113009 
 L 838.08 90.113009 
-" clip-path="url(#p4086c607d9)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
+" clip-path="url(#p17d349809f)" style="fill: none; stroke: #c9ced3; stroke-opacity: 0.6; stroke-width: 0.6; stroke-linecap: square"/>
      </g>
      <g id="line2d_18"/>
      <g id="text_9">
-      <text style="font-size: 12px; font-family: 'Menlo'; text-anchor: end; fill: #526476" x="61.12" y="94.671603" transform="rotate(-0 61.12 94.671603)">4%</text>
+      <text style="font-size: 12px; font-family: 'Roboto Mono'; text-anchor: end; fill: #526476" x="61.12" y="96.400118" transform="rotate(-0 61.12 96.400118)">4%</text>
      </g>
     </g>
     <g id="text_10">
-     <text style="font-size: 11px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="25.579922" y="243" transform="rotate(-90 25.579922 243)">mean monthly churn, restated v2</text>
+     <text style="font-size: 11px; font-family: 'Roboto Mono'; text-anchor: middle; fill: #526476" x="25.331543" y="243" transform="rotate(-90 25.331543 243)">mean monthly churn, restated v2</text>
     </g>
    </g>
    <g id="patch_3">
@@ -148,7 +148,7 @@ L 242.257928 417.96
 L 242.257928 184.520648 
 L 104.072727 184.520648 
 z
-" clip-path="url(#p4086c607d9)" style="fill: #c9ced3"/>
+" clip-path="url(#p17d349809f)" style="fill: #c9ced3"/>
    </g>
    <g id="patch_4">
     <path d="M 258.515011 417.96 
@@ -156,7 +156,7 @@ L 396.700211 417.96
 L 396.700211 217.314909 
 L 258.515011 217.314909 
 z
-" clip-path="url(#p4086c607d9)" style="fill: #90b39d"/>
+" clip-path="url(#p17d349809f)" style="fill: #90b39d"/>
    </g>
    <g id="patch_5">
     <path d="M 510.499789 417.96 
@@ -164,7 +164,7 @@ L 648.684989 417.96
 L 648.684989 184.520648 
 L 510.499789 184.520648 
 z
-" clip-path="url(#p4086c607d9)" style="fill: #c9ced3"/>
+" clip-path="url(#p17d349809f)" style="fill: #c9ced3"/>
    </g>
    <g id="patch_6">
     <path d="M 664.942072 417.96 
@@ -172,7 +172,7 @@ L 803.127273 417.96
 L 803.127273 131.140328 
 L 664.942072 131.140328 
 z
-" clip-path="url(#p4086c607d9)" style="fill: #a93427"/>
+" clip-path="url(#p17d349809f)" style="fill: #a93427"/>
    </g>
    <g id="patch_7">
     <path d="M 69.12 417.96 
@@ -185,42 +185,42 @@ L 838.08 417.96
 " style="fill: none; stroke: #526476; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="text_11">
-    <text style="font-size: 13px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="173.165328" y="179.602943" transform="rotate(-0 173.165328 179.602943)">2.85%</text>
+    <text style="font-size: 13px; font-family: 'Roboto Mono'; text-anchor: middle; fill: #526476" x="173.165328" y="179.602943" transform="rotate(-0 173.165328 179.602943)">2.85%</text>
    </g>
    <g id="text_12">
-    <text style="font-size: 13px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="327.607611" y="212.397205" transform="rotate(-0 327.607611 212.397205)">2.45%</text>
+    <text style="font-size: 13px; font-family: 'Roboto Mono'; text-anchor: middle; fill: #526476" x="327.607611" y="212.397205" transform="rotate(-0 327.607611 212.397205)">2.45%</text>
    </g>
    <g id="text_13">
-    <text style="font-size: 11px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="173.165328" y="440.909289" transform="rotate(-0 173.165328 440.909289)">H1 2025</text>
+    <text style="font-size: 11px; font-family: 'Roboto Mono'; text-anchor: middle; fill: #526476" x="173.165328" y="440.909289" transform="rotate(-0 173.165328 440.909289)">H1 2025</text>
    </g>
    <g id="text_14">
-    <text style="font-size: 11px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="327.607611" y="440.909289" transform="rotate(-0 327.607611 440.909289)">H1 2026</text>
+    <text style="font-size: 11px; font-family: 'Roboto Mono'; text-anchor: middle; fill: #526476" x="327.607611" y="440.909289" transform="rotate(-0 327.607611 440.909289)">H1 2026</text>
    </g>
    <g id="text_15">
-    <text style="font-size: 13px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="579.592389" y="179.602943" transform="rotate(-0 579.592389 179.602943)">2.85%</text>
+    <text style="font-size: 13px; font-family: 'Roboto Mono'; text-anchor: middle; fill: #526476" x="579.592389" y="179.602943" transform="rotate(-0 579.592389 179.602943)">2.85%</text>
    </g>
    <g id="text_16">
-    <text style="font-size: 13px; font-family: 'Menlo'; text-anchor: middle; fill: #a93427" x="734.034672" y="126.222623" transform="rotate(-0 734.034672 126.222623)">3.50%</text>
+    <text style="font-size: 13px; font-family: 'Roboto Mono'; text-anchor: middle; fill: #a93427" x="734.034672" y="126.222623" transform="rotate(-0 734.034672 126.222623)">3.50%</text>
    </g>
    <g id="text_17">
-    <text style="font-size: 11px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="579.592389" y="440.909289" transform="rotate(-0 579.592389 440.909289)">H1 2025</text>
+    <text style="font-size: 11px; font-family: 'Roboto Mono'; text-anchor: middle; fill: #526476" x="579.592389" y="440.909289" transform="rotate(-0 579.592389 440.909289)">H1 2025</text>
    </g>
    <g id="text_18">
-    <text style="font-size: 11px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="734.034672" y="440.909289" transform="rotate(-0 734.034672 440.909289)">H1 2026</text>
+    <text style="font-size: 11px; font-family: 'Roboto Mono'; text-anchor: middle; fill: #526476" x="734.034672" y="440.909289" transform="rotate(-0 734.034672 440.909289)">H1 2026</text>
    </g>
    <g id="text_19">
-    <text style="font-size: 13px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="250.386469" y="88.414553" transform="rotate(-0 250.386469 88.414553)">WRITTEN CONTEXT</text>
+    <text style="font-size: 13px; font-family: 'Roboto Mono'; text-anchor: middle; fill: #526476" x="250.386469" y="92.15967" transform="rotate(-0 250.386469 92.15967)">WRITTEN CONTEXT</text>
    </g>
    <g id="text_20">
-    <text style="font-size: 13px; font-family: 'Menlo'; text-anchor: middle; fill: #526476" x="656.813531" y="88.414553" transform="rotate(-0 656.813531 88.414553)">AFTER THE ROT COMMIT</text>
+    <text style="font-size: 13px; font-family: 'Roboto Mono'; text-anchor: middle; fill: #526476" x="656.813531" y="92.15967" transform="rotate(-0 656.813531 92.15967)">AFTER THE ROT COMMIT</text>
    </g>
   </g>
   <g id="text_21">
-   <text style="font-size: 10.5px; font-family: 'Menlo'; text-anchor: start; fill: #526476; opacity: 0.85" x="69.12" y="468.99" transform="rotate(-0 69.12 468.99)">Kelder Coffee warehouse, with-context and rot states · metrics_subscriber_churn_monthly.churn_rate_v2_restated</text>
+   <text style="font-size: 10.5px; font-family: 'Roboto Mono'; text-anchor: start; fill: #526476; opacity: 0.85" x="69.12" y="468.99" transform="rotate(-0 69.12 468.99)">Kelder Coffee warehouse, with-context and rot states · metrics_subscriber_churn_monthly.churn_rate_v2_restated</text>
   </g>
  </g>
  <defs>
-  <clipPath id="p4086c607d9">
+  <clipPath id="p17d349809f">
    <rect x="69.12" y="68.04" width="768.96" height="349.92"/>
   </clipPath>
  </defs>
