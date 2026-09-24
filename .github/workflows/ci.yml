@@ -1,0 +1,49 @@
+# Pull request checks. Regenerates the data, builds the head state of kelder-dbt/ and runs:
+# - kelder-checks: what Kelder's own CI runs (verified queries against pinned answers, and the
+#   context capture check on the real pull request body);
+# - builder-truth: the builder's ground-truth test for the head state.
+name: kelder checks
+
+on:
+  pull_request:
+
+jobs:
+  kelder-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - name: Generate data and load the raw warehouse
+        run: make generate load
+      - name: Build the head state
+        run: uv run python scripts/build_state.py head --ref "${{ github.event.pull_request.head.sha }}" --quiet
+      - name: Write the pull request body
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: printf '%s\n' "$PR_BODY" > "$RUNNER_TEMP/pr_body.md"
+      - name: Verified queries and context capture check
+        env:
+          FORCE_COLOR: "1"
+        run: >
+          uv run python scripts/check.py --state head
+          --base "${{ github.event.pull_request.base.sha }}"
+          --head "${{ github.event.pull_request.head.sha }}"
+          --pr-body "$RUNNER_TEMP/pr_body.md"
+
+  builder-truth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: make generate load
+      - run: uv run python scripts/build_state.py head --ref "${{ github.event.pull_request.head.sha }}" --quiet
+      - name: Head state equals the ground truth
+        run: uv run pytest tests/truth/test_head_state.py -q

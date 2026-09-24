@@ -38,7 +38,7 @@ check:
 	$(PY) scripts/check.py --state $(STATE) --pr-body $(PR_BODY)
 
 freeze-verified:
-	$(PY) scripts/freeze_verified.py
+	$(PY) scripts/freeze_verified.py --approved-by "$(APPROVED_BY)"
 
 charts:
 	$(PY) charts/render.py

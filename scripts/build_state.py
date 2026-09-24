@@ -21,7 +21,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 WAREHOUSE = ROOT / "data" / "warehouse"
 BUILD = ROOT / "build"
-REFS = {"before": "refs/tags/kelder/before-context", "with_context": "refs/tags/kelder/with-context", "rot": "refs/tags/kelder/rot"}
+REFS = {"before": "refs/tags/kelder/before-context", "with_context": "refs/tags/kelder/with-context",
+        "rot": "refs/tags/kelder/rot", "head": "HEAD"}
 
 
 def extract(ref: str, dest: Path) -> Path:
