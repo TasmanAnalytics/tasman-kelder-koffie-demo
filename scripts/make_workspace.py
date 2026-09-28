@@ -89,6 +89,8 @@ def settings(ws: Path, server: str = SERVER_NAME) -> dict:
     others = [DEMO / n for n in WORKSPACES if DEMO / n != ws] + [DEMO / "bare"]
     outside = [ROOT.parent, Path("/private/tmp"), Path("/tmp"), home / ".claude", home / "Documents", home / "Desktop",
                home / "Downloads", home / "Library", TOOLS, CONFIG_DIR, *others]
+    # never deny a directory that contains this workspace (for example a demo folder placed under /tmp)
+    outside = [p for p in outside if not str(ws.resolve()).startswith(str(p.resolve()) + "/")]
     deny_paths = [f"{tool}(/{p}/**)" for p in outside for tool in ("Read", "Grep", "Glob")]
     deny_paths += [f"Read(/{home / '.claude.json'})"]
     return {

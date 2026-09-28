@@ -7,7 +7,7 @@ WORKSPACE ?= installed
 PROMPTS ?= all
 N ?= 3
 
-.PHONY: serve serve-stop serve-status index all generate load build build-all test test-data test-truth test-dbt check freeze-verified charts workspaces leak-check trials summary context-files clean
+.PHONY: setup doctor demo serve serve-stop serve-status index all generate load build build-all test test-data test-truth test-dbt check freeze-verified charts workspaces leak-check trials summary context-files clean
 
 all: generate load build-all test charts index
 
@@ -73,3 +73,15 @@ serve-stop:
 
 serve-status:
 	$(PY) scripts/ktx_serve.py status
+
+# First run on a new machine: Python environment, pinned agent tooling, .env from the example
+setup:
+	uv sync --frozen
+	tools/demo/setup.sh
+	@[ -f .env ] || { cp .env.example .env; echo "created .env from .env.example: add ANTHROPIC_API_KEY"; }
+
+doctor:
+	@$(PY) scripts/doctor.py
+
+# Agent side, after make all: workspaces, ktx servers, leak check
+demo: workspaces serve leak-check

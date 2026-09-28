@@ -8,6 +8,7 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 DEST="${KELDER_DEMO_DIR:-$HOME/kelder-demo}/_tools/npm"
+command -v npm >/dev/null || { echo "npm not found: install Node.js 18 or newer first (for example: brew install node)" >&2; exit 1; }
 mkdir -p "$DEST"
 cp "$HERE/package.json" "$HERE/package-lock.json" "$DEST/"
 (cd "$DEST" && npm ci --no-fund --no-audit --loglevel=error)
@@ -16,9 +17,7 @@ OLD="DuckDBInstance.create(this.dbPath, { access_mode: 'read_only' })"
 NEW="DuckDBInstance.create(this.dbPath, { access_mode: 'read_only', enable_external_access: 'false', lock_configuration: 'true' })"
 if grep -qF "$NEW" "$F"; then echo "ktx patch already applied"
 elif grep -qF "$OLD" "$F"; then
-  python3 - "$F" "$OLD" "$NEW" <<'PY'
-import sys; p, old, new = sys.argv[1:]; s = open(p).read(); open(p, "w").write(s.replace(old, new, 1))
-PY
+  "$DEST/node_modules/.bin/node" -e 'const fs=require("fs");const [p,o,n]=process.argv.slice(1);fs.writeFileSync(p,fs.readFileSync(p,"utf8").replace(o,n))' "$F" "$OLD" "$NEW"
   echo "ktx patch applied"
 else echo "ktx connector changed upstream: patch not applied" >&2; exit 1; fi
 "$DEST/node_modules/.bin/claude" --version
