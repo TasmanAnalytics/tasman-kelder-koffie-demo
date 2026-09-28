@@ -134,7 +134,9 @@ def test_settings_deny_web_and_bash(ws):
     # other workspaces and the build repository are not readable
     for other in [w for w in ALL if w != ws]:
         assert f"Read(/{DEMO / other}/**)" in perms["deny"], other
-    assert f"Read(/{ROOT.parent}/**)" in perms["deny"]
+    assert f"Read(/{ROOT}/**)" in perms["deny"], "the build repository must be unreadable"
+    if not str((DEMO / ws).resolve()).startswith(str(ROOT.parent.resolve()) + "/"):
+        assert f"Read(/{ROOT.parent}/**)" in perms["deny"]
 
 
 def _server(ws):

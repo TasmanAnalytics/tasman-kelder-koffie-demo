@@ -87,7 +87,7 @@ def ktx_config(ws: Path, state: str) -> str:
 def settings(ws: Path, server: str = SERVER_NAME) -> dict:
     home = Path.home()
     others = [DEMO / n for n in WORKSPACES if DEMO / n != ws] + [DEMO / "bare"]
-    outside = [ROOT.parent, Path("/private/tmp"), Path("/tmp"), home / ".claude", home / "Documents", home / "Desktop",
+    outside = [ROOT, ROOT.parent, Path("/private/tmp"), Path("/tmp"), home / ".claude", home / "Documents", home / "Desktop",
                home / "Downloads", home / "Library", TOOLS, CONFIG_DIR, *others]
     # never deny a directory that contains this workspace (for example a demo folder placed under /tmp)
     outside = [p for p in outside if not str(ws.resolve()).startswith(str(p.resolve()) + "/")]

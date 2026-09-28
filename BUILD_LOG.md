@@ -66,6 +66,17 @@ Newest checkpoint at the bottom of each section.
 
 ## Checkpoints
 
+### 2026-09-28, portable to a fresh machine
+
+- Added `START_HERE.md` (read first), `CLAUDE.md` (imports it and adds the working rules for a new Claude Code session), and `make setup`, `make doctor` and `make demo`.
+- `tools/demo/setup.sh` no longer needs the system Python, and stops with a clear message if npm is missing.
+- Workspace settings always deny the build repository itself. They never deny a folder that contains the workspace.
+- `ktx_serve.py stop` now waits, then ends only the ktx process serving that workspace's project.
+- Rehearsal: the folder was copied without `data/`, `build/` or `.venv/`, into a separate demo directory, and `make setup && make all && make demo && make doctor` was run.
+  - All tests pass (52 data, 28 truth and verified with 1 skipped, 25 leak).
+  - The doctor reported ready, and an isolation dry run from the copy passed.
+  - Setup plus build took about 6 minutes, most of it npm and the ktx runtime download.
+
 ### 2026-09-24, ktx wired and trials at N=3
 
 - All three workspaces serve ktx. Leak check 25/25; isolation dry runs pass (tools, denied reads, AGENTS.md loads only in written and rot).

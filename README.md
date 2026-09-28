@@ -3,7 +3,9 @@
 > Evidence for **"Building a data context layer to fix your AI analytics"**, by Thomas in't Veld
 > (Tasman Analytics), Compass AI & Tech Summit, Budapest, 1 October 2026.
 
-**Start here: open [`index.html`](index.html)** (or run `make index` first). It is a one-page map of
+**New machine or new Claude Code session? Read [`START_HERE.md`](START_HERE.md) first** (`make setup`, `make all`, `make demo`, `make doctor`).
+
+**Then open [`index.html`](index.html)** (or run `make index` first). It is a one-page map of
 the evidence, the numbers, the commands and the files. Every number on it is read from the build.
 
 Kelder Coffee is a fictional Amsterdam coffee subscription company from Tasman's July 2026 article

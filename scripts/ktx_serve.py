@@ -82,11 +82,30 @@ def start(name: str):
         print(r.stdout, r.stderr)
 
 
+def _listener_pids(name: str) -> list[int]:
+    """ktx processes serving this workspace's project on its port (never anything else)."""
+    out = subprocess.run(["lsof", "-ti", f"tcp:{PORTS[name]}", "-sTCP:LISTEN"], capture_output=True, text=True).stdout.split()
+    pids = []
+    for pid in out:
+        cmd = subprocess.run(["ps", "-o", "command=", "-p", pid], capture_output=True, text=True).stdout
+        if "ktx" in cmd and str(make_workspace.KTX_PROJECTS / name) in cmd:
+            pids.append(int(pid))
+    return pids
+
+
 def stop(name: str):
     project = make_workspace.KTX_PROJECTS / name
     if project.exists():
         ktx(["mcp", "stop"], project)
-    print(f"{name}: stopped" if not alive(name) else f"{name}: still running")
+    for _ in range(10):
+        if not alive(name):
+            break
+        time.sleep(1)
+    if alive(name):
+        for pid in _listener_pids(name):
+            os.kill(pid, 15)
+        time.sleep(2)
+    print(f"{name}: stopped" if not alive(name) else f"{name}: still running (port {PORTS[name]} held by another process)")
 
 
 def main():
