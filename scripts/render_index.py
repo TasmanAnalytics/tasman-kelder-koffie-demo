@@ -230,6 +230,7 @@ def main():
     mark_light = (BRAND / "kelder-mark-reversed.svg").read_text()
     favicon = "data:image/svg+xml;utf8," + html.escape(mark_dark.replace("\n", "").replace("#", "%23"), quote=True)
 
+    n_runs = sum(int(r[2]) for r in t["rows"])
     b_inst = t["board"].get("installed", (0, 3))
     b_writ = t["board"].get("written", (0, 3))
 
@@ -248,7 +249,7 @@ def main():
 <style>{CSS}</style></head>
 <body>
 <nav><div class="wrap"><a class="brand" href="#">{mark_light}<span>Kelder <em>Koffie</em></span></a>
-<a href="#tenet-1">tenet 1</a><a href="#tenet-2">tenet 2</a><a href="#tenet-3">tenet 3</a><a href="#trials">all 45 trials</a></div></nav>
+<a href="#tenet-1">tenet 1</a><a href="#tenet-2">tenet 2</a><a href="#tenet-3">tenet 3</a><a href="#trials">all {n_runs} trials</a></div></nav>
 
 <header><div class="wrap hero"><div>
 <div class="kicker">Tasman Analytics · Compass AI &amp; Tech Summit · Budapest · 1 October 2026</div>
@@ -310,7 +311,7 @@ def main():
 </div></section>
 
 <section id="trials"><div class="wrap">
-<h2 style="font-size:30px">All 45 trial runs</h2>
+<h2 style="font-size:30px">All {n_runs} trial runs</h2>
 <details><summary>Show results by question and workspace</summary>
 {trial_table(t['rows'])}</details>
 </div></section>

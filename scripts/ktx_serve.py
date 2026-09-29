@@ -26,7 +26,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import make_workspace  # noqa: E402
 
 NPM_BIN = make_workspace.DEMO / "_tools" / "npm" / "node_modules" / ".bin"
-PORTS = {"installed": 7801, "written": 7802, "rot": 7803}
+PORTS = make_workspace.KTX_PORTS
 RUNTIME = make_workspace.DEMO / "_tools" / "ktx-runtime"
 
 

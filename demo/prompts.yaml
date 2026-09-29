@@ -11,3 +11,4 @@ matrix:
   installed: [churn_spike_why, churn_board_number, email_revenue_april, churn_may_improvement, churn_yoy_like_for_like, new_subscribers_june]
   written: [churn_spike_why, churn_board_number, email_revenue_april, churn_may_improvement, churn_yoy_like_for_like, new_subscribers_june]
   rot: [churn_yoy_like_for_like, churn_spike_why, churn_board_number]
+  wiki: [churn_spike_why, churn_board_number, email_revenue_april, churn_may_improvement, churn_yoy_like_for_like, new_subscribers_june]

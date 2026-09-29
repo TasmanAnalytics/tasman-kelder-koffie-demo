@@ -8,6 +8,10 @@ that state (no .git, no build output), a copy of that state's warehouse as wareh
 MCP configuration (.mcp.json) serving that file read-only, and .claude/settings.json allowing only
 Read, Grep, Glob and the warehouse tools. written/ and rot/ also get a CLAUDE.md that imports
 AGENTS.md and nothing else.
+
+wiki/ is the with-context state with the prose notes (AGENTS.md, context/, the pull request template)
+removed from the repository copy, so they reach the agent only through the ktx wiki, which holds every
+context/*.md verbatim. Its CLAUDE.md is a short pointer to the wiki instead of AGENTS.md.
 """
 
 from __future__ import annotations
@@ -25,11 +29,11 @@ ROOT = Path(__file__).resolve().parent.parent
 DEMO = Path(os.environ.get("KELDER_DEMO_DIR", Path.home() / "kelder-demo"))
 TOOLS = DEMO / "_tools"
 CONFIG_DIR = DEMO / ".claude-config"
-WORKSPACES = {"installed": "before", "written": "with_context", "rot": "rot"}
+WORKSPACES = {"installed": "before", "written": "with_context", "rot": "rot", "wiki": "with_context"}
 SERVER_NAME = "warehouse"  # fallback server name
 KTX_TOOLS = ["connection_list", "wiki_search", "wiki_read", "sl_read_source", "sl_query", "entity_details",
              "dictionary_search", "discover_data", "sql_execution", "sql_dialect_notes"]
-KTX_PORTS = {"installed": 7801, "written": 7802, "rot": 7803}
+KTX_PORTS = {"installed": 7801, "written": 7802, "rot": 7803, "wiki": 7804}
 # ktx 0.16 git-inits its project directory, and a workspace must not contain .git, so each
 # workspace's ktx project lives beside it (outside the agent's reach); ktx reads the workspace's
 # kelder-dbt/ and warehouse from there and serves the semantic layer and wiki over MCP.
@@ -37,6 +41,11 @@ KTX_PROJECTS = TOOLS / "ktx-projects"
 FALLBACK_TOOLS = ["execute_query", "list_tables", "list_columns", "list_databases"]
 # never copied into a workspace even though they are part of the Kelder repo at that state
 EXCLUDE = {".pr", "target", "logs", "dbt_packages", ".ktx", ".user.yml", ".git"}
+# also left out of the wiki workspace's repository copy: the notes live only in the ktx wiki there
+WIKI_ONLY_EXCLUDE = {"AGENTS.md", "context", ".github"}
+WIKI_POINTER = ("Kelder's business context (decision records, glossary, data quirks, metric changelog and verified\n"
+                "queries) is in the ktx wiki. Search it with wiki_search and read pages with wiki_read before\n"
+                "answering questions about Kelder's numbers.\n")
 
 
 def server_launcher() -> Path:
@@ -118,7 +127,11 @@ def make(name: str, launcher: Path, server: str = "ktx") -> Path:
     if ws.exists():
         shutil.rmtree(ws)
     ws.mkdir(parents=True)
-    shutil.copytree(src, ws / "kelder-dbt", ignore=lambda d, names: [n for n in names if n in EXCLUDE])
+    skip = EXCLUDE | (WIKI_ONLY_EXCLUDE if name == "wiki" else set())
+    top = str(src)
+    # WIKI_ONLY_EXCLUDE applies at the top of kelder-dbt/ only (models/context/ is dbt code, not notes)
+    shutil.copytree(src, ws / "kelder-dbt", ignore=lambda d, names: [n for n in names if n in EXCLUDE
+                                                                      or (d == top and n in skip)])
     shutil.copyfile(db, ws / "warehouse.duckdb")
     (ws / ".claude").mkdir()
     (ws / ".claude" / "settings.json").write_text(json.dumps(settings(ws, server), indent=2) + "\n")
@@ -137,7 +150,9 @@ def make(name: str, launcher: Path, server: str = "ktx") -> Path:
     else:
         mcp = mcp_config(ws, launcher)
     (ws / ".mcp.json").write_text(json.dumps(mcp, indent=2) + "\n")
-    if (ws / "kelder-dbt" / "AGENTS.md").exists():
+    if name == "wiki":
+        (ws / "CLAUDE.md").write_text(WIKI_POINTER)
+    elif (ws / "kelder-dbt" / "AGENTS.md").exists():
         (ws / "CLAUDE.md").write_text("@kelder-dbt/AGENTS.md\n")
     print(f"workspace {name}: {ws} (state {state})")
     return ws

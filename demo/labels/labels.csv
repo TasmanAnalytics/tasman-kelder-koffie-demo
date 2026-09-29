@@ -2,21 +2,33 @@ workspace,prompt_id,run,model,proposed_class,thomas_class,notes,transcript
 installed,churn_board_number,1,claude-opus-5-5,C,,Claude's reading: Recommends 2.8% (wrong); never gives 3.3%. Reading: D (other).,demo/runs/installed/churn_board_number/1.md
 installed,churn_board_number,2,claude-opus-5-5,C,,Claude's reading: Recommends 2.8% (wrong); never gives 3.3%. Reading: D (other).,demo/runs/installed/churn_board_number/2.md
 installed,churn_board_number,3,claude-opus-5-5,C,,Claude's reading: Recommends 2.8% (wrong); never gives 3.3%. Reading: D (other).,demo/runs/installed/churn_board_number/3.md
+installed,churn_board_number,4,claude-opus-5-5,C,,Claude's reading: Finds the 12 March batch; recommends 2.8% (wrong; true 3.3%).,demo/runs/installed/churn_board_number/4.md
+installed,churn_board_number,5,claude-opus-5-5,C,,Claude's reading: Finds the batch; recommends reporting 9.4% with a footnote giving ~2.8% underlying. Reading: C.,demo/runs/installed/churn_board_number/5.md
 installed,churn_may_improvement,1,claude-opus-5-5,A,,Claude's reading: Finds the definition change in the SQL. Reading: A.,demo/runs/installed/churn_may_improvement/1.md
 installed,churn_may_improvement,2,claude-opus-5-5,B,,Claude's reading: Finds the definition change in the SQL. Reading: A.,demo/runs/installed/churn_may_improvement/2.md
 installed,churn_may_improvement,3,claude-opus-5-5,A,,Claude's reading: Finds the definition change in the SQL. Reading: A.,demo/runs/installed/churn_may_improvement/3.md
+installed,churn_may_improvement,4,claude-opus-5-5,B,,,demo/runs/installed/churn_may_improvement/4.md
+installed,churn_may_improvement,5,claude-opus-5-5,A,,,demo/runs/installed/churn_may_improvement/5.md
 installed,churn_spike_why,1,claude-opus-5-5,A,,Claude's reading: Finds the 12 March batch and ties it to the migration; adjusted figure 2.8% is wrong (true 3.3%).,demo/runs/installed/churn_spike_why/1.md
 installed,churn_spike_why,2,claude-opus-5-5,A,,Claude's reading: Finds the 12 March batch and ties it to the migration; adjusted figure 2.8% is wrong (true 3.3%).,demo/runs/installed/churn_spike_why/2.md
 installed,churn_spike_why,3,claude-opus-5-5,B,,Claude's reading: Finds the 12 March batch and ties it to the migration; adjusted figure 2.8% is wrong (true 3.3%).,demo/runs/installed/churn_spike_why/3.md
+installed,churn_spike_why,4,claude-opus-5-5,B,,,demo/runs/installed/churn_spike_why/4.md
+installed,churn_spike_why,5,claude-opus-5-5,A,,,demo/runs/installed/churn_spike_why/5.md
 installed,churn_yoy_like_for_like,1,claude-opus-5-5,B,,"Claude's reading: Improved, rebuilt by hand, roughly right size. Reading: A.",demo/runs/installed/churn_yoy_like_for_like/1.md
 installed,churn_yoy_like_for_like,2,claude-opus-5-5,B,,"Claude's reading: Improved, rebuilt by hand, roughly right size. Reading: A.",demo/runs/installed/churn_yoy_like_for_like/2.md
 installed,churn_yoy_like_for_like,3,claude-opus-5-5,B,,"Claude's reading: Improved, rebuilt by hand, roughly right size. Reading: A.",demo/runs/installed/churn_yoy_like_for_like/3.md
+installed,churn_yoy_like_for_like,4,claude-opus-5-5,A,,,demo/runs/installed/churn_yoy_like_for_like/4.md
+installed,churn_yoy_like_for_like,5,claude-opus-5-5,B,,,demo/runs/installed/churn_yoy_like_for_like/5.md
 installed,email_revenue_april,1,claude-opus-5-5,A,,Claude's reading: Identifies the missing Klaviyo data. Reading: A.,demo/runs/installed/email_revenue_april/1.md
 installed,email_revenue_april,2,claude-opus-5-5,A,,Claude's reading: Identifies the missing Klaviyo data. Reading: A.,demo/runs/installed/email_revenue_april/2.md
 installed,email_revenue_april,3,claude-opus-5-5,A,,Claude's reading: Identifies the missing Klaviyo data. Reading: A.,demo/runs/installed/email_revenue_april/3.md
+installed,email_revenue_april,4,claude-opus-5-5,A,,,demo/runs/installed/email_revenue_april/4.md
+installed,email_revenue_april,5,claude-opus-5-5,A,,,demo/runs/installed/email_revenue_april/5.md
 installed,new_subscribers_june,1,claude-opus-5-5,B,,"Claude's reading: 1,768 by excluding re-created subscriptions. Reading: A (check bundle mention).",demo/runs/installed/new_subscribers_june/1.md
 installed,new_subscribers_june,2,claude-opus-5-5,B,,"Claude's reading: 1,768 by excluding re-created subscriptions. Reading: A (check bundle mention).",demo/runs/installed/new_subscribers_june/2.md
 installed,new_subscribers_june,3,claude-opus-5-5,B,,"Claude's reading: 1,768 by excluding re-created subscriptions. Reading: A (check bundle mention).",demo/runs/installed/new_subscribers_june/3.md
+installed,new_subscribers_june,4,claude-opus-5-5,B,,,demo/runs/installed/new_subscribers_june/4.md
+installed,new_subscribers_june,5,claude-opus-5-5,B,,,demo/runs/installed/new_subscribers_june/5.md
 rot,churn_board_number,1,claude-opus-5-5,A,,Claude's reading: Reading: A.,demo/runs/rot/churn_board_number/1.md
 rot,churn_board_number,2,claude-opus-5-5,A,,Claude's reading: Reading: A.,demo/runs/rot/churn_board_number/2.md
 rot,churn_board_number,3,claude-opus-5-5,A,,Claude's reading: Reading: A.,demo/runs/rot/churn_board_number/3.md
@@ -26,6 +38,18 @@ rot,churn_spike_why,3,claude-opus-5-5,A,,Claude's reading: Reading: A.,demo/runs
 rot,churn_yoy_like_for_like,1,claude-opus-5-5,B,,Claude's reading: Improved 2.45 vs 2.85 AND flags the rot bug on line 107. Reading: A (caught the rot).,demo/runs/rot/churn_yoy_like_for_like/1.md
 rot,churn_yoy_like_for_like,2,claude-opus-5-5,B,,Claude's reading: Improved 2.45 vs 2.85 AND flags the rot bug on line 107. Reading: A (caught the rot).,demo/runs/rot/churn_yoy_like_for_like/2.md
 rot,churn_yoy_like_for_like,3,claude-opus-5-5,B,,Claude's reading: Improved 2.45 vs 2.85 AND flags the rot bug on line 107. Reading: A (caught the rot).,demo/runs/rot/churn_yoy_like_for_like/3.md
+wiki,churn_board_number,1,claude-opus-5-5,A,,"Claude's reading: 3.3% adjusted, cites the wiki; warns off 9.4% raw and explains 2.8% restated. Reading: A.",demo/runs/wiki/churn_board_number/1.md
+wiki,churn_board_number,2,claude-opus-5-5,A,,Claude's reading: 3.3% adjusted; warns off 9.4% raw and explains 2.8% restated. Reading: A.,demo/runs/wiki/churn_board_number/2.md
+wiki,churn_may_improvement,1,claude-opus-5-5,B,,,demo/runs/wiki/churn_may_improvement/1.md
+wiki,churn_may_improvement,2,claude-opus-5-5,A,,,demo/runs/wiki/churn_may_improvement/2.md
+wiki,churn_spike_why,1,claude-opus-5-5,A,,"Claude's reading: Migration, cites decision 0007 from the wiki, 3.3% adjusted. Reading: A.",demo/runs/wiki/churn_spike_why/1.md
+wiki,churn_spike_why,2,claude-opus-5-5,A,,"Claude's reading: Migration, cites decision 0007 from the wiki, 3.3% adjusted. Reading: A.",demo/runs/wiki/churn_spike_why/2.md
+wiki,churn_yoy_like_for_like,1,claude-opus-5-5,A,,,demo/runs/wiki/churn_yoy_like_for_like/1.md
+wiki,churn_yoy_like_for_like,2,claude-opus-5-5,A,,,demo/runs/wiki/churn_yoy_like_for_like/2.md
+wiki,email_revenue_april,1,claude-opus-5-5,A,,,demo/runs/wiki/email_revenue_april/1.md
+wiki,email_revenue_april,2,claude-opus-5-5,A,,,demo/runs/wiki/email_revenue_april/2.md
+wiki,new_subscribers_june,1,claude-opus-5-5,A,,,demo/runs/wiki/new_subscribers_june/1.md
+wiki,new_subscribers_june,2,claude-opus-5-5,A,,,demo/runs/wiki/new_subscribers_june/2.md
 written,churn_board_number,1,claude-opus-5-5,A,,Claude's reading: 3.3% and 9.4% with reason. Reading: A.,demo/runs/written/churn_board_number/1.md
 written,churn_board_number,2,claude-opus-5-5,A,,Claude's reading: 3.3% and 9.4% with reason. Reading: A.,demo/runs/written/churn_board_number/2.md
 written,churn_board_number,3,claude-opus-5-5,A,,Claude's reading: 3.3% and 9.4% with reason. Reading: A.,demo/runs/written/churn_board_number/3.md

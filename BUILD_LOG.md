@@ -53,6 +53,10 @@ Newest checkpoint at the bottom of each section.
 | 2026-09-24 | Trials | Auto-memory is off for demo runs (`CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` and `autoMemoryEnabled: false`). The dry runs had created empty memory folders, and nothing was ever written to them. | The installed agent's answer showed Claude Code's memory prompt. |
 | 2026-09-24 | Trials | One measurement run (installed, churn_spike_why) was made with the first ktx setup, with the ktx project inside `kelder-dbt/`. It cost $0.27 over 21 turns. It is kept in `demo/runs/_superseded_setup1/` and not counted, because the setup changed afterwards. Its answer found the 12 March batch, the null reasons and the ~1,900 paused subscriptions, and tied them to the Shopify to Recharge move. It gave 2.8% as adjusted churn, because it also removed the 142 genuine queued cancellations. | Honesty rules: every run kept, changes logged. |
 | 2026-09-24 | Working notes | A `thinking/` folder holds design notes and decisions. It is builder-only and never reaches a workspace. | Requested by Thomas. |
+| 2026-09-29 | Workspaces | New workspace `wiki`: the with-context warehouse and stored ktx ingest (no new ingest), ktx on 127.0.0.1:7804. `AGENTS.md`, `context/` and `.github/` are left out of its repository copy, so the prose notes reach the agent only through the ktx wiki (every `context/*.md` is a verbatim wiki page). Its `CLAUDE.md` is a three-line pointer to `wiki_search` and `wiki_read` instead of the `AGENTS.md` import. The dbt code keeps its own comments and column caveats, as in `written`. The question prompts are unchanged. | Thomas asked whether the agent would use the ktx wiki if the notes lived only there. In the 45 trials, `written` never called the wiki: `AGENTS.md` loads first. |
+| 2026-09-29 | Workspaces | All workspaces rebuilt so each denies reads of `~/kelder-demo/wiki/`; nothing else in `installed`, `written` or `rot` changed. The ktx servers were restarted. | The leak check requires every workspace to deny every other. |
+| 2026-09-29 | Leak check | `test_dedicated_config_dir_has_no_memory_or_instructions` failed: Claude Code had downloaded the official plugin marketplace catalogue into `~/kelder-demo/.claude-config/plugins/` at 11:59 (no plugin installed or enabled, so nothing could load). The catalogue was removed and the check passes, 31/31. All 45 counted trials ran before it appeared. | Most likely downloaded when an interactive demo session started. The check stays as strict as before. |
+| 2026-09-29 | Trials | Sample set at N=2 on all six questions in `wiki` and `installed` (24 runs), requested by Thomas. `written` was not re-run. The new `installed` runs are extra runs, counted alongside the first three. | Tests whether the wiki route reaches the notes; see the checkpoint below. |
 
 ## Open questions (waiting for Thomas)
 
@@ -65,6 +69,14 @@ Newest checkpoint at the bottom of each section.
 7. A private GitHub repository and a pull request from `kelder/rot` for the red-check screenshot. Nothing has been pushed.
 
 ## Checkpoints
+
+### 2026-09-29, wiki workspace and sample runs
+
+- Leak check 31/31 with the new `wiki` workspace. 24 runs at N=2 on `claude-opus-5-5`: `wiki` $1.86 and `installed` $2.68, $4.54 in total. Every run is kept and counted (69 runs in all).
+- `wiki` used the wiki on every run (19 `wiki_search`, 56 `wiki_read`) and never read a repository file. It gave 3.3% as the board number in 2/2 runs, citing the wiki, and named decision 0007 for the March spike in 2/2.
+- `installed` board number in the two new runs: 2.8% once, and once 9.4% with a footnote giving about 2.8% underlying. Across its five runs so far: 0/5 give 3.3%.
+- Board-number question, mean turns and cost: `installed` 16.4 turns and $0.18 (N=5), `wiki` 9.5 and $0.09 (N=2), `written` 6 and $0.07 (N=3).
+- Readings are Claude's, in the notes column of `demo/labels/labels.csv`; Thomas has not labelled them.
 
 ### 2026-09-28, portable to a fresh machine
 

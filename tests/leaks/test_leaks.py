@@ -20,7 +20,7 @@ import make_workspace  # noqa: E402
 import mcp_probe  # noqa: E402
 
 DEMO = make_workspace.DEMO
-ALL = ["installed", "written", "rot", "bare"]
+ALL = ["installed", "written", "rot", "wiki", "bare"]
 PRESENT = [w for w in ALL if (DEMO / w).exists()]
 BLIND = [w for w in ("installed", "bare") if w in PRESENT]
 BANNED_WORDS = ["migration", "artefact", "artifact", "backfill", "legacy_pause", "restore_source", "is_legacy", "0007",
@@ -118,6 +118,16 @@ def test_agents_md_is_imported_and_nothing_else(ws):
     root = DEMO / ws
     assert (root / "CLAUDE.md").read_text().strip() == "@kelder-dbt/AGENTS.md"
     assert (root / "kelder-dbt" / "AGENTS.md").exists()
+
+
+@pytest.mark.parametrize("ws", [w for w in ("wiki",) if w in PRESENT])
+def test_wiki_workspace_has_notes_only_in_ktx(ws):
+    root = DEMO / ws
+    assert (root / "CLAUDE.md").read_text() == make_workspace.WIKI_POINTER
+    for name in ("AGENTS.md", ".github"):
+        assert not list(root.rglob(name)), name
+    assert not (root / "kelder-dbt" / "context").exists()
+    assert list((make_workspace.KTX_PROJECTS / ws / "wiki" / "global").glob("0007-*.md")), "decision 0007 missing from the wiki"
 
 
 @pytest.mark.parametrize("ws", PRESENT)

@@ -44,6 +44,7 @@ charts:
 	$(PY) charts/render.py
 	$(PY) charts/domain_model.py
 	$(PY) charts/architecture.py
+	$(PY) charts/architecture_simple.py
 
 workspaces:
 	$(PY) scripts/make_workspace.py --all
@@ -66,7 +67,7 @@ clean:
 index:
 	$(PY) scripts/render_index.py
 
-# ktx MCP servers for the agent workspaces (127.0.0.1:7801-7803); WORKSPACE=installed|written|rot for one
+# ktx MCP servers for the agent workspaces (127.0.0.1:7801-7804); WORKSPACE=installed|written|rot|wiki for one
 serve:
 	$(PY) scripts/ktx_serve.py start $(if $(filter command line,$(origin WORKSPACE)),--workspace $(WORKSPACE))
 
