@@ -134,6 +134,35 @@ def cancellations_by_hour():
     save(fig, "cancellations_by_hour_feb_mar_2026", {"unit": "cancellations", "hour_utc": list(range(24)), **data})
 
 
+def cancellations_monthly():
+    """Cancellations per month as the warehouse records them (before-context state, nothing adjusted)."""
+    c = con("before")
+    rows = c.execute("""
+        select strftime(timezone('Europe/Amsterdam', occurred_at), '%Y-%m') as month, count(*) as n
+        from main.fct_subscription_events
+        where event_type = 'cancelled'
+          and timezone('Europe/Amsterdam', occurred_at) >= timestamp '2025-09-01'
+          and timezone('Europe/Amsterdam', occurred_at) < timestamp '2026-07-01'
+        group by all order by all
+    """).fetchall()
+    months = [dt.datetime.strptime(m, "%Y-%m") for m, _ in rows]
+    counts = [n for _, n in rows]
+    fig, ax = plt.subplots(figsize=(W_IN, H_IN * 0.7), dpi=DPI)
+    fig.subplots_adjust(left=0.1, right=0.97, top=0.88, bottom=0.2)
+    colors = [BRICK if m.month == 3 and m.year == 2026 else SLATE for m in months]
+    ax.bar(range(len(months)), counts, color=colors, width=0.72)
+    ax.set_xticks(range(len(months)))
+    ax.set_xticklabels([m.strftime("%b %y") for m in months])
+    style_axes(ax, pct=False)
+    ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
+    i = [m.month for m in months].index(3)
+    ax.text(i, counts[i] * 1.03, f"{counts[i]:,}", ha="center", va="bottom", **mono(13, color=BRICK))
+    ax.set_ylim(0, counts[i] * 1.18)
+    ax.set_ylabel("cancellations", **mono(11))
+    source_line(fig, "Kelder Coffee warehouse, before-context state · fct_subscription_events, cancelled, by month")
+    save(fig, "cancellations_monthly", {"unit": "cancellations", "series": [{"month": m, "cancellations": n} for m, n in rows]})
+
+
 def churn_monthly_2026_events():
     c = con("with_context")
     rows = c.execute("""
@@ -270,6 +299,7 @@ def yoy_like_for_like():
 
 def main():
     F.update(setup_fonts())
+    cancellations_monthly()
     cancellations_by_hour()
     churn_monthly_2026_events()
     churn_v1_vs_v2_restated()

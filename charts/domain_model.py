@@ -4,7 +4,7 @@
 
 Writes charts/out/domain_model_logical.svg and charts/out/domain_model_erd.svg.
 
-This is a DESIGN. Kelder's dbt project has no domain layer yet, and both figures say so. The entities are
+The model explains the idea; Kelder's dbt project does not implement a domain layer. The entities are
 the ones in the talk outline (customer, subscription, subscription status change, delivery, payment attempt),
 plus the review queue that the "a cancellation needs an initiator and a reason" rule creates.
 """
@@ -38,7 +38,7 @@ def wrap(x, y, lines, size=15, fam=SANS, fill=ESPRESSO, lh=None, **kw):
     return "".join(t(x, y + i * lh, ln, size, fam, fill, **kw) for i, ln in enumerate(lines))
 
 
-def frame(body: str, title: str, subtitle: str, note: str, badge: str = "DESIGN, NOT BUILT ON KELDER") -> str:
+def frame(body: str, title: str, subtitle: str, note: str, badge: str = "KELDER KOFFIE · DOMAIN MODEL") -> str:
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" role="img" aria-label="{escape(title)}">
 <rect width="{W}" height="{H}" fill="{CREMA}"/>
 {t(60, 62, title, 34, SERIF, ESPRESSO, 500)}

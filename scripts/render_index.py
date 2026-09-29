@@ -59,6 +59,12 @@ def facts() -> dict:
     if yr:
         r = yr["mean_monthly_churn_rate_v2_restated"]["rot"]
         f["rot_25"], f["rot_26"] = r["h1_2025"] / 100, r["h1_2026"] / 100
+    cm = load_json(ROOT / "charts" / "out" / "cancellations_monthly.json")
+    if cm:
+        vals = {r["month"][:7]: r["cancellations"] for r in cm["series"]}
+        f["march_cancellations"] = vals.get("2026-03", 0)
+        others = sorted(v for k, v in vals.items() if k != "2026-03")
+        f["typical_cancellations"] = round(others[len(others) // 2], -1) if others else 0
     ch = load_json(ROOT / "charts" / "out" / "cancellations_by_hour_feb_mar_2026.json")
     if ch:
         f["midnight"] = ch["2026-03"][0]
@@ -157,6 +163,7 @@ h3 { font-family: var(--serif); font-weight: 600; font-size: 22px; margin: 0 0 6
 .sub { color: #4A3A2F; margin: 0 0 30px; max-width: 800px; font-size: 18px; }
 .figure { margin: 0 0 34px; background: var(--crema); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
 .figure img, .figure svg { width: 100%; height: auto; display: block; }
+.figure.small { max-width: 880px; }
 .figure figcaption { padding: 14px 22px 16px; border-top: 1px solid var(--line); background: var(--paper); font-size: 16px; }
 .figure figcaption b { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; color: var(--baksteen); margin-right: 10px; font-weight: 500; }
 .two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 34px; align-items: start; }
@@ -266,6 +273,8 @@ def main():
 <div class="tenet-n">Tenet 1</div>
 <h2>An agent can find what looks odd in the data. Only people know why it happened.</h2>
 <p class="sub">On 12 March 2026 Kelder moved billing from Shopify to Recharge. The import stamped a batch of cancellations at midnight UTC. The agent finds the batch. It cannot know which of those cancellations were real customers leaving, because that fact never reached a table.</p>
+<figure class="figure small">{chart('cancellations_monthly', 'Cancellations per month, September 2025 to June 2026')}
+<figcaption><b>THE SPIKE</b>Cancellations per month as the warehouse records them. March stands out: {f.get('march_cancellations', 0):,} against about {f.get('typical_cancellations', 0):,} in a normal month.</figcaption></figure>
 <figure class="figure">{chart('cancellations_by_hour_feb_mar_2026', 'Cancellations by hour of day, February and March 2026')}
 <figcaption><b>WHAT THE AGENT SEES</b>{f.get('midnight', 0):,} cancellations at 00:00 UTC in March. Nothing in the rows says why.</figcaption></figure>
 <figure class="figure">{chart('churn_monthly_2026_events', 'Monthly churn, January to June 2026')}
@@ -306,8 +315,12 @@ def main():
 <figcaption><b>LOGICAL VIEW</b>What Kelder is made of, written before looking at any source system. A cancellation needs an initiator and a reason.</figcaption></figure>
 <figure class="figure">{svg('domain_model_erd')}
 <figcaption><b>ERD</b>The same model as tables. Rows that break the cancellation rule land in a review queue, not in the status-change table.</figcaption></figure>
+<figure class="figure">{svg('architecture_plain')}
+<figcaption><b>THE PLAIN STACK</b>No ktx and no context layer: the agent and the BI tool query the marts directly, and each works out what the numbers mean on its own.</figcaption></figure>
+<figure class="figure">{svg('architecture_without_context')}
+<figcaption><b>WITHOUT A CONTEXT LAYER</b>Sources, dbt, the warehouse, ktx as the agent's door to the data, and a BI tool. The agent gets SQL and a semantic layer inferred from the schema; nothing says why a number moved.</figcaption></figure>
 <figure class="figure">{svg('architecture')}
-<figcaption><b>ARCHITECTURE</b>How dbt, DuckDB, ktx and Claude fit together, where the domain layer sits between staging and the marts, and how a modern BI tool (Omni, Lightdash) reads from the marts and ktx while bringing its own context. Solid is built, dashed is design.</figcaption></figure>
+<figcaption><b>WITH A CONTEXT LAYER</b>The same stack with a domain layer, the context schema and the written notes. The notes reach the agent straight from the repo or through the ktx wiki, and the checks keep them true.</figcaption></figure>
 <p class="sub">Six things happened at Kelder in the first half of 2026. Most of them belong in the model. The context layer shrinks to the reasons behind decisions, small enough for a named owner to keep current.</p>
 <div class="numbers-table"><table class="data"><thead><tr><th>What happened</th><th>Where it belongs</th><th>Why</th></tr></thead><tbody>{six}</tbody></table></div>
 </div></section>

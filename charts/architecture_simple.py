@@ -2,8 +2,8 @@
 
     uv run python charts/architecture_simple.py
 
-Writes charts/out/architecture_simple.svg. The three result cards are read from demo/trial_summary.md
-(board-number question), never typed in.
+Writes charts/out/architecture_simple.svg. The three cards show the set-ups compared in the demo: no notes,
+notes in the repo, notes in the ktx wiki.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import domain_model as dm  # noqa: E402
-from architecture import DARK_HONING, board_results  # noqa: E402
+from architecture import DARK_HONING  # noqa: E402
 from domain_model import BAKSTEEN, CREMA, ESPRESSO, GRACHT, HAND, HONING, LINE, MONO, MUTED, OUT, PAPER, SANS, SERIF, t, wrap  # noqa: E402
 
 
@@ -40,14 +40,13 @@ def arrow(x1, y1, x2, y2, color, text=None, tx=None, ty=None, anchor="middle"):
     return s
 
 
-def result(x, y, w, head, sub, right, runs, good):
-    col = GRACHT if good else BAKSTEEN
+def case(x, y, w, head, sub, knows_why):
+    col = GRACHT if knows_why else BAKSTEEN
     s = f'<rect x="{x}" y="{y}" width="{w}" height="118" rx="16" fill="{PAPER}" stroke="{LINE}" stroke-width="2"/>'
     s += f'<rect x="{x}" y="{y}" width="10" height="118" rx="5" fill="{col}"/>'
-    s += t(x + 32, y + 42, head, 22, SERIF, ESPRESSO, 600)
-    s += t(x + 32, y + 72, sub, 14.5, MONO, MUTED)
-    s += t(x + 32, y + 100, "board number right", 13, MONO, MUTED)
-    s += t(x + w - 26, y + 94, f"{right}/{runs}" if runs else "–", 52, SERIF, col, 600, "end")
+    s += t(x + 32, y + 46, head, 22, SERIF, ESPRESSO, 600)
+    s += t(x + 32, y + 80, sub, 14.5, MONO, MUTED)
+    s += t(x + w - 30, y + 84, "why ✓" if knows_why else "why ?", 30, HAND, col, 600, "end")
     return s
 
 
@@ -77,16 +76,14 @@ def build() -> str:
     b += t(1320, 560, "2  the ktx wiki", 15, MONO, ESPRESSO)
     b += arrow(770, 390, 890, 470, DARK_HONING)
 
-    # results
-    res = board_results()
-    b += t(60, 668, "WHAT THE AGENT TOLD THE BOARD", 13, MONO, MUTED, 600, spacing=1)
-    for i, (ws, head, sub, good) in enumerate([("installed", "No notes", "finds the odd batch, not why", False),
-                                                ("written", "Notes in the repo", "AGENTS.md, read at start", True),
-                                                ("wiki", "Notes in the ktx wiki", "found with wiki_search", True)]):
-        r, n = res.get(ws, (0, 0))
-        b += result(60 + i * 500, 684, 470, head, sub, r, n, good and r > 0)
+    # three set-ups, same question
+    b += t(60, 668, "THREE SET-UPS, SAME QUESTION", 13, MONO, MUTED, 600, spacing=1)
+    for i, (head, sub, knows) in enumerate([("No notes", "finds the odd batch, not why", False),
+                                            ("Notes in the repo", "AGENTS.md, read at start", True),
+                                            ("Notes in the ktx wiki", "found with wiki_search", True)]):
+        b += case(60 + i * 500, 684, 470, head, sub, knows)
     return dm.frame(b, "How the demo works", "ONE AGENT · THE DATA · THE NOTES",
-                    "The right answer is 3.3%. Same model, same warehouse, same question; only the notes change.",
+                    "Same model, same warehouse, same question; only where the notes live changes.",
                     badge="KELDER KOFFIE DEMO")
 
 

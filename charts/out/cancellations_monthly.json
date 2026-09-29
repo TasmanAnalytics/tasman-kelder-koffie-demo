@@ -1,0 +1,45 @@
+{
+  "unit": "cancellations",
+  "series": [
+    {
+      "month": "2025-09",
+      "cancellations": 658
+    },
+    {
+      "month": "2025-10",
+      "cancellations": 638
+    },
+    {
+      "month": "2025-11",
+      "cancellations": 655
+    },
+    {
+      "month": "2025-12",
+      "cancellations": 716
+    },
+    {
+      "month": "2026-01",
+      "cancellations": 801
+    },
+    {
+      "month": "2026-02",
+      "cancellations": 764
+    },
+    {
+      "month": "2026-03",
+      "cancellations": 2766
+    },
+    {
+      "month": "2026-04",
+      "cancellations": 771
+    },
+    {
+      "month": "2026-05",
+      "cancellations": 782
+    },
+    {
+      "month": "2026-06",
+      "cancellations": 774
+    }
+  ]
+}
