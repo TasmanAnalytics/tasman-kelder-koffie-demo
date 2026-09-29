@@ -303,6 +303,8 @@ def main():
 <figcaption><b>LOGICAL VIEW</b>What Kelder is made of, written before looking at any source system. A cancellation needs an initiator and a reason.</figcaption></figure>
 <figure class="figure">{svg('domain_model_erd')}
 <figcaption><b>ERD</b>The same model as tables. Rows that break the cancellation rule land in a review queue, not in the status-change table.</figcaption></figure>
+<figure class="figure">{svg('architecture')}
+<figcaption><b>ARCHITECTURE</b>How dbt, DuckDB, ktx and Claude fit together, where the domain layer sits between staging and the marts, and where a BI tool such as Omni reads from. Solid is built, dashed is design.</figcaption></figure>
 <p class="sub">Six things happened at Kelder in the first half of 2026. Most of them belong in the model. The context layer shrinks to the reasons behind decisions, small enough for a named owner to keep current.</p>
 <div class="numbers-table"><table class="data"><thead><tr><th>What happened</th><th>Where it belongs</th><th>Why</th></tr></thead><tbody>{six}</tbody></table></div>
 </div></section>

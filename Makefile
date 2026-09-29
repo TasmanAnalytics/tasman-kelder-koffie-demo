@@ -43,6 +43,7 @@ freeze-verified:
 charts:
 	$(PY) charts/render.py
 	$(PY) charts/domain_model.py
+	$(PY) charts/architecture.py
 
 workspaces:
 	$(PY) scripts/make_workspace.py --all

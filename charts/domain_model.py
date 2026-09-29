@@ -38,13 +38,13 @@ def wrap(x, y, lines, size=15, fam=SANS, fill=ESPRESSO, lh=None, **kw):
     return "".join(t(x, y + i * lh, ln, size, fam, fill, **kw) for i, ln in enumerate(lines))
 
 
-def frame(body: str, title: str, subtitle: str, note: str) -> str:
+def frame(body: str, title: str, subtitle: str, note: str, badge: str = "DESIGN, NOT BUILT ON KELDER") -> str:
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" role="img" aria-label="{escape(title)}">
 <rect width="{W}" height="{H}" fill="{CREMA}"/>
 {t(60, 62, title, 34, SERIF, ESPRESSO, 500)}
 {t(60, 92, subtitle, 15, MONO, MUTED, spacing=0.4)}
 <g transform="translate({W - 60},58)"><rect x="-292" y="-22" width="292" height="34" rx="17" fill="none" stroke="{BAKSTEEN}" stroke-width="1.6"/>
-{t(-146, 0, "DESIGN, NOT BUILT ON KELDER", 13, MONO, BAKSTEEN, 500, "middle", spacing=1)}</g>
+{t(-146, 0, badge, 13, MONO, BAKSTEEN, 500, "middle", spacing=1)}</g>
 {body}
 {t(60, H - 22, note, 13.5, MONO, MUTED)}
 </svg>
