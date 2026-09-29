@@ -1,10 +1,10 @@
 """Architecture diagram: how dbt, DuckDB, ktx and Claude fit together in the Kelder demo, the two routes by
-which the written notes reach the agent, and where a domain layer and a BI tool such as Omni would sit.
+which the written notes reach the agent, and where a domain layer and a modern BI tool (Omni, Lightdash) would sit.
 
     uv run python charts/architecture.py
 
 Writes charts/out/architecture.svg. Solid boxes exist in this repository. Dashed boxes are design or
-illustration: the domain layer is not built on Kelder, and Omni is not part of the demo. The trial results
+illustration: the domain layer is not built on Kelder, and no BI tool is part of the demo. The trial results
 on the workspace chips are read from demo/trial_summary.md, never typed in.
 """
 
@@ -110,16 +110,17 @@ def build() -> str:
     b += route([(900, 243), (976, 243)], GRACHT)
     b += label(938, 222, "SQL", GRACHT)
 
-    # ---- Claude and Omni
+    # ---- Claude and a BI tool
     b += panel(1290, 150, 260, 190, "Claude Code", BAKSTEEN)
     b += wrap(1308, 222, ["The agent, pinned model.", "Tools: Read, Grep, Glob", "and the ktx tools only."], 15, SANS, ESPRESSO, 22)
     b += route([(1230, 243), (1290, 243)], BAKSTEEN)
     b += label(1260, 222, "MCP", BAKSTEEN)
-    b += panel(1290, 390, 260, 110, "Omni", BAKSTEEN, dashed=True)
-    b += wrap(1308, 450, ["A BI tool: dashboards and", "the board pack. Illustrative."], 14, SANS, ESPRESSO, 20)
+    b += panel(1290, 372, 260, 150, "Modern BI tool", BAKSTEEN, dashed=True)
+    b += t(1308, 426, "e.g. Omni, Lightdash", 12.5, MONO, BAKSTEEN, 600)
+    b += wrap(1308, 452, ["Dashboards, board pack.", "Brings its own context:", "its model, AI notes and", "usage data. Illustrative."], 13.5, SANS, ESPRESSO, 19)
     b += route([(900, 452), (1290, 452)], BAKSTEEN, dashed=True)
     b += label(992, 452, "reads the marts", BAKSTEEN)
-
+    b += route([(1230, 398), (1290, 398)], BAKSTEEN, dashed=True)
     # ---- repo
     b += panel(280, 540, 620, 170, "kelder-dbt/  (the team's git repo)", ESPRESSO)
     b += t(298, 614, "dbt models and tests", 15, MONO, ESPRESSO, 600)

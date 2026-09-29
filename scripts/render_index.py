@@ -284,6 +284,8 @@ def main():
 <div class="tenet-n">Tenet 2</div>
 <h2>Written context describes the business on the day it was written, and the business keeps changing.</h2>
 <p class="sub">Once the reasons are written down, the agent gets it right. Then one ordinary commit, “Fix churn logic”, points the restated churn series at the unadjusted cancellations. Every note still says the import is excluded. Every dbt test still passes.</p>
+<figure class="figure">{svg('knowledge_homes')}
+<figcaption><b>WHERE THE NOTES LIVE</b>Four kinds of knowledge, each in its natural home in Kelder's repo and warehouse. The agent reads them through ktx or straight from the repo.</figcaption></figure>
 <figure class="figure">{chart('yoy_like_for_like_written_vs_rot', 'First half of 2025 against first half of 2026, before and after the rot commit')}
 <figcaption><b>THE COMPARISON FLIPS</b>First half of 2025 against first half of 2026, same rules. Improved from {pct(f.get('yoy_25'), 2)} to {pct(f.get('yoy_26'), 2)}; after the commit, worse, {pct(f.get('rot_25'), 2)} to {pct(f.get('rot_26'), 2)}.</figcaption></figure>
 <div class="two"><div><h3>The rot commit</h3>
@@ -305,7 +307,7 @@ def main():
 <figure class="figure">{svg('domain_model_erd')}
 <figcaption><b>ERD</b>The same model as tables. Rows that break the cancellation rule land in a review queue, not in the status-change table.</figcaption></figure>
 <figure class="figure">{svg('architecture')}
-<figcaption><b>ARCHITECTURE</b>How dbt, DuckDB, ktx and Claude fit together, where the domain layer sits between staging and the marts, and where a BI tool such as Omni reads from. Solid is built, dashed is design.</figcaption></figure>
+<figcaption><b>ARCHITECTURE</b>How dbt, DuckDB, ktx and Claude fit together, where the domain layer sits between staging and the marts, and how a modern BI tool (Omni, Lightdash) reads from the marts and ktx while bringing its own context. Solid is built, dashed is design.</figcaption></figure>
 <p class="sub">Six things happened at Kelder in the first half of 2026. Most of them belong in the model. The context layer shrinks to the reasons behind decisions, small enough for a named owner to keep current.</p>
 <div class="numbers-table"><table class="data"><thead><tr><th>What happened</th><th>Where it belongs</th><th>Why</th></tr></thead><tbody>{six}</tbody></table></div>
 </div></section>
