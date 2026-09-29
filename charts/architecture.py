@@ -1,10 +1,11 @@
-"""Architecture diagram: how dbt, DuckDB, ktx and Claude fit together in the Kelder demo, and where a domain
-layer and a BI tool such as Omni would sit.
+"""Architecture diagram: how dbt, DuckDB, ktx and Claude fit together in the Kelder demo, the two routes by
+which the written notes reach the agent, and where a domain layer and a BI tool such as Omni would sit.
 
     uv run python charts/architecture.py
 
 Writes charts/out/architecture.svg. Solid boxes exist in this repository. Dashed boxes are design or
-illustration: the domain layer is not built on Kelder, and Omni is not part of the demo.
+illustration: the domain layer is not built on Kelder, and Omni is not part of the demo. The trial results
+on the workspace chips are read from demo/trial_summary.md, never typed in.
 """
 
 from __future__ import annotations
@@ -14,147 +15,145 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import domain_model as dm  # noqa: E402
-from domain_model import (BAKSTEEN, CREMA, ESPRESSO, GRACHT, HONING, LINE, MONO, MUTED, PAPER, SANS, SERIF,  # noqa: E402
-                          H, OUT, W, t, wrap)
+from domain_model import (BAKSTEEN, CREMA, ESPRESSO, GRACHT, HONING, LINE, MONO, MUTED, OUT, PAPER, ROOT,  # noqa: E402
+                          SANS, SERIF, t, wrap)
+
+DARK_HONING = "#8A5F12"  # honing is too faint for text on crema
 
 
-def box(x, y, w, h, title, lines=(), color=ESPRESSO, dashed=False, fill=PAPER, title_fill=None, size=15, head=None):
-    dash = ' stroke-dasharray="7 6"' if dashed else ""
-    s = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="12" fill="{fill}" stroke="{color}" stroke-width="2.2"{dash}/>'
-    ty = y + 30
-    if head:
-        s += f'<path d="M{x} {y + 12}a12 12 0 0 1 12 -12h{w - 24}a12 12 0 0 1 12 12v{head - 12}h-{w}z" fill="{color}"/>'
-        s += t(x + 16, y + head - 13, title, 20, SERIF, CREMA, 600)
-        ty = y + head + 26
-    else:
-        s += t(x + 16, ty, title, 20, SERIF, title_fill or color, 600)
-        ty += 26
-    s += wrap(x + 16, ty, list(lines), size, SANS, ESPRESSO, size * 1.42)
-    return s
+def board_results() -> dict:
+    """{workspace: (right, runs)} for the board-number question, from the trial summary."""
+    out = {}
+    p = ROOT / "demo" / "trial_summary.md"
+    if p.exists():
+        for line in p.read_text().splitlines():
+            cells = [c.strip() for c in line.strip("|").split("|")]
+            if line.startswith("| ") and len(cells) == 9 and cells[1] == "churn_board_number":
+                out[cells[0]] = (int(cells[3]), int(cells[2]))
+    return out
 
 
-def chip(x, y, w, h, title, sub=None, color=ESPRESSO, dashed=False, fill=CREMA):
-    dash = ' stroke-dasharray="6 5"' if dashed else ""
-    s = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="9" fill="{fill}" stroke="{color}" stroke-width="2"{dash}/>'
-    s += t(x + w / 2, y + (28 if sub else h / 2 + 5), title, 15, MONO, color, 600, "middle")
-    if sub:
-        s += t(x + w / 2, y + 52, sub, 12, MONO, MUTED, 400, "middle")
-    return s
-
-
-def link(x1, y1, x2, y2, color=ESPRESSO, dashed=False, width=2.4, head=True, path=None):
+def panel(x, y, w, h, title, color, dashed=False, head=44, title_ink=CREMA):
     dash = ' stroke-dasharray="8 6"' if dashed else ""
-    d = path or f"M{x1} {y1}L{x2} {y2}"
-    s = f'<path d="{d}" fill="none" stroke="{color}" stroke-width="{width}"{dash}/>'
+    s = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="14" fill="{PAPER}" stroke="{color}" stroke-width="2.6"{dash}/>'
+    if dashed:
+        s += t(x + 18, y + 32, title, 21, SERIF, color, 600)
+    else:
+        s += f'<path d="M{x} {y + 14}a14 14 0 0 1 14 -14h{w - 28}a14 14 0 0 1 14 14v{head - 14}h-{w}z" fill="{color}"/>'
+        s += t(x + 18, y + head - 14, title, 21, SERIF, title_ink, 600)
+    return s
+
+
+def chip(x, y, w, h, title, sub=None, color=ESPRESSO, dashed=False):
+    dash = ' stroke-dasharray="6 5"' if dashed else ""
+    s = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="9" fill="{CREMA}" stroke="{color}" stroke-width="2"{dash}/>'
+    s += t(x + w / 2, y + (h / 2 - 3 if sub else h / 2 + 5), title, 13.5, MONO, color, 600, "middle")
+    if sub:
+        s += t(x + w / 2, y + h / 2 + 17, sub, 12, MONO, MUTED, 400, "middle")
+    return s
+
+
+def route(points, color=ESPRESSO, dashed=False, width=2.6, head=True):
+    """An orthogonal path through points [(x, y), ...] with an arrowhead at the last point."""
+    dash = ' stroke-dasharray="8 6"' if dashed else ""
+    d = "M" + " L".join(f"{x} {y}" for x, y in points)
+    s = f'<path d="{d}" fill="none" stroke="{color}" stroke-width="{width}"{dash} stroke-linejoin="round"/>'
     if head:
-        # arrowhead at (x2, y2), direction from the last segment
-        px, py = (x1, y1) if not path else (path_last(path)[0], path_last(path)[1])
-        dx, dy = x2 - px, y2 - py
+        (x1, y1), (x2, y2) = points[-2], points[-1]
+        dx, dy = x2 - x1, y2 - y1
         n = (dx * dx + dy * dy) ** 0.5 or 1
         ux, uy = dx / n, dy / n
-        s += f'<path d="M{x2} {y2}L{x2 - ux * 15 - uy * 7} {y2 - uy * 15 + ux * 7}L{x2 - ux * 15 + uy * 7} {y2 - uy * 15 - ux * 7}Z" fill="{color}"/>'
+        s += (f'<path d="M{x2} {y2}L{x2 - ux * 15 - uy * 7} {y2 - uy * 15 + ux * 7}'
+              f'L{x2 - ux * 15 + uy * 7} {y2 - uy * 15 - ux * 7}Z" fill="{color}"/>')
     return s
 
 
-def path_last(path):
-    """Second-to-last point of an M/H/V path, so the arrowhead can point along the final segment."""
-    toks = path.replace("M", " M ").replace("H", " H ").replace("V", " V ").replace("L", " L ").split()
-    pts, x, y, i = [], 0.0, 0.0, 0
-    while i < len(toks):
-        c = toks[i]
-        if c in ("M", "L"):
-            x, y = float(toks[i + 1]), float(toks[i + 2]); i += 3
-        elif c == "H":
-            x = float(toks[i + 1]); i += 2
-        else:
-            y = float(toks[i + 1]); i += 2
-        pts.append((x, y))
-    return pts[-2]
-
-
-def tag(x, y, text, color=MUTED):
-    wd = len(text) * 7.6 + 18
-    return (f'<rect x="{x - wd / 2}" y="{y - 13}" width="{wd}" height="24" rx="12" fill="{CREMA}" stroke="{LINE}"/>'
-            + t(x, y + 4, text, 12, MONO, color, 500, "middle"))
+def label(x, y, text, color=ESPRESSO, anchor="middle"):
+    wd = len(text) * 7.7 + 20
+    x0 = x - wd / 2 if anchor == "middle" else x
+    return (f'<rect x="{x0}" y="{y - 13}" width="{wd}" height="25" rx="12.5" fill="{CREMA}" stroke="{color}" stroke-width="1.3"/>'
+            + t(x0 + wd / 2, y + 4, text, 12.5, MONO, color, 600, "middle"))
 
 
 def build() -> str:
     b = ""
     # ---- sources
-    b += t(50, 158, "SOURCES (SIMULATED)", 12.5, MONO, MUTED, 600, spacing=1)
-    for i, (n, sub) in enumerate([("Shopify", "orders, customers"), ("Recharge", "subscriptions"), ("Klaviyo", "email events"), ("Ad platforms", "spend")]):
-        y = 176 + i * 74
-        b += f'<rect x="50" y="{y}" width="200" height="60" rx="10" fill="{PAPER}" stroke="{ESPRESSO}" stroke-width="2"/>'
-        b += t(66, y + 26, n, 17, SERIF, ESPRESSO, 600) + t(66, y + 46, sub, 12, MONO, MUTED)
-    b += f'<path d="M250 206H285M250 280H285M250 354H285M250 428H285M285 206V428" fill="none" stroke="{ESPRESSO}" stroke-width="2.4"/>'
-    b += link(285, 300, 335, 300)
-    b += t(50, 480, "load_raw.py loads Parquet into raw_*", 12, MONO, MUTED)
+    b += t(50, 168, "SOURCES (SIMULATED)", 12, MONO, MUTED, 600, spacing=1)
+    for i, (n, sub) in enumerate([("Shopify", "orders"), ("Recharge", "subscriptions"), ("Klaviyo", "email"), ("Ad platforms", "spend")]):
+        y = 182 + i * 66
+        b += f'<rect x="50" y="{y}" width="180" height="54" rx="10" fill="{PAPER}" stroke="{ESPRESSO}" stroke-width="2"/>'
+        b += t(64, y + 24, n, 16, SERIF, ESPRESSO, 600) + t(64, y + 43, sub, 11.5, MONO, MUTED)
+    b += route([(230, 310), (280, 310)])
 
-    # ---- warehouse (DuckDB) with dbt inside
-    b += f'<rect x="320" y="150" width="680" height="342" rx="16" fill="none" stroke="{GRACHT}" stroke-width="3"/>'
-    b += f'<path d="M320 166a16 16 0 0 1 16 -16h648a16 16 0 0 1 16 16v26h-680z" fill="{GRACHT}"/>'
-    b += t(340, 178, "DuckDB warehouse", 21, SERIF, CREMA, 600) + t(985, 178, "one file per state", 12.5, MONO, HONING, 500, "end")
-    cy, cw = 210, 120
-    for i, (n, sub, dashed) in enumerate([("raw_*", "as loaded", False), ("staging", "cleaned", False), ("intermediate", "joined", False),
-                                          ("domain", "DESIGN", True), ("marts", "fct + metrics", False)]):
-        x = 336 + i * 130
-        b += chip(x, cy, cw, 70, n, sub, BAKSTEEN if dashed else ESPRESSO, dashed)
+    # ---- warehouse
+    b += panel(280, 150, 620, 320, "DuckDB warehouse", GRACHT)
+    b += t(884, 180, "built and tested by dbt", 12.5, MONO, HONING, 500, "end")
+    names = [("raw_*", "as loaded", False), ("staging", "cleaned", False), ("intermediate", "joined", False),
+             ("domain", "design", True), ("marts", "fct, metrics", False)]
+    for i, (n, sub, dashed) in enumerate(names):
+        x = 296 + i * 120
+        b += chip(x, 212, 108, 64, n, sub, BAKSTEEN if dashed else ESPRESSO, dashed)
         if i:
-            b += link(x - 10, cy + 35, x, cy + 35, BAKSTEEN if i in (3, 4) else ESPRESSO, dashed=i in (3, 4), width=2, path=f"M{x - 10} {cy + 35}H{x}")
-    b += f'<rect x="336" y="302" width="640" height="56" rx="9" fill="{CREMA}" stroke="{ESPRESSO}" stroke-width="2"/>'
-    b += t(352, 326, "context schema", 15, MONO, ESPRESSO, 600) + t(352, 346, "business_events · metric_changelog · column caveats", 13, MONO, MUTED)
-    b += f'<rect x="336" y="376" width="640" height="46" rx="9" fill="{ESPRESSO}"/>'
-    b += t(352, 405, "dbt (dbt-duckdb)  builds, tests and documents every layer", 16, MONO, CREMA, 500)
-    b += t(985, 470, "kelder_before.duckdb · kelder_with_context.duckdb · kelder_rot.duckdb", 12, MONO, MUTED, 400, "end")
-
-    # ---- repo
-    b += box(320, 560, 680, 170, "kelder-dbt/  (git)", [
-        "models, tests, profiles.yml", "AGENTS.md: where each note lives",
-        "context/: decision records, glossary, quirks, verified_queries.yml", "pull request template: the metric-impact question"],
-        ESPRESSO, head=42, size=15)
-    b += link(660, 560, 660, 494, ESPRESSO, path="M660 560V494")
-    b += tag(660, 528, "models + tests + context")
+            b += route([(x - 12, 244), (x, 244)], BAKSTEEN if i in (3, 4) else ESPRESSO, dashed=i in (3, 4), width=2)
+    b += f'<rect x="296" y="296" width="588" height="54" rx="9" fill="{CREMA}" stroke="{ESPRESSO}" stroke-width="2"/>'
+    b += t(312, 319, "context schema", 15, MONO, ESPRESSO, 600)
+    b += t(312, 339, "business_events · metric_changelog (with-context state only)", 12, MONO, MUTED)
+    b += wrap(296, 384, ["Domain layer (design): sources map into it once,", "and everything downstream reads only from it."], 13.5, SANS, BAKSTEEN, 19)
+    b += t(296, 448, "one file per state: before · with-context · rot", 12, MONO, MUTED)
 
     # ---- ktx
-    b += box(1060, 150, 250, 200, "ktx", [
-        "Reads the warehouse", "(read-only), kelder-dbt/", "and the dbt manifest.", "An LLM ingest builds a", "semantic layer and a wiki."],
-        ESPRESSO, head=42, size=14)
-    b += t(1076, 340, "serves MCP, 127.0.0.1:7801-7803", 11, MONO, MUTED)
-    b += link(1000, 250, 1060, 250, path="M1000 250H1060")
-    b += tag(1030, 224, "SQL")
+    b += panel(960, 150, 270, 280, "ktx", ESPRESSO)
+    b += chip(976, 208, 238, 70, "SQL gateway", "the agent's queries, read-only", GRACHT)
+    b += f'<rect x="976" y="292" width="238" height="120" rx="9" fill="{CREMA}" stroke="{DARK_HONING}" stroke-width="2"/>'
+    b += t(1095, 318, "wiki + semantic layer", 15, MONO, DARK_HONING, 600, "middle")
+    b += wrap(992, 342, ["built once by an LLM ingest:", "wiki pages, table and column", "descriptions, a few measures"], 12, MONO, MUTED, 18)
+    b += route([(900, 243), (976, 243)], GRACHT)
+    b += label(938, 222, "SQL", GRACHT)
 
-    # ---- Claude
-    b += box(1360, 150, 200, 200, "Claude Code", [
-        "The agent. Pinned model.", "Tools: Read, Grep, Glob", "and the ktx tools.", "Reads AGENTS.md and", "the repo copy directly."],
-        GRACHT, head=42, size=14)
-    b += link(1310, 250, 1360, 250, path="M1310 250H1360")
-    b += tag(1335, 224, "MCP")
+    # ---- Claude and Omni
+    b += panel(1290, 150, 260, 190, "Claude Code", BAKSTEEN)
+    b += wrap(1308, 222, ["The agent, pinned model.", "Tools: Read, Grep, Glob", "and the ktx tools only."], 15, SANS, ESPRESSO, 22)
+    b += route([(1230, 243), (1290, 243)], BAKSTEEN)
+    b += label(1260, 222, "MCP", BAKSTEEN)
+    b += panel(1290, 390, 260, 110, "Omni", BAKSTEEN, dashed=True)
+    b += wrap(1308, 450, ["A BI tool: dashboards and", "the board pack. Illustrative."], 14, SANS, ESPRESSO, 20)
+    b += route([(900, 452), (1290, 452)], BAKSTEEN, dashed=True)
+    b += label(992, 452, "reads the marts", BAKSTEEN)
 
-    # ---- Omni (illustrative)
-    b += box(1360, 400, 200, 130, "Omni", [
-        "A standard BI tool.", "Models the marts;", "dashboards, board pack."],
-        BAKSTEEN, dashed=True, size=14)
-    b += t(1376, 520, "ILLUSTRATIVE", 11, MONO, BAKSTEEN, 600, spacing=1)
-    b += link(1000, 450, 1360, 450, BAKSTEEN, dashed=True, path="M1000 450H1360")
-    b += tag(1180, 424, "SQL", BAKSTEEN)
+    # ---- repo
+    b += panel(280, 540, 620, 170, "kelder-dbt/  (the team's git repo)", ESPRESSO)
+    b += t(298, 614, "dbt models and tests", 15, MONO, ESPRESSO, 600)
+    b += wrap(298, 638, ["staging, intermediate, marts,", "column descriptions, tests"], 13.5, SANS, ESPRESSO, 20)
+    b += f'<rect x="590" y="596" width="294" height="100" rx="9" fill="{CREMA}" stroke="{DARK_HONING}" stroke-width="2"/>'
+    b += t(606, 620, "the written notes", 15, MONO, DARK_HONING, 600)
+    b += wrap(606, 644, ["AGENTS.md, decision records,", "glossary, quirks, verified queries"], 13.5, SANS, ESPRESSO, 20)
+    b += route([(440, 540), (440, 470)])
+    b += label(440, 505, "dbt build")
+
+    # two routes for the notes
+    b += route([(884, 626), (1095, 626), (1095, 430)], DARK_HONING)
+    b += label(1095, 560, "route 2: ingest copies notes into the wiki", DARK_HONING)
+    b += route([(884, 676), (1260, 676), (1260, 310), (1290, 310)], DARK_HONING)
+    b += label(1262, 676, "route 1: AGENTS.md loads at start", DARK_HONING, anchor="start")
 
     # ---- checks
-    b += box(1060, 560, 500, 170, "Checks (make check, CI)", [
-        "Verified queries against pinned answers.", "Capture check on the pull request body.",
-        "Design: a lineage check, so presentation models", "read only from the domain layer."],
-        BAKSTEEN, size=15, head=42)
-    b += link(1000, 645, 1060, 645, path="M1000 645H1060")
+    b += panel(50, 540, 190, 170, "Checks", BAKSTEEN)
+    b += wrap(66, 612, ["make check, CI:", "verified queries", "against pinned", "answers; PR capture."], 13.5, SANS, ESPRESSO, 19)
+    b += route([(280, 625), (240, 625)], BAKSTEEN)
 
-    # ---- domain note
-    b += f'<rect x="50" y="526" width="252" height="204" rx="12" fill="{CREMA}" stroke="{HONING}" stroke-width="2.4" stroke-dasharray="7 6"/>'
-    b += t(66, 554, "Where the domain layer fits", 14, SERIF, ESPRESSO, 600)
-    b += wrap(66, 580, ["Between staging and", "the marts. Sources map", "into it once. Everything", "downstream, including", "ktx, Omni and the", "agent, reads from it."], 13.5, SANS, ESPRESSO, 19.5)
-
-    # ---- legend
-    b += f'<rect x="60" y="832" width="34" height="16" rx="4" fill="none" stroke="{ESPRESSO}" stroke-width="2"/>' + t(102, 845, "built in this repository", 12.5, MONO, MUTED)
-    b += f'<rect x="320" y="832" width="34" height="16" rx="4" fill="none" stroke="{BAKSTEEN}" stroke-width="2" stroke-dasharray="5 4"/>' + t(362, 845, "design or illustration, not in the demo", 12.5, MONO, MUTED)
-    return dm.frame(b, "How the pieces fit together", "SOURCES · DBT · DUCKDB · KTX · CLAUDE, WITH A DOMAIN LAYER AND A BI TOOL",
-                    "In a real company DuckDB would be Snowflake, BigQuery or similar; the shape stays the same.",
+    # ---- the four workspaces
+    res = board_results()
+    ws = [("installed", "before state, no notes", BAKSTEEN), ("written", "notes by route 1", GRACHT),
+          ("wiki", "notes by route 2 only", GRACHT), ("rot", "route 1, one bad commit", GRACHT)]
+    b += t(50, 752, "FOUR AGENT WORKSPACES · BOARD NUMBER RIGHT (3.3%)", 12, MONO, MUTED, 600, spacing=1)
+    for i, (name, sub, col) in enumerate(ws):
+        x = 50 + i * 378
+        right, runs = res.get(name, (0, 0))
+        b += f'<rect x="{x}" y="764" width="360" height="62" rx="10" fill="{PAPER}" stroke="{LINE}" stroke-width="1.6"/>'
+        b += t(x + 16, 791, name, 17, MONO, ESPRESSO, 700) + t(x + 16, 813, sub, 12.5, MONO, MUTED)
+        b += t(x + 344, 806, f"{right} of {runs}" if runs else "–", 26, SERIF, col if right else BAKSTEEN, 600, "end")
+    return dm.frame(b, "How the pieces fit together", "SOURCES · DBT · DUCKDB · KTX · CLAUDE, AND TWO ROUTES FOR THE NOTES",
+                    "Dashed: design or illustration, not in the demo. In a real company DuckDB would be Snowflake or BigQuery; the shape is the same.",
                     badge="SOLID: BUILT · DASHED: DESIGN")
 
 
