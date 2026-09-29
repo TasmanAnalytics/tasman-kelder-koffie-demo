@@ -1,17 +1,17 @@
-"""Render index.html: the start page for this repository.
+"""Render index.html: the evidence page behind the talk. Three tenets, each with the chart or trial that backs it.
 
     uv run python scripts/render_index.py      (or: make index)
 
-Every number on the page is read from build outputs (truth targets, frozen verified answers,
-chart data, trial summary), never typed in. Missing outputs show as "not built yet".
+Every number on the page is read from build outputs (frozen verified answers, chart data, trial summary and
+labels), never typed in. Tenet 3 is design reasoning, and the page says so.
 """
 
 from __future__ import annotations
 
+import csv
 import datetime as dt
 import html
 import json
-import re
 import subprocess
 from pathlib import Path
 
@@ -19,6 +19,7 @@ import duckdb
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "index.html"
+BRAND = ROOT / "assets" / "brand"
 
 
 def esc(s) -> str:
@@ -43,9 +44,7 @@ def facts() -> dict:
     t = ROOT / "data" / "truth" / "kelder_truth.duckdb"
     if t.exists():
         c = duckdb.connect(str(t), read_only=True)
-        f["targets"] = c.execute("select target, expected, achieved, passed from targets").fetchall()
         f["artefacts"] = c.execute("select count(*) from id_map where is_migration_artifact").fetchone()[0]
-        f["restores"] = c.execute("select count(recharge_restore_subscription_id) from id_map").fetchone()[0]
         c.close()
     ex = ROOT / "tests" / "verified" / "expected"
     m = load_json(ex / "churn_march_2026.json")
@@ -63,31 +62,42 @@ def facts() -> dict:
     ch = load_json(ROOT / "charts" / "out" / "cancellations_by_hour_feb_mar_2026.json")
     if ch:
         f["midnight"] = ch["2026-03"][0]
-    e = load_json(ex / "email_revenue_april_2026.json")
-    if e:
-        f["email_april"] = dict(zip(e["columns"], e["rows"][0]))["attributed_revenue_eur"]
-    n = load_json(ex / "new_subscribers_june_2026.json")
-    if n:
-        f["june"] = dict(zip(n["columns"], n["rows"][0]))
     return f
 
 
-def trial_table() -> str:
+def trials() -> dict:
+    """Class counts from demo/trial_summary.md and Claude's reading of transcripts from demo/labels/labels.csv."""
+    out = {"board": {}, "rows": [], "wrong_28": 0, "caught_rot": 0}
     p = ROOT / "demo" / "trial_summary.md"
-    if not p.exists():
+    if p.exists():
+        for l in p.read_text().splitlines():
+            if l.startswith("| ") and not l.startswith("| Workspace") and "---" not in l:
+                ws, pid, n, a, b, c, d, top, lab = [c.strip() for c in l.strip("|").split("|")]
+                out["rows"].append((ws, pid, n, a, b, c, d, top, lab))
+                if pid == "churn_board_number":
+                    out["board"][ws] = (int(a), int(n))
+    lp = ROOT / "demo" / "labels" / "labels.csv"
+    if lp.exists():
+        for r in csv.DictReader(lp.open()):
+            if r["workspace"] == "installed" and r["prompt_id"] == "churn_board_number" and "2.8%" in r["notes"]:
+                out["wrong_28"] += 1
+            if r["workspace"] == "rot" and r["prompt_id"] == "churn_yoy_like_for_like" and "caught the rot" in r["notes"]:
+                out["caught_rot"] += 1
+    return out
+
+
+def trial_table(rows) -> str:
+    if not rows:
         return '<p class="muted">No trials yet. Run <code>make trials</code>, then <code>make summary</code>.</p>'
-    rows = [l for l in p.read_text().splitlines() if l.startswith("| ") and not l.startswith("| Workspace") and "---" not in l]
-    body = []
-    for l in rows:
-        cells = [c.strip() for c in l.strip("|").split("|")]
-        ws, pid, n, a, b, c, d, top, lab = cells
-        body.append(f"<tr><td><span class='tag tag-{esc(ws)}'>{esc(ws)}</span></td><td><code>{esc(pid)}</code></td>"
-                    f"<td class='num'>{esc(n)}</td>" + "".join(f"<td class='num cls cls-{k}'>{esc(v)}</td>" for k, v in zip("ABCD", (a, b, c, d)))
-                    + f"<td class='num'><b>{esc(top)}</b></td><td class='num muted'>{esc(lab)}</td></tr>")
-    return ("<div class='numbers-table'><table class='data'><thead><tr><th>Workspace</th><th>Prompt</th><th>Runs</th><th>A</th><th>B</th><th>C</th><th>D</th>"
-            "<th>Most common</th><th>Labelled</th></tr></thead><tbody>" + "".join(body) + "</tbody></table></div>"
-            "<p class='muted small'>A is the right answer, C the confident wrong one (definitions in <a href='demo/trial_summary.md'>demo/trial_summary.md</a>). "
-            "Every run counts; classes use Thomas's label where one exists.</p>")
+    body = "".join(
+        f"<tr><td><span class='tag tag-{esc(ws)}'>{esc(ws)}</span></td><td><code>{esc(pid)}</code></td><td class='num'>{esc(n)}</td>"
+        + "".join(f"<td class='num cls cls-{k}'>{esc(v)}</td>" for k, v in zip("ABCD", (a, b, c, d)))
+        + "</tr>" for ws, pid, n, a, b, c, d, _top, _lab in rows)
+    return ("<div class='numbers-table'><table class='data'><thead><tr><th>Workspace</th><th>Question</th><th>Runs</th>"
+            "<th>A</th><th>B</th><th>C</th><th>D</th></tr></thead><tbody>" + body + "</tbody></table></div>"
+            "<p class='muted small'>A is the right answer, C the confident wrong one. Class definitions are in "
+            "<a href='demo/trial_summary.md'>demo/trial_summary.md</a>. The classes are a keyword heuristic; nothing is labelled by hand yet. "
+            "Every run counts.</p>")
 
 
 def rot_diff() -> str:
@@ -100,103 +110,86 @@ def rot_diff() -> str:
             continue
         cls = "add" if line.startswith("+") else "del" if line.startswith("-") else "hunk" if line.startswith("@@") else ""
         out.append(f"<span class='{cls}'>{esc(line)}</span>")
-    return "\n".join(out)
-
-
-def target_rows(f) -> str:
-    if "targets" not in f:
-        return "<tr><td colspan='3' class='muted'>Run <code>make generate</code>.</td></tr>"
-    keep = [t for t in f["targets"] if not t[0].startswith("v1_adjusted_")]
-    months = [t for t in f["targets"] if t[0].startswith("v1_adjusted_")]
-    rows = []
-    for name, expected, achieved, passed in keep:
-        a = f"{achieved:,.0f}" if abs(achieved) >= 10 else (f"{achieved:.4f}" if abs(achieved) < 1 else f"{achieved:.2f}")
-        rows.append(f"<tr><td>{esc(name.replace('_', ' '))}</td><td class='mono'>{esc(expected)}</td>"
-                    f"<td class='mono num'>{a} <span class='{'ok' if passed else 'bad'}'>{'✓' if passed else '✗'}</span></td></tr>")
-    ok = sum(1 for m in months if m[3])
-    rows.append(f"<tr><td>monthly v1 adjusted churn, Jan 2025 to Jun 2026</td><td class='mono'>each ±0.02 pp</td>"
-                f"<td class='mono num'>{ok}/{len(months)} <span class='{'ok' if ok == len(months) else 'bad'}'>{'✓' if ok == len(months) else '✗'}</span></td></tr>")
-    return "".join(rows)
+    return "".join(out)
 
 
 CSS = r"""
-@font-face { font-family: "EB Garamond"; src: url("charts/fonts/EBGaramond[wght].ttf") format("truetype"); font-weight: 400 800; }
-@font-face { font-family: "Roboto Mono"; src: url("charts/fonts/RobotoMono[wght].ttf") format("truetype"); font-weight: 100 700; }
 :root {
-  --cream: #fff9eb; --paper: #fffdf6; --slate: #526476; --ink: #34414e; --sage: #90b39d; --brick: #a93427;
-  --line: #e7e0cf; --soft: #f5eedd; --muted: #7d8a97;
-  --serif: "EB Garamond", Georgia, serif; --mono: "Roboto Mono", Menlo, monospace;
-  --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --espresso: #2A1C15; --crema: #F4EADB; --baksteen: #A9462B; --gracht: #2F5B55; --honing: #D9A441;
+  --paper: #FAF4E9; --line: #DDCFB8; --soft: #EADFCB; --muted: #7A6656; --ink: #2A1C15;
+  --serif: "Fraunces", Georgia, serif; --sans: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", Menlo, monospace; --hand: "Caveat", cursive;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; overflow-x: hidden; background: var(--cream); color: var(--ink); font: 16px/1.6 var(--sans); }
-a { color: var(--slate); text-decoration-color: var(--sage); text-underline-offset: 3px; }
-a:hover { color: var(--brick); }
-code, .mono { font-family: var(--mono); font-size: .88em; }
+body { margin: 0; overflow-x: hidden; background: var(--crema); color: var(--ink); font: 17px/1.6 var(--sans); }
+a { color: var(--gracht); text-decoration-color: var(--honing); text-underline-offset: 3px; }
+a:hover { color: var(--baksteen); }
+code, .mono { font-family: var(--mono); font-size: .86em; }
 code { background: var(--soft); padding: .1em .35em; border-radius: 4px; }
-.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
-nav { position: sticky; top: 0; z-index: 10; background: rgba(255,249,235,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-nav .wrap { display: flex; gap: 22px; align-items: center; height: 54px; overflow-x: auto; scrollbar-width: none; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+nav { position: sticky; top: 0; z-index: 10; background: rgba(42,28,21,.96); backdrop-filter: blur(8px); }
+nav .wrap { display: flex; gap: 26px; align-items: center; height: 58px; overflow-x: auto; scrollbar-width: none; }
 nav .wrap::-webkit-scrollbar { display: none; }
-nav .brand { font-family: var(--serif); font-size: 21px; color: var(--slate); font-weight: 600; white-space: nowrap; margin-right: auto; text-decoration: none; }
-nav a:not(.brand) { font-family: var(--mono); font-size: 12.5px; text-decoration: none; letter-spacing: .02em; white-space: nowrap; }
-header { padding: 72px 0 40px; }
-.kicker { font-family: var(--mono); font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(40px, 6vw, 66px); line-height: 1.02; color: var(--slate); margin: 14px 0 18px; letter-spacing: -.01em; }
-h1 em { color: var(--brick); font-style: italic; }
-.lede { font-size: 19px; max-width: 760px; color: var(--ink); }
-h2 { font-family: var(--serif); font-weight: 500; font-size: 36px; color: var(--slate); margin: 0 0 8px; }
-h3 { font-family: var(--serif); font-weight: 600; font-size: 22px; color: var(--slate); margin: 0 0 6px; }
-section { padding: 56px 0; border-top: 1px solid var(--line); }
-.sub { color: var(--muted); margin: 0 0 28px; max-width: 760px; }
-.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 36px; }
-.stat { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 18px 18px 14px; }
-.stat .v { font-family: var(--serif); font-size: 40px; line-height: 1; color: var(--slate); }
-.stat .v.brick { color: var(--brick); } .stat .v.sage { color: #5f8a6f; }
-.stat .l { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-top: 8px; letter-spacing: .02em; }
-.claims { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
-.claim { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
-.claim img { width: 100%; display: block; border-bottom: 1px solid var(--line); background: var(--cream); }
-.claim .body { padding: 18px 20px 20px; }
-.claim .n { font-family: var(--mono); font-size: 12px; color: var(--brick); letter-spacing: .1em; }
-.claim p { margin: 6px 0 10px; }
-.links { font-family: var(--mono); font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 6px 14px; }
-.steps { counter-reset: step; display: grid; gap: 12px; }
-.step { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 14px; align-items: start; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
-.step::before { counter-increment: step; content: counter(step); font-family: var(--serif); font-size: 26px; color: var(--sage); line-height: 1; padding-top: 4px; }
-.step h4 { margin: 0 0 4px; font-size: 16px; color: var(--slate); }
-.step p { margin: 0 0 8px; color: var(--ink); font-size: 14.5px; }
-pre.cmd { position: relative; margin: 0; background: var(--slate); color: var(--cream); border-radius: 8px; padding: 11px 76px 11px 14px; font: 13px/1.55 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
-pre.cmd button { position: absolute; top: 7px; right: 7px; font: 11px var(--mono); background: transparent; color: var(--cream); border: 1px solid rgba(255,249,235,.4); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
-pre.cmd button:hover { background: rgba(255,249,235,.12); }
-.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.card { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
-.card .ref { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-table.data { width: 100%; border-collapse: collapse; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; font-size: 14.5px; }
-table.data th { text-align: left; font: 500 11.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--soft); padding: 10px 12px; }
-table.data td { padding: 9px 12px; border-top: 1px solid var(--line); }
+nav .brand { display: flex; align-items: center; gap: 12px; margin-right: auto; text-decoration: none; color: var(--crema); white-space: nowrap; }
+nav .brand svg { height: 34px; width: auto; }
+nav .brand span { font-family: var(--serif); font-size: 21px; font-weight: 600; }
+nav .brand em { color: var(--honing); font-weight: 500; }
+nav a:not(.brand) { font-family: var(--mono); font-size: 12.5px; text-decoration: none; letter-spacing: .04em; white-space: nowrap; color: var(--crema); opacity: .85; }
+nav a:not(.brand):hover { opacity: 1; color: var(--honing); }
+header { background: var(--espresso); color: var(--crema); padding: 76px 0 60px; }
+.kicker { font-family: var(--mono); font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--honing); }
+h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(40px, 6vw, 72px); line-height: 1.02; margin: 16px 0 22px; letter-spacing: -.015em; max-width: 980px; }
+h1 em { color: var(--honing); font-style: italic; }
+.lede { font-size: 20px; max-width: 800px; color: #E7DAC5; margin: 0; }
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 48px; align-items: center; }
+.hero svg { width: 100%; height: auto; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 44px; max-width: 860px; }
+.stat { border: 1px solid rgba(244,234,219,.22); border-radius: 12px; padding: 18px 20px 14px; }
+.stat .v { font-family: var(--serif); font-size: 46px; line-height: 1; }
+.stat .v.brick { color: #E0876A; } .stat .v.gr { color: var(--honing); }
+.stat .l { font-family: var(--mono); font-size: 11.5px; color: #CDBFA9; margin-top: 10px; letter-spacing: .03em; }
+section { padding: 72px 0; border-top: 1px solid var(--line); }
+section:first-of-type { border-top: 0; }
+.tenet-n { font-family: var(--hand); font-size: 30px; color: var(--baksteen); line-height: 1; }
+h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(28px, 3.6vw, 42px); line-height: 1.12; color: var(--espresso); margin: 6px 0 14px; max-width: 980px; }
+h3 { font-family: var(--serif); font-weight: 600; font-size: 22px; margin: 0 0 6px; }
+.sub { color: #4A3A2F; margin: 0 0 30px; max-width: 800px; font-size: 18px; }
+.figure { margin: 0 0 34px; background: var(--crema); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.figure img, .figure svg { width: 100%; height: auto; display: block; }
+.figure figcaption { padding: 14px 22px 16px; border-top: 1px solid var(--line); background: var(--paper); font-size: 16px; }
+.figure figcaption b { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; color: var(--baksteen); margin-right: 10px; font-weight: 500; }
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 34px; align-items: start; }
+.tally { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; }
+.card .v { font-family: var(--serif); font-size: 54px; line-height: 1; }
+.card .v.brick { color: var(--baksteen); } .card .v.gr { color: var(--gracht); }
+.card .l { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+.callout { border-left: 4px solid var(--honing); background: var(--paper); padding: 16px 20px; border-radius: 0 12px 12px 0; margin: 0 0 30px; max-width: 860px; }
+.callout b { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--baksteen); font-weight: 500; }
+table.data { width: 100%; border-collapse: collapse; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; font-size: 15.5px; }
+table.data th { text-align: left; font: 500 11.5px var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); background: var(--soft); padding: 11px 14px; }
+table.data td { padding: 12px 14px; border-top: 1px solid var(--line); vertical-align: top; }
 td.num { text-align: right; font-variant-numeric: tabular-nums; }
-.ok { color: #5f8a6f; font-weight: 700; } .bad { color: var(--brick); font-weight: 700; }
-.cls-A { color: #5f8a6f; } .cls-C { color: var(--brick); }
-.tag { font: 11.5px var(--mono); padding: 2px 8px; border-radius: 99px; background: var(--soft); color: var(--slate); }
-.tag-written { background: #e3eee6; } .tag-rot { background: #f3dfdb; color: var(--brick); }
+.cls-A { color: var(--gracht); font-weight: 700; } .cls-C { color: var(--baksteen); font-weight: 700; }
+.tag { font: 11.5px var(--mono); padding: 2px 9px; border-radius: 99px; background: var(--soft); }
+.tag-written { background: #D3E0DA; color: var(--gracht); } .tag-rot { background: #EBCDBF; color: var(--baksteen); }
 pre.diff { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; font: 13px/1.55 var(--mono); overflow-x: auto; margin: 0; }
-pre.diff .add { color: #2f6b45; background: #e3eee6; display: block; }
-pre.diff .del { color: var(--brick); background: #f6e3df; display: block; }
+pre.diff .add { color: var(--gracht); background: #DCE8E2; display: block; }
+pre.diff .del { color: var(--baksteen); background: #F0D8CD; display: block; }
 pre.diff .hunk { color: var(--muted); display: block; }
-.tree { font: 13.5px/1.9 var(--mono); columns: 2; column-gap: 40px; }
-.tree div { break-inside: avoid; }
-.tree a { text-decoration: none; }
-.tree span { color: var(--muted); font-family: var(--sans); font-size: 13.5px; }
-.muted { color: var(--muted); } .small { font-size: 13px; }
-footer { padding: 40px 0 70px; border-top: 1px solid var(--line); font: 12.5px var(--mono); color: var(--muted); }
-.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 28px; align-items: start; }
+pre.cmd { position: relative; margin: 0; background: var(--espresso); color: var(--crema); border-radius: 8px; padding: 12px 76px 12px 16px; font: 13px/1.55 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+pre.cmd button { position: absolute; top: 8px; right: 8px; font: 11px var(--mono); background: transparent; color: var(--crema); border: 1px solid rgba(244,234,219,.4); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+details { margin-top: 8px; }
+summary { cursor: pointer; font-family: var(--mono); font-size: 13px; color: var(--gracht); margin-bottom: 14px; }
+.muted { color: var(--muted); } .small { font-size: 14px; }
+footer { background: var(--espresso); color: #CDBFA9; padding: 38px 0 56px; font: 12.5px/1.8 var(--mono); }
+footer a { color: var(--honing); }
 @media (max-width: 860px) {
-  .stats { grid-template-columns: repeat(2, 1fr); } .claims, .grid3, .two { grid-template-columns: minmax(0, 1fr); }
-  .wrap { padding: 0 16px; } table.data { font-size: 13px; } table.data td, table.data th { padding: 8px; }
-  .numbers-table { overflow-x: auto; }
-  .tree { columns: 1; } header { padding-top: 44px; }
+  .stats, .tally, .two, .hero { grid-template-columns: minmax(0, 1fr); }
+  .hero svg { max-width: 120px; order: -1; }
+  .wrap { padding: 0 16px; } table.data { font-size: 13.5px; } table.data td, table.data th { padding: 9px; }
+  .numbers-table { overflow-x: auto; } header { padding-top: 44px; } section { padding: 48px 0; }
 }
 """
 
@@ -208,6 +201,16 @@ document.querySelectorAll('pre.cmd').forEach(pre => {
 });
 """
 
+# Design reasoning, not a trial result. The six events are the ones in the talk outline (slide 29).
+SIX_EVENTS = [
+    ("Pause-instead-of-cancel campaign", "Domain model", "A pause is a state of a subscription, never a cancellation."),
+    ("Father's Day gift bundle", "Domain model", "A gift subscription is its own type with no recurring revenue, so flat MRR follows from the model."),
+    ("Billing migration", "Domain model, plus one decision record", "The model refuses a cancellation with no initiator and no reason. Decision 0007 records how the genuine ones were confirmed."),
+    ("Klaviyo connector outage", "Data foundations", "A completeness check on the load flags the gap as missing data, not lost revenue."),
+    ("Churn definition v2", "Versioned metric definition", "Both versions are calculated from the same domain records."),
+    ("PostNL courier strike", "Context note", "An outside cause that no table can hold."),
+]
+
 
 def cmd(text: str) -> str:
     return f"<pre class='cmd' data-cmd='{esc(text)}'>{esc(text)}</pre>"
@@ -215,122 +218,103 @@ def cmd(text: str) -> str:
 
 def main():
     f = facts()
+    t = trials()
     now = dt.datetime.now().strftime("%d %B %Y, %H:%M")
     head = git("rev-parse", "--short", "HEAD")
-    tags = {t: git("rev-parse", "--short", f"refs/tags/{t}") for t in ("kelder/before-context", "kelder/with-context", "kelder/rot")}
-    selected = sorted((ROOT / "demo" / "selected").glob("*.md"))
 
-    def chart(stem):
+    def chart(stem, alt):
         p = ROOT / "charts" / "out" / f"{stem}.png"
-        return f"<img src='charts/out/{stem}.png' alt='{esc(stem)}' loading='lazy'>" if p.exists() else ""
+        return f"<img src='charts/out/{stem}.png' alt='{esc(alt)}' loading='lazy'>" if p.exists() else "<p class='muted'>Chart not built yet: run <code>make charts</code>.</p>"
 
-    claims = [
-        ("01", "Agents on a good warehouse still explain numbers wrongly",
-         f"The before-context warehouse is well modelled and fully documented, yet {f.get('midnight', 0):,} March cancellations share one midnight UTC timestamp. Without the reason written down, an agent reads it as customers leaving.",
-         "cancellations_by_hour_feb_mar_2026", [("installed workspace", None), ("ingest_before_summary.md", "demo/selected/ingest_before_summary.md")]),
-        ("02", "Writing the context down fixes most of it",
-         f"Caveats, <code>context.business_events</code>, decision records and verified queries turn {pct(f.get('march_raw'))} into {pct(f.get('march_adj'))}, with the reason attached. The model is the same.",
-         "churn_monthly_2026_events", [("AGENTS.md", "kelder-dbt/AGENTS.md"), ("0007", "kelder-dbt/context/decisions/0007-recharge-migration-churn-artifacts.md"), ("verified_queries.yml", "kelder-dbt/context/verified_queries.yml")]),
-        ("03", "Written context decays",
-         f"One commit, “Fix churn logic”, points the restated series at the unadjusted events. The like-for-like comparison flips from {pct(f.get('yoy_26'), 2)} vs {pct(f.get('yoy_25'), 2)} (improved) to {pct(f.get('rot_26'), 2)} (worse), while every caveat still says the artefacts are excluded.",
-         "yoy_like_for_like_written_vs_rot", [("rot diff", "#rot"), ("rot workspace", None)]),
-        ("04", "Forcing functions catch the decay",
-         "The pull request template asks for the metric impact; CI runs the verified queries against pinned answers. On the rot commit, the like-for-like query and the capture check fail, and the March query still passes.",
-         "churn_v1_vs_v2_restated", [("make check", "#start"), ("pull request template", ".github/pull_request_template.md"), ("ci.yml", ".github/workflows/ci.yml")]),
-    ]
+    mark_dark = (BRAND / "kelder-mark.svg").read_text()
+    mark_light = (BRAND / "kelder-mark-reversed.svg").read_text()
+    favicon = "data:image/svg+xml;utf8," + html.escape(mark_dark.replace("\n", "").replace("#", "%23"), quote=True)
 
-    def links(ls):
-        return "".join(f"<a href='{esc(h)}'>{esc(t)}</a>" if h else f"<span class='muted'>{esc(t)}</span>" for t, h in ls)
+    b_inst = t["board"].get("installed", (0, 3))
+    b_writ = t["board"].get("written", (0, 3))
 
-    claim_html = "".join(f"""<article class='claim'>{chart(c[3])}<div class='body'><div class='n'>CLAIM {c[0]}</div>
-        <h3>{esc(c[1])}</h3><p>{c[2]}</p><div class='links'>{links(c[4])}</div></div></article>""" for c in claims)
+    def svg(stem):
+        q = ROOT / "charts" / "out" / f"{stem}.svg"
+        return q.read_text() if q.exists() else "<p class='muted'>Diagram not built yet: run <code>make charts</code>.</p>"
 
-    june = f.get("june") or {}
-    stats = [
-        (pct(f.get("march_raw")), "brick", "March 2026 churn, raw"),
-        (pct(f.get("march_adj")), "sage", "March 2026 churn, adjusted"),
-        (f"{f.get('artefacts', 0):,}", "", "paused subscriptions imported as cancelled"),
-        (f"{june.get('new_subscribers', '–'):,}" if june else "–", "", f"new subscribers June 2026, {june.get('restores_excluded', '–')} restores excluded"),
-    ]
-    stat_html = "".join(f"<div class='stat'><div class='v {c}'>{esc(v)}</div><div class='l'>{esc(l)}</div></div>" for v, c, l in stats)
-
-    steps = [
-        ("Set up and build everything", "Install the pinned environment and agent tooling, then generate the data, build the three states, run the tests and render the charts. About three minutes after setup. New machine? See START_HERE.md.", "make setup && make all"),
-        ("Run the checks CI runs", "Verified queries against pinned answers, and the context capture check on the rot pull request body. Red on purpose.", "make check STATE=rot PR_BODY=kelder-dbt/.pr/rot.md"),
-        ("Create the agent workspaces", "installed, written and rot under ~/kelder-demo, each with its own ktx project and warehouse copy; starts their ktx servers and runs the leak check. make doctor says what is missing.", "make demo"),
-        ("Prove the isolation", "Leak check across every workspace, then dry runs that confirm the tools, the denied reads and that AGENTS.md loads.", "make leak-check && uv run python scripts/verify_isolation.py"),
-        ("Run trials", "Same question, fresh session, pinned model, every transcript kept. Start with three runs per question.", "make trials WORKSPACE=installed N=3 && make summary"),
-        ("Record the clips", "Clip one: installed and written side by side. Clip two: the rot diff, the rot agent, then the failing check.", "scripts/demo_terminal.sh side-by-side"),
-    ]
-    step_html = "".join(f"<div class='step'><div><h4>{esc(t)}</h4><p>{esc(d)}</p>{cmd(c)}</div></div>" for t, d, c in steps)
-
-    tree = [
-        ("BUILD_BRIEF.md", "the specification"), ("BUILD_LOG.md", "every deviation and judgement call"), ("README.md", "how to reproduce"),
-        ("generator/", "world simulation, source systems, incidents, truth"), ("generator/config.yaml", "every parameter and the seed"),
-        ("loader/load_raw.py", "Parquet into raw_* schemas"), ("kelder-dbt/", "Kelder's analytics repo (three states)"),
-        ("kelder-dbt/context/", "decisions, glossary, quirks, verified queries"), ("scripts/", "build states, checks, workspaces, trials"),
-        ("tests/", "targets, realism, incidents, truth, leaks"), ("charts/out/", "slide charts: SVG, PNG, JSON"),
-        ("demo/", "prompts, trials, labels, selected answers"), ("demo/ktx/", "stored ktx ingest output per state"),
-        ("data/profile_report.md", "ten-minute sniff test of the data"), ("thinking/", "design notes"),
-    ]
-    tree_html = "".join(f"<div><a href='{esc(p)}'>{esc(p)}</a> <span>{esc(d)}</span></div>" for p, d in tree)
-
-    states = [
-        ("before-context", "kelder/before-context", f"A competent dbt project with no context layer. March reads {pct(f.get('march_raw'))} and restores count as new subscribers.", "installed"),
-        ("with-context", "kelder/with-context", "The article's end state: caveats, business events, metric changelog, decision records, verified queries, AGENTS.md, PR template.", "written"),
-        ("rot", "kelder/rot", "One commit on top of with-context that breaks the restated series. Every piece of context still claims otherwise.", "rot"),
-    ]
-    state_html = "".join(f"""<div class='card'><div class='ref'>{esc(r)} · {esc(tags.get(r, ''))}</div><h3>{esc(n)}</h3>
-        <p class='small'>{esc(d)}</p><div class='links'><span class='tag tag-{esc(w)}'>~/kelder-demo/{esc(w)}</span></div></div>""" for n, r, d, w in states)
-
-    sel_html = "".join(f"<div><a href='{esc(p.relative_to(ROOT))}'>{esc(p.name)}</a></div>" for p in selected) or "<p class='muted'>None yet.</p>"
+    six = "".join(f"<tr><td><b>{esc(e)}</b></td><td>{esc(w)}</td><td>{esc(why)}</td></tr>" for e, w, why in SIX_EVENTS)
 
     page = f"""<!doctype html>
 <html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kelder context layer</title><style>{CSS}</style></head>
+<title>Kelder Koffie: the evidence</title>
+<link rel="icon" href="{favicon}">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>{CSS}</style></head>
 <body>
-<nav><div class="wrap"><a class="brand" href="#">Kelder Coffee</a>
-<a href="#claims">claims</a><a href="#numbers">numbers</a><a href="#start">start here</a><a href="#states">states</a><a href="#rot">rot</a><a href="#trials">trials</a><a href="#map">map</a></div></nav>
-<header><div class="wrap">
+<nav><div class="wrap"><a class="brand" href="#">{mark_light}<span>Kelder <em>Koffie</em></span></a>
+<a href="#tenet-1">tenet 1</a><a href="#tenet-2">tenet 2</a><a href="#tenet-3">tenet 3</a><a href="#trials">all 45 trials</a></div></nav>
+
+<header><div class="wrap hero"><div>
 <div class="kicker">Tasman Analytics · Compass AI &amp; Tech Summit · Budapest · 1 October 2026</div>
 <h1>Building a data context layer to <em>fix</em> your AI analytics</h1>
-<p class="lede">The evidence behind the talk. Kelder Coffee is a fictional Amsterdam coffee subscription company with a well-modelled warehouse, six events nobody wrote down, and an agent that explains them wrongly with total confidence, until the context is written down. Then one ordinary commit makes that context false.</p>
-<div class="stats">{stat_html}</div>
-</div></header>
+<p class="lede">The evidence behind the talk. Kelder Koffie is a fictional Amsterdam coffee subscription company, fictional on purpose so we know the right answer. Three tenets, and the chart or trial that backs each one.</p>
+<div class="stats">
+<div class="stat"><div class="v brick">{pct(f.get('march_raw'))}</div><div class="l">March 2026 churn, raw</div></div>
+<div class="stat"><div class="v gr">{pct(f.get('march_adj'))}</div><div class="l">March 2026 churn, adjusted</div></div>
+<div class="stat"><div class="v">{f.get('artefacts', 0):,}</div><div class="l">paused subscriptions imported as cancelled on 12 March</div></div>
+</div></div>
+<div>{mark_light}</div></div></header>
 
-<section id="claims"><div class="wrap"><h2>Four claims, four pieces of evidence</h2>
-<p class="sub">Every chart reads only from a warehouse state, never from the hidden truth, so each one is evidence about what an agent could see.</p>
-<div class="claims">{claim_html}</div></div></section>
+<section id="tenet-1"><div class="wrap">
+<div class="tenet-n">Tenet 1</div>
+<h2>An agent can find what looks odd in the data. Only people know why it happened.</h2>
+<p class="sub">On 12 March 2026 Kelder moved billing from Shopify to Recharge. The import stamped a batch of cancellations at midnight UTC. The agent finds the batch. It cannot know which of those cancellations were real customers leaving, because that fact never reached a table.</p>
+<figure class="figure">{chart('cancellations_by_hour_feb_mar_2026', 'Cancellations by hour of day, February and March 2026')}
+<figcaption><b>WHAT THE AGENT SEES</b>{f.get('midnight', 0):,} cancellations at 00:00 UTC in March. Nothing in the rows says why.</figcaption></figure>
+<figure class="figure">{chart('churn_monthly_2026_events', 'Monthly churn, January to June 2026')}
+<figcaption><b>THE NUMBER</b>{pct(f.get('march_raw'))} raw in March, {pct(f.get('march_adj'))} once the import is taken out.</figcaption></figure>
+<div class="two"><div>
+<h3>Trial result: one number for the board</h3>
+<p class="sub" style="margin-bottom:16px">Same question, same model, same warehouse, no notes. The agent recommended 2.8% in {t['wrong_28']} of 3 runs. The true figure is {pct(f.get('march_adj'))}. Some of the imported cancellations were real customers leaving, and the rows cannot tell them apart.</p>
+<p class="small muted">Read from <a href="demo/labels/labels.csv">demo/labels/labels.csv</a> and <a href="demo/trial_summary.md">demo/trial_summary.md</a>.</p></div>
+<div class="tally">
+<div class="card"><div class="v brick">{b_inst[0]} of {b_inst[1]}</div><div class="l">runs gave the right board number<br>installed workspace, no context</div></div>
+<div class="card"><div class="v gr">{b_writ[0]} of {b_writ[1]}</div><div class="l">runs gave the right board number<br>written workspace, context written down</div></div>
+</div></div>
+</div></section>
 
-<section id="numbers"><div class="wrap two"><div><h2>Numbers that must reconcile</h2>
-<p class="sub">Asserted by tests against the generated data. Read live from <code>data/truth/kelder_truth.duckdb</code>.</p>
-<div class="numbers-table"><table class="data"><thead><tr><th>Target</th><th>Expected</th><th>Achieved</th></tr></thead><tbody>{target_rows(f)}</tbody></table></div></div>
-<div><h2>The core fact</h2><p>On 12 March 2026 Kelder migrated billing from Shopify to Recharge. About {f.get('artefacts', 1900):,} paused subscriptions were written as cancelled. March churn is <b style="color:var(--brick)">{pct(f.get('march_raw'))}</b> raw and <b style="color:#5f8a6f">{pct(f.get('march_adj'))}</b> adjusted. Anyone quoting the raw number is wrong.</p>
-<p class="small muted">Findable in the <code>churned_at</code> caveat, <code>context.business_events</code>, decision 0007, the March verified query and <code>AGENTS.md</code>, and checked by <code>tests/truth/test_context_files.py</code>.</p>
-<h3 style="margin-top:28px">Also in the data</h3>
-<p class="small">Email-attributed revenue for April 2026 reads €{f.get('email_april', 0):,.0f} because of a 31-hour Klaviyo gap. From May the churn definition gives failed payments 30 days' grace. A PostNL strike hit parcels shipped 18 to 24 May. The Father's Day bundle ran 14 to 21 June. {f.get('restores', 0):,} wiped pauses came back as “new” Recharge subscriptions.</p></div></div></section>
-
-<section id="start"><div class="wrap"><h2>Start here</h2><p class="sub">Everything runs locally. Requirements: uv and git; the agent tooling (pinned Claude Code, ktx, Node 22) installs into <code>~/kelder-demo/_tools</code> with <code>tools/demo/setup.sh</code>.</p>
-<div class="steps">{step_html}</div></div></section>
-
-<section id="states"><div class="wrap"><h2>Three states of one repository</h2>
-<p class="sub"><code>git log --oneline -- kelder-dbt/</code> reads as Kelder's own history, from January to June 2026. Each state is a git reference; <code>scripts/build_state.py</code> builds any of them into its own warehouse.</p>
-<div class="grid3">{state_html}</div></div></section>
-
-<section id="rot"><div class="wrap two"><div><h2>The rot commit</h2>
-<p class="sub">“Fix churn logic”, by Sanne, 26 June 2026. The pull request body has no box ticked and one line under “What changed”: <i>Simplify churn model, consolidate v1 and v2 CTEs.</i></p>
+<section id="tenet-2"><div class="wrap">
+<div class="tenet-n">Tenet 2</div>
+<h2>Written context describes the business on the day it was written, and the business keeps changing.</h2>
+<p class="sub">Once the reasons are written down, the agent gets it right. Then one ordinary commit, “Fix churn logic”, points the restated churn series at the unadjusted cancellations. Every note still says the import is excluded. Every dbt test still passes.</p>
+<figure class="figure">{chart('yoy_like_for_like_written_vs_rot', 'First half of 2025 against first half of 2026, before and after the rot commit')}
+<figcaption><b>THE COMPARISON FLIPS</b>First half of 2025 against first half of 2026, same rules. Improved from {pct(f.get('yoy_25'), 2)} to {pct(f.get('yoy_26'), 2)}; after the commit, worse, {pct(f.get('rot_25'), 2)} to {pct(f.get('rot_26'), 2)}.</figcaption></figure>
+<div class="two"><div><h3>The rot commit</h3>
+<p class="sub" style="margin-bottom:16px">Sanne, 26 June 2026. The pull request body has one line under “What changed” and no metric-impact box ticked.</p>
 <pre class="diff">{rot_diff()}</pre></div>
-<div><h2>What catches it</h2><p>Not the dbt tests: they all pass. The verified query for the like-for-like comparison fails against its pinned answer, and the capture check fails because a metrics model changed with no metric-impact box ticked.</p>
+<div><h3>What catches it</h3>
+<p>Not the dbt tests. The verified query for the like-for-like comparison fails against its pinned answer, and the capture check fails because a metrics model changed with no impact box ticked.</p>
 {cmd("make check STATE=rot PR_BODY=kelder-dbt/.pr/rot.md")}
-<p class="small muted" style="margin-top:12px">Pinned answers live in <code>tests/verified/expected/</code>, outside every workspace. They are frozen only with Thomas's approval, and every freeze is logged.</p></div></div></section>
+<div class="callout" style="margin-top:22px"><b>Trial note</b><br>In the rot workspace, {t['caught_rot']} of 3 runs of the like-for-like question flagged the bug in the SQL. That is Claude's reading of the transcripts, not yet a label from Thomas.</div>
+</div></div>
+</div></section>
 
-<section id="trials"><div class="wrap"><h2>Trials</h2><p class="sub">The same six questions, many times, in each workspace, on one pinned model. Honesty rules: every run is kept and counted, and the recorded take shows the most common outcome.</p>
-{trial_table()}
-<h3 style="margin-top:28px">Selected answers for slides</h3><div class="tree">{sel_html}</div></div></section>
+<section id="tenet-3"><div class="wrap">
+<div class="tenet-n">Tenet 3</div>
+<h2>Model the business first, then write down only what the model cannot hold.</h2>
+<div class="callout"><b>Design, not a trial result</b><br>This tenet rests on Tasman practice and design reasoning. No trial on this page tests it, and Kelder's dbt project has no domain layer yet.</div>
+<figure class="figure">{svg('domain_model_logical')}
+<figcaption><b>LOGICAL VIEW</b>What Kelder is made of, written before looking at any source system. A cancellation needs an initiator and a reason.</figcaption></figure>
+<figure class="figure">{svg('domain_model_erd')}
+<figcaption><b>ERD</b>The same model as tables. Rows that break the cancellation rule land in a review queue, not in the status-change table.</figcaption></figure>
+<p class="sub">Six things happened at Kelder in the first half of 2026. Most of them belong in the model. The context layer shrinks to the reasons behind decisions, small enough for a named owner to keep current.</p>
+<div class="numbers-table"><table class="data"><thead><tr><th>What happened</th><th>Where it belongs</th><th>Why</th></tr></thead><tbody>{six}</tbody></table></div>
+</div></section>
 
-<section id="map"><div class="wrap"><h2>Where things are</h2><div class="tree">{tree_html}</div></div></section>
+<section id="trials"><div class="wrap">
+<h2 style="font-size:30px">All 45 trial runs</h2>
+<details><summary>Show results by question and workspace</summary>
+{trial_table(t['rows'])}</details>
+</div></section>
 
-<footer><div class="wrap">Generated {esc(now)} from commit {esc(head)} by <code>scripts/render_index.py</code>. Every number on this page is read from build outputs.</div></footer>
+<footer><div class="wrap">Built from commit {esc(head)} on {esc(now)} by <code>scripts/render_index.py</code>. Every number on this page is read from build outputs.<br>
+To rebuild and run the demo, see <a href="START_HERE.md">START_HERE.md</a>.</div></footer>
 <script>{JS}</script></body></html>"""
     OUT.write_text(page)
     print(f"wrote {OUT.relative_to(ROOT)}")

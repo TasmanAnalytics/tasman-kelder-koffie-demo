@@ -26,8 +26,9 @@ OUT = ROOT / "charts" / "out"
 FONTS = ROOT / "charts" / "fonts"
 WAREHOUSE = ROOT / "data" / "warehouse"
 
-CREAM, SLATE, SAGE, BRICK = "#fff9eb", "#526476", "#90b39d", "#a93427"
-SLATE_LIGHT = "#c9ced3"
+# Kelder Koffie brand: Crema, Espresso, Gracht, Baksteen. The names below are roles, not colours.
+CREAM, SLATE, SAGE, BRICK = "#F4EADB", "#2A1C15", "#2F5B55", "#A9462B"
+SLATE_LIGHT = "#CDBFA9"
 W_IN, H_IN, DPI = 12, 6.75, 200  # 2400 x 1350 px
 
 
@@ -43,7 +44,7 @@ def setup_fonts() -> dict:
     if display != "EB Garamond" or mono != "Roboto Mono":
         print("WARNING: EB Garamond or Roboto Mono not found in charts/fonts; using fallback fonts", file=sys.stderr)
     plt.rcParams.update({
-        "font.family": body, "font.size": 15, "text.color": SLATE, "axes.labelcolor": SLATE,
+        "font.family": body, "font.size": 19, "text.color": SLATE, "axes.labelcolor": SLATE,
         "axes.edgecolor": SLATE, "xtick.color": SLATE, "ytick.color": SLATE, "axes.facecolor": CREAM,
         "figure.facecolor": CREAM, "savefig.facecolor": CREAM, "axes.spines.top": False,
         "axes.spines.right": False, "axes.linewidth": 1.0, "svg.fonttype": "none",
@@ -55,19 +56,19 @@ F = {}
 
 
 def mono(size=12, **kw):
-    return dict(fontfamily=F["mono"], fontsize=size, **kw)
+    return dict(fontfamily=F["mono"], fontsize=round(size * 1.4, 1), **kw)
 
 
 def figure():
     fig, ax = plt.subplots(figsize=(W_IN, H_IN), dpi=DPI)
-    fig.subplots_adjust(left=0.08, right=0.97, top=0.86, bottom=0.14)
+    fig.subplots_adjust(left=0.1, right=0.97, top=0.86, bottom=0.18)
     return fig, ax
 
 
 def style_axes(ax, pct=True):
     for lab in ax.get_xticklabels() + ax.get_yticklabels():
         lab.set_fontfamily(F["mono"])
-        lab.set_fontsize(12)
+        lab.set_fontsize(17)
     ax.tick_params(length=0, pad=8)
     ax.grid(axis="y", color=SLATE_LIGHT, linewidth=0.6, alpha=0.6)
     ax.set_axisbelow(True)
@@ -76,7 +77,7 @@ def style_axes(ax, pct=True):
 
 
 def source_line(fig, text):
-    fig.text(0.08, 0.035, text, **mono(10.5, color=SLATE, alpha=0.85))
+    fig.text(0.08, 0.03, text, **mono(7.6, color=SLATE, alpha=0.8))
 
 
 def save(fig, stem, values):
@@ -114,7 +115,7 @@ def cancellations_by_hour():
     for m, h, n in rows:
         data[m][h] = n
     fig, axes = plt.subplots(1, 2, figsize=(W_IN, H_IN), dpi=DPI, sharey=True)
-    fig.subplots_adjust(left=0.08, right=0.97, top=0.84, bottom=0.16, wspace=0.08)
+    fig.subplots_adjust(left=0.1, right=0.97, top=0.86, bottom=0.22, wspace=0.08)
     for ax, (m, label) in zip(axes, [("2026-02", "FEBRUARY 2026"), ("2026-03", "MARCH 2026")]):
         colors = [SLATE] * 24
         if m == "2026-03":
@@ -145,15 +146,14 @@ def churn_monthly_2026_events():
     adj = [r[1] * 100 for r in rows]
     raw_mar = next(r[2] for r in rows if r[0].month == 3) * 100
     fig, ax = figure()
-    fig.subplots_adjust(top=0.78)
-    ax.plot(x[:-1], adj[:-1], color=SLATE, lw=2.4, marker="o", ms=7, zorder=3)
-    ax.plot(x[-2:], adj[-2:], color=SLATE, lw=2.4, ls=(0, (3, 2)), zorder=2)
+    ax.plot(x[:-1], adj[:-1], color=SLATE, lw=3.6, marker="o", ms=7, zorder=3)
+    ax.plot(x[-2:], adj[-2:], color=SLATE, lw=3.6, ls=(0, (3, 2)), zorder=2)
     ax.plot(x[-1], adj[-1], marker="o", ms=8, mfc=CREAM, mec=SLATE, mew=2, zorder=4)
     i_mar = [m.month for m in months].index(3)
     ax.plot([x[i_mar], x[i_mar]], [adj[i_mar], raw_mar], color=SLATE_LIGHT, lw=1.2, zorder=1)
     ax.plot(x[i_mar], raw_mar, marker="o", ms=9, color=BRICK, zorder=5)
     ax.annotate(f"{raw_mar:.1f}% raw", xy=(x[i_mar], raw_mar), xytext=(10, -4), textcoords="offset points", **mono(13, color=BRICK))
-    ax.annotate(f"{adj[i_mar]:.1f}% adjusted", xy=(x[i_mar], adj[i_mar]), xytext=(10, -18), textcoords="offset points", **mono(12, color=SAGE))
+    ax.annotate(f"{adj[i_mar]:.1f}% adjusted", xy=(x[i_mar], adj[i_mar]), xytext=(-14, -40), textcoords="offset points", ha="right", **mono(12, color=SAGE))
     ax.annotate("provisional", xy=(x[-1], adj[-1]), xytext=(-10, -22), textcoords="offset points", ha="right", **mono(11, color=SLATE))
     v2 = dt.datetime(2026, 5, 1)
     ax.axvline(v2, color=SLATE, lw=1, ls="--", alpha=0.8)
@@ -164,15 +164,12 @@ def churn_monthly_2026_events():
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
     style_axes(ax)
     ax.set_ylabel("subscriber churn, as reported", **mono(11))
-    plotted_events = []
-    for i, (d, etype, title) in enumerate(events):
-        t = dt.datetime(d.year, d.month, d.day)
-        ax.axvline(t, color=SLATE_LIGHT, lw=1, ls=":", zorder=0)
-        y = 1.02 + 0.075 * (i % 2)
-        ax.text(t, y, f"{d.strftime('%-d %b').upper()} {etype.replace('_', ' ')}", transform=ax.get_xaxis_transform(),
-                ha="center", va="bottom", **mono(10, color=SLATE))
-        plotted_events.append({"event_date": d, "event_type": etype, "title": title})
-    source_line(fig, "Kelder Coffee warehouse, with-context state · metrics_subscriber_churn_monthly, context.business_events")
+    plotted_events = [{"event_date": d, "event_type": etype, "title": title} for d, etype, title in events]
+    mig = next((d for d, etype, _ in events if etype == "migration"), None)
+    if mig:
+        ax.text(dt.datetime(mig.year, mig.month, mig.day), 10.05, "12 MAR: billing migration", ha="right", va="top",
+                **mono(11, color=SLATE))
+    source_line(fig, "Kelder Coffee warehouse, with-context state · metrics_subscriber_churn_monthly")
     save(fig, "churn_monthly_2026_events", {
         "unit": "percent", "series": [{"month": m, "churn_rate_as_reported": a, "definition_version": r[3], "is_provisional": r[4]}
                                       for m, a, r in zip(months, adj, rows)],
@@ -186,9 +183,9 @@ def churn_v1_vs_v2_restated():
     v1 = [r[1] * 100 for r in rows]
     v2 = [r[2] * 100 for r in rows]
     fig, ax = figure()
-    ax.plot(x, v1, color=SLATE, lw=2.4, marker="o", ms=5, label="v1: failed payment is churn on day one")
-    ax.plot(x[:-1], v2[:-1], color=SAGE, lw=2.4, marker="o", ms=5, label="v2 restated: only if not recovered in 30 days")
-    ax.plot(x[-2:], v2[-2:], color=SAGE, lw=2.4, ls=(0, (3, 2)))
+    ax.plot(x, v1, color=SLATE, lw=3.6, marker="o", ms=5, label="v1: failed payment is churn on day one")
+    ax.plot(x[:-1], v2[:-1], color=SAGE, lw=3.6, marker="o", ms=5, label="v2 restated: only if not recovered in 30 days")
+    ax.plot(x[-2:], v2[-2:], color=SAGE, lw=3.6, ls=(0, (3, 2)))
     ax.plot(x[-1], v2[-1], marker="o", ms=7, mfc=CREAM, mec=SAGE, mew=2)
     brk = dt.datetime(2026, 5, 1)
     ax.axvline(brk, color=SLATE, lw=1, ls="--")
@@ -196,9 +193,9 @@ def churn_v1_vs_v2_restated():
             **mono(10.5, color=SLATE))
     ax.set_ylim(0, 4.2)
     ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 4, 7, 10]))
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %y"))
     style_axes(ax)
-    leg = ax.legend(loc="lower left", frameon=False, prop={"family": F["mono"], "size": 11})
+    leg = ax.legend(loc="lower left", frameon=False, prop={"family": F["mono"], "size": 15})
     for t in leg.get_texts():
         t.set_color(SLATE)
     ax.set_ylabel("subscriber churn, adjusted", **mono(11))
@@ -223,7 +220,7 @@ def email_revenue_daily_april_2026():
     ax.bar(days, rev, width=0.75, color=colors)
     lo, hi = dt.datetime(2026, 4, 9, 8), dt.datetime(2026, 4, 10, 15)  # 06:00 to 13:00 UTC in CEST
     ax.axvspan(lo, hi, color=SLATE_LIGHT, alpha=0.55, lw=0)
-    ax.text(hi + dt.timedelta(hours=10), max(rev) * 0.95, "no Klaviyo data\n9 Apr 06:00 to 10 Apr 13:00 UTC", va="top", **mono(11, color=SLATE))
+    ax.text(hi + dt.timedelta(hours=10), max(rev) * 0.95, "no Klaviyo data\n9 Apr 06:00 to\n10 Apr 13:00 UTC", va="top", **mono(11, color=SLATE))
     ax.plot(days[i9], max(rev) * 0.012, marker="^", ms=14, color=BRICK, zorder=5, clip_on=False)
     ax.annotate(f"Thu 9 Apr, campaign day: €{rev[i9]:,.0f}", xy=(days[i9], max(rev) * 0.03), xytext=(days[i9] - dt.timedelta(days=5.6), max(rev) * 0.45),
                 **mono(12, color=BRICK), arrowprops=dict(arrowstyle="-", color=BRICK, lw=1))
@@ -233,7 +230,7 @@ def email_revenue_daily_april_2026():
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b"))
     style_axes(ax, pct=False)
     ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"€{v:,.0f}"))
-    ax.set_ylabel("email-attributed revenue per day", **mono(11))
+    ax.set_ylabel("email revenue per day", **mono(11))
     source_line(fig, "Kelder Coffee warehouse, with-context state · metrics_email_attribution_daily, context.business_events")
     save(fig, "email_revenue_daily_april_2026", {"unit": "EUR", "series": [{"day": d, "attributed_revenue_eur": v, "is_incomplete": inc}
                                                                           for d, v, inc in rows], "outage": {"event_date": ev[0], "description": ev[1]}})

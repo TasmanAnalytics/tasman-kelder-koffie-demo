@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="20 30 670 805" role="img" aria-label="Kelder Koffie mark">
+  <defs>
+    <mask id="bean-hole" maskUnits="userSpaceOnUse" x="0" y="0" width="760" height="860">
+      <rect width="760" height="860" fill="#fff"/>
+      <ellipse cx="352" cy="259" rx="54" ry="84" transform="rotate(-13 352 259)" fill="#000"/>
+      <path d="M325 190C318 235 350 255 372 290C382 305 380 322 378 333" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="round"/>
+    </mask>
+  </defs>
+  <circle cx="355" cy="62" r="27" fill="#2A1C15"/>
+  <path mask="url(#bean-hole)" fill="#2A1C15" d="M228 230C228 150 290 105 355 105C425 105 485 150 485 230L485 340Q485 385 525 387L580 387Q613 388 613 425L613 583L95 583L95 425Q95 388 130 387L185 387Q228 385 228 340Z"/>
+  <path fill="#2A1C15" fill-rule="evenodd" d="M95 618H613V800H95Z M170 671H222Q237 671 237 686V726Q237 741 222 741H170Q155 741 155 726V686Q155 671 170 671Z M488 671H540Q555 671 555 686V726Q555 741 540 741H488Q473 741 473 726V686Q473 671 488 671Z"/>
+  <path fill="#A9462B" d="M296 800V705Q296 653 355 653Q413 653 413 705V800Z"/>
+  <rect x="25" y="800" width="660" height="31" rx="15.5" fill="#2A1C15"/>
+</svg>

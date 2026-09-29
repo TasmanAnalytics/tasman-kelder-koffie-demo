@@ -48,7 +48,7 @@ This checks everything above and prints the next command to run. Run it whenever
 open index.html
 ```
 
-This is the one-page map of the evidence, the numbers, the commands and the files.
+This is the evidence page for the talk: the three tenets, each with the chart or trial that backs it.
 
 ## Then
 
