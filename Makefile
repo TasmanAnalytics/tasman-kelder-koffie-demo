@@ -7,7 +7,7 @@ WORKSPACE ?= installed
 PROMPTS ?= all
 N ?= 3
 
-.PHONY: setup doctor demo serve serve-stop serve-status index all generate load build build-all test test-data test-truth test-dbt check freeze-verified charts workspaces leak-check trials summary context-files clean
+.PHONY: setup doctor demo serve serve-stop serve-status index ktx-viewer all generate load build build-all test test-data test-truth test-dbt check freeze-verified charts workspaces leak-check trials summary context-files clean
 
 all: generate load build-all test charts index
 
@@ -68,6 +68,10 @@ clean:
 
 index:
 	$(PY) scripts/render_index.py
+
+# Browsable view of the ktx wiki and semantic layer per state (ktx 0.16.0 has no UI)
+ktx-viewer:
+	$(PY) scripts/render_ktx_viewer.py
 
 # ktx MCP servers for the agent workspaces (127.0.0.1:7801-7804); WORKSPACE=installed|written|rot|wiki for one
 serve:
