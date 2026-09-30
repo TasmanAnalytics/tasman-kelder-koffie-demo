@@ -46,6 +46,7 @@ charts:
 	$(PY) charts/architecture.py
 	$(PY) charts/architecture_simple.py
 	$(PY) charts/knowledge_homes.py
+	$(PY) charts/marts_erd.py
 
 workspaces:
 	$(PY) scripts/make_workspace.py --all
