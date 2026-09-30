@@ -72,8 +72,8 @@ def facts() -> dict:
 
 
 def trials() -> dict:
-    """Class counts from demo/trial_summary.md and Claude's reading of transcripts from demo/labels/labels.csv."""
-    out = {"board": {}, "rows": [], "wrong_28": 0, "caught_rot": 0}
+    """Class counts from demo/trial_summary.md and our reading of the transcripts from demo/labels/labels.csv."""
+    out = {"board": {}, "rows": [], "wrong_28": 0, "caught_rot": 0, "rot_yoy_runs": 0}
     p = ROOT / "demo" / "trial_summary.md"
     if p.exists():
         for l in p.read_text().splitlines():
@@ -85,10 +85,11 @@ def trials() -> dict:
     lp = ROOT / "demo" / "labels" / "labels.csv"
     if lp.exists():
         for r in csv.DictReader(lp.open()):
-            if r["workspace"] == "installed" and r["prompt_id"] == "churn_board_number" and "2.8%" in r["notes"]:
+            if r["workspace"] == "installed" and r["prompt_id"] == "churn_board_number" and "recommends 2.8%" in r["notes"].lower():
                 out["wrong_28"] += 1
-            if r["workspace"] == "rot" and r["prompt_id"] == "churn_yoy_like_for_like" and "caught the rot" in r["notes"]:
-                out["caught_rot"] += 1
+            if r["workspace"] == "rot" and r["prompt_id"] == "churn_yoy_like_for_like":
+                out["rot_yoy_runs"] += 1
+                out["caught_rot"] += "caught the rot" in r["notes"]
     return out
 
 
@@ -102,7 +103,7 @@ def trial_table(rows) -> str:
     return ("<div class='numbers-table'><table class='data'><thead><tr><th>Workspace</th><th>Question</th><th>Runs</th>"
             "<th>A</th><th>B</th><th>C</th><th>D</th></tr></thead><tbody>" + body + "</tbody></table></div>"
             "<p class='muted small'>A is the right answer, C the confident wrong one. Class definitions are in "
-            "<a href='demo/trial_summary.md'>demo/trial_summary.md</a>. The classes are a keyword heuristic; nothing is labelled by hand yet. "
+            "<a href='demo/trial_summary.md'>demo/trial_summary.md</a>. Classes come from a keyword heuristic on each final answer; our reading of every run is in <a href='demo/labels/labels.csv'>labels.csv</a>. "
             "Every run counts.</p>")
 
 
@@ -167,7 +168,8 @@ h3 { font-family: var(--serif); font-weight: 600; font-size: 22px; margin: 0 0 6
 .figure figcaption { padding: 14px 22px 16px; border-top: 1px solid var(--line); background: var(--paper); font-size: 16px; }
 .figure figcaption b { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; color: var(--baksteen); margin-right: 10px; font-weight: 500; }
 .two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 34px; align-items: start; }
-.tally { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.tally { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.tally .card .v { font-size: 44px; }
 .card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; }
 .card .v { font-family: var(--serif); font-size: 54px; line-height: 1; }
 .card .v.brick { color: var(--baksteen); } .card .v.gr { color: var(--gracht); }
@@ -240,6 +242,7 @@ def main():
     n_runs = sum(int(r[2]) for r in t["rows"])
     b_inst = t["board"].get("installed", (0, 3))
     b_writ = t["board"].get("written", (0, 3))
+    b_wiki = t["board"].get("wiki", (0, 0))
 
     def svg(stem):
         q = ROOT / "charts" / "out" / f"{stem}.svg"
@@ -256,12 +259,12 @@ def main():
 <style>{CSS}</style></head>
 <body>
 <nav><div class="wrap"><a class="brand" href="#">{mark_light}<span>Kelder <em>Koffie</em></span></a>
-<a href="#tenet-1">tenet 1</a><a href="#tenet-2">tenet 2</a><a href="#tenet-3">tenet 3</a><a href="#trials">all {n_runs} trials</a></div></nav>
+<a href="#tenet-1">tenet 1</a><a href="#tenet-2">tenet 2</a><a href="#tenet-3">tenet 3</a><a href="#trials">all {n_runs} trials</a><a href="#run">run it</a></div></nav>
 
 <header><div class="wrap hero"><div>
 <div class="kicker">Tasman Analytics · Compass AI &amp; Tech Summit · Budapest · 1 October 2026</div>
 <h1>Building a data context layer to <em>fix</em> your AI analytics</h1>
-<p class="lede">The evidence behind the talk. Kelder Koffie is a fictional Amsterdam coffee subscription company, fictional on purpose so we know the right answer. Three tenets, and the chart or trial that backs each one.</p>
+<p class="lede">The evidence behind the talk. Kelder Koffie is a fictional coffee subscription company in Amsterdam, fictional on purpose so we know the right answer. The page follows the talk's three tenets. Everything on it is produced by the code in this repository, and every number is read from that code's output.</p>
 <div class="stats">
 <div class="stat"><div class="v brick">{pct(f.get('march_raw'))}</div><div class="l">March 2026 churn, raw</div></div>
 <div class="stat"><div class="v gr">{pct(f.get('march_adj'))}</div><div class="l">March 2026 churn, adjusted</div></div>
@@ -281,11 +284,12 @@ def main():
 <figcaption><b>THE NUMBER</b>{pct(f.get('march_raw'))} raw in March, {pct(f.get('march_adj'))} once the import is taken out.</figcaption></figure>
 <div class="two"><div>
 <h3>Trial result: one number for the board</h3>
-<p class="sub" style="margin-bottom:16px">Same question, same model, same warehouse, no notes. The agent recommended 2.8% in {t['wrong_28']} of 3 runs. The true figure is {pct(f.get('march_adj'))}. Some of the imported cancellations were real customers leaving, and the rows cannot tell them apart.</p>
+<p class="sub" style="margin-bottom:16px">Same question, same model, same warehouse, no notes. It recommended 2.8% in {t['wrong_28']} of {b_inst[1]} runs. The true figure is {pct(f.get('march_adj'))}. Some of the imported cancellations were real customers leaving, and the rows cannot tell them apart.</p>
 <p class="small muted">Read from <a href="demo/labels/labels.csv">demo/labels/labels.csv</a> and <a href="demo/trial_summary.md">demo/trial_summary.md</a>.</p></div>
 <div class="tally">
-<div class="card"><div class="v brick">{b_inst[0]} of {b_inst[1]}</div><div class="l">runs gave the right board number<br>installed workspace, no context</div></div>
-<div class="card"><div class="v gr">{b_writ[0]} of {b_writ[1]}</div><div class="l">runs gave the right board number<br>written workspace, context written down</div></div>
+<div class="card"><div class="v brick">{b_inst[0]} of {b_inst[1]}</div><div class="l">runs gave the right board number<br>installed workspace, no notes</div></div>
+<div class="card"><div class="v gr">{b_writ[0]} of {b_writ[1]}</div><div class="l">runs gave the right board number<br>written workspace, notes in the repo</div></div>
+<div class="card"><div class="v gr">{b_wiki[0]} of {b_wiki[1]}</div><div class="l">runs gave the right board number<br>wiki workspace, notes in ktx only</div></div>
 </div></div>
 </div></section>
 
@@ -303,7 +307,7 @@ def main():
 <div><h3>What catches it</h3>
 <p>Not the dbt tests. The verified query for the like-for-like comparison fails against its pinned answer, and the capture check fails because a metrics model changed with no impact box ticked.</p>
 {cmd("make check STATE=rot PR_BODY=kelder-dbt/.pr/rot.md")}
-<div class="callout" style="margin-top:22px"><b>Trial note</b><br>In the rot workspace, {t['caught_rot']} of 3 runs of the like-for-like question flagged the bug in the SQL. That is Claude's reading of the transcripts, not yet a label from Thomas.</div>
+<div class="callout" style="margin-top:22px"><b>Trial note</b><br>In the rot workspace, {t['caught_rot']} of {t['rot_yoy_runs']} runs of the like-for-like question flagged the bug in the SQL. That is our reading of the transcripts. A dashboard reading the same series would not have noticed.</div>
 </div></div>
 </div></section>
 
@@ -331,8 +335,19 @@ def main():
 {trial_table(t['rows'])}</details>
 </div></section>
 
-<footer><div class="wrap">Built from commit {esc(head)} on {esc(now)} by <code>scripts/render_index.py</code>. Every number on this page is read from build outputs.<br>
-To rebuild and run the demo, see <a href="START_HERE.md">START_HERE.md</a>.</div></footer>
+<section id="run"><div class="wrap">
+<h2 style="font-size:30px">Run it yourself</h2>
+<p class="sub">You need macOS, uv, git and Node.js 18 or newer. Nothing is installed globally. Agent runs need an Anthropic API key and cost about $0.10 to $0.30 each.</p>
+{cmd("make setup && make all && make demo")}
+<p class="small" style="margin-top:14px">Then ask the no-notes agent and the agent with notes the same question, in two terminals:</p>
+{cmd("scripts/demo_terminal.sh agent installed")}
+<div style="height:10px"></div>
+{cmd("scripts/demo_terminal.sh agent written")}
+<p class="small muted" style="margin-top:14px">Everything else, including the checks and the trial harness, is in the <a href="README.md">README</a>.</p>
+</div></section>
+
+<footer><div class="wrap">Built from commit {esc(head)} on {esc(now)}. Every number on this page is read from build outputs.<br>
+Read more: <a href="https://www.tasman.ai/news/how-to-build-a-context-layer">How to Build a Context Layer</a> · <a href="https://www.tasman.ai/news/domain-modelling-howto">Addressing Data Model Creep with Domain Modeling</a></div></footer>
 <script>{JS}</script></body></html>"""
     OUT.write_text(page)
     print(f"wrote {OUT.relative_to(ROOT)}")

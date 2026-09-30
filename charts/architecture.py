@@ -2,11 +2,12 @@
 
     uv run python charts/architecture.py
 
-Writes three files:
+Writes four files:
 - charts/out/architecture_plain.svg: the plain stack. The agent and a BI tool query the marts directly, with no
   ktx and no context layer.
 - charts/out/architecture_without_context.svg: the usual stack. The agent reaches the data through ktx (SQL and
   a semantic layer inferred from the schema); nothing records why a number moved.
+- charts/out/architecture_demo.svg: what this repository actually builds, for the README.
 - charts/out/architecture.svg: the same stack with a context layer: a domain layer, the context schema, the
   written notes in the repo, the two routes by which they reach the agent, and the checks that keep them honest.
 
@@ -62,11 +63,13 @@ def label(x, y, text, color=ESPRESSO, anchor="middle"):
 
 
 def build(mode: str) -> str:
-    """mode: "plain" (no ktx, no context), "without" (ktx, no context) or "with" (ktx and a context layer)."""
-    with_context = mode == "with"
+    """mode: "plain" (no ktx, no context), "without" (ktx, no context), "with" (ktx and a context layer) or
+    "demo" (what this repository builds: the with-context stack without a domain layer or a BI tool)."""
+    with_context = mode in ("with", "demo")
+    demo = mode == "demo"
     b = ""
     # ---- sources
-    b += t(50, 168, "SOURCES", 12, MONO, MUTED, 600, spacing=1)
+    b += t(50, 168, "SOURCES (SIMULATED)" if mode == "demo" else "SOURCES", 12, MONO, MUTED, 600, spacing=1)
     for i, (n, sub) in enumerate([("Shopify", "orders"), ("Recharge", "subscriptions"), ("Klaviyo", "email"), ("Ad platforms", "spend")]):
         y = 182 + i * 66
         b += f'<rect x="50" y="{y}" width="180" height="54" rx="10" fill="{PAPER}" stroke="{ESPRESSO}" stroke-width="2"/>'
@@ -76,7 +79,7 @@ def build(mode: str) -> str:
     # ---- warehouse
     b += panel(280, 150, 620, 320, "Warehouse", GRACHT)
     b += t(884, 180, "built and tested by dbt", 12.5, MONO, HONING, 500, "end")
-    if with_context:
+    if with_context and not demo:
         names = [("raw", "as loaded"), ("staging", "cleaned"), ("intermediate", "joined"), ("domain", "what exists"), ("marts", "fct, metrics")]
         cw, gap = 108, 12
     else:
@@ -91,7 +94,10 @@ def build(mode: str) -> str:
         b += f'<rect x="296" y="296" width="588" height="54" rx="9" fill="{CREMA}" stroke="{ESPRESSO}" stroke-width="2"/>'
         b += t(312, 319, "context schema", 15, MONO, ESPRESSO, 600)
         b += t(312, 339, "business_events · metric_changelog", 12, MONO, MUTED)
-        b += wrap(296, 384, ["Domain layer: sources map into it once, and", "everything downstream reads only from it."], 13.5, SANS, BAKSTEEN, 19)
+        if not demo:
+            b += wrap(296, 384, ["Domain layer: sources map into it once, and", "everything downstream reads only from it."], 13.5, SANS, BAKSTEEN, 19)
+        else:
+            b += wrap(296, 384, ["Three states, each its own warehouse file:", "before-context, with-context and rot."], 13.5, SANS, ESPRESSO, 19)
     else:
         b += wrap(296, 330, ["Correct as calculations. Nothing in these", "tables says why a number moved."], 16, SANS, ESPRESSO, 23)
     b += t(296, 448, "DuckDB in the demo; Snowflake or BigQuery in real life", 12, MONO, MUTED)
@@ -117,16 +123,18 @@ def build(mode: str) -> str:
         b += route([(900, 243), (1290, 243)], BAKSTEEN)
         b += label(1095, 243, "SQL over MCP", BAKSTEEN)
     else:
-        b += wrap(1308, 222, ["Claude in the demo.", "Asks ktx for data and", "meaning, then answers."], 15, SANS, ESPRESSO, 22)
+        b += wrap(1308, 222, ["Claude Code, pinned model.", "Tools: Read, Grep, Glob", "and the ktx tools only."] if demo else
+                  ["Claude in the demo.", "Asks ktx for data and", "meaning, then answers."], 15, SANS, ESPRESSO, 22)
         b += route([(1230, 243), (1290, 243)], BAKSTEEN)
         b += label(1260, 222, "MCP", BAKSTEEN)
-    b += panel(1290, 372, 260, 150, "BI tool", BAKSTEEN)
-    b += t(1308, 440, "e.g. Omni, Lightdash", 12.5, MONO, BAKSTEEN, 600)
-    b += wrap(1308, 466, ["Dashboards, board pack.", "Brings its own model,", "AI notes and usage data."], 13.5, SANS, ESPRESSO, 19)
-    b += route([(900, 452), (1290, 452)], BAKSTEEN)
-    b += label(992 if mode != "plain" else 1095, 452, "reads the marts", BAKSTEEN)
-    if mode != "plain":
-        b += route([(1230, 400), (1290, 400)], BAKSTEEN)
+    if not demo:
+        b += panel(1290, 372, 260, 150, "BI tool", BAKSTEEN)
+        b += t(1308, 440, "e.g. Omni, Lightdash", 12.5, MONO, BAKSTEEN, 600)
+        b += wrap(1308, 466, ["Dashboards, board pack.", "Brings its own model,", "AI notes and usage data."], 13.5, SANS, ESPRESSO, 19)
+        b += route([(900, 452), (1290, 452)], BAKSTEEN)
+        b += label(992 if mode != "plain" else 1095, 452, "reads the marts", BAKSTEEN)
+        if mode != "plain":
+            b += route([(1230, 400), (1290, 400)], BAKSTEEN)
 
     # ---- repo
     b += panel(280, 540, 620, 170, "The team's git repo", ESPRESSO)
@@ -145,9 +153,19 @@ def build(mode: str) -> str:
         b += panel(50, 540, 190, 170, "Checks", BAKSTEEN)
         b += wrap(66, 612, ["verified queries", "against pinned", "answers; one impact", "question per PR"], 13.5, SANS, ESPRESSO, 19)
         b += route([(280, 625), (240, 625)], BAKSTEEN)
-        b += t(50, 790, "The reasons are written down once, reach every reader, and the checks keep them true.", 28, HAND, GRACHT, 600)
-        title, sub, badge = ("With a context layer", "THE SAME STACK, WITH THE REASONS WRITTEN DOWN", "WITH CONTEXT")
-        note = "The notes reach the agent straight from the repo, or through the ktx wiki. Either works."
+        if demo:
+            b += t(50, 748, "FOUR AGENT WORKSPACES, SAME WAREHOUSE TOOLING", 12, MONO, MUTED, 600, spacing=1)
+            for i, (name, what) in enumerate([("installed", "before-context state, no notes"), ("written", "notes by route 1"),
+                                              ("wiki", "notes by route 2 only"), ("rot", "route 1, plus one bad commit")]):
+                x = 50 + i * 378
+                b += f'<rect x="{x}" y="762" width="360" height="62" rx="10" fill="{PAPER}" stroke="{ESPRESSO}" stroke-width="1.6"/>'
+                b += t(x + 16, 789, name, 17, MONO, ESPRESSO, 700) + t(x + 16, 811, what, 12.5, MONO, MUTED)
+            title, sub, badge = ("What this repository builds", "SIMULATED SOURCES · DBT · DUCKDB · KTX · CLAUDE CODE · CHECKS", "KELDER KOFFIE DEMO")
+            note = "Each workspace is a folder the agent is locked into. The hidden ground truth never reaches one."
+        else:
+            b += t(50, 790, "The reasons are written down once, reach every reader, and the checks keep them true.", 28, HAND, GRACHT, 600)
+            title, sub, badge = ("With a context layer", "THE SAME STACK, WITH THE REASONS WRITTEN DOWN", "WITH CONTEXT")
+            note = "The notes reach the agent straight from the repo, or through the ktx wiki. Either works."
     else:
         b += wrap(606, 614, ["The reasons behind the numbers", "live in people's heads, Slack", "threads and a wiki page."], 15, SANS, MUTED, 22)
         if mode == "plain":
@@ -163,7 +181,8 @@ def build(mode: str) -> str:
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    for name, mode in (("architecture_plain", "plain"), ("architecture_without_context", "without"), ("architecture", "with")):
+    for name, mode in (("architecture_plain", "plain"), ("architecture_without_context", "without"), ("architecture", "with"),
+                       ("architecture_demo", "demo")):
         (OUT / f"{name}.svg").write_text(build(mode))
         print(f"wrote charts/out/{name}.svg")
 

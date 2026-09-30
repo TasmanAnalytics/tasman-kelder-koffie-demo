@@ -4,7 +4,7 @@
 #   scripts/demo_terminal.sh setup          prompt, colours and font hints; checks prerequisites
 #   scripts/demo_terminal.sh side-by-side   clip 1: tmux split, installed left, written right
 #   scripts/demo_terminal.sh rot            clip 2: rot diff, then the rot agent, then make check
-#   scripts/demo_terminal.sh agent <ws>     one agent in this terminal (installed, written or rot), no tmux needed
+#   scripts/demo_terminal.sh agent <ws>     one agent in this terminal (installed, written, wiki or rot), no tmux needed
 #
 # Every agent pane runs Claude Code with exactly the trial settings (scripts/agent_cmd.py).
 set -euo pipefail
@@ -65,7 +65,7 @@ TXT
     FORCE_COLOR=1 make -s check STATE=rot PR_BODY=kelder-dbt/.pr/rot.md || true
     ;;
   agent)
-    case "${2:-}" in installed|written|rot) ;; *) echo "usage: scripts/demo_terminal.sh agent installed|written|rot"; exit 1 ;; esac
+    case "${2:-}" in installed|written|wiki|rot) ;; *) echo "usage: scripts/demo_terminal.sh agent installed|written|wiki|rot"; exit 1 ;; esac
     eval "$minimal_prompt"
     bash -c "$(agent "$2")"
     ;;
