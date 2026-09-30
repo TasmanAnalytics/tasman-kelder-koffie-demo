@@ -62,6 +62,8 @@ make trials WORKSPACE=wiki N=3              # recorded runs, then: make summary
 
 A good first question: *What was subscriber churn in March 2026? I need one number for the board deck.*
 
+[`DEMO.md`](DEMO.md) walks through the three demos from the talk, step by step.
+
 ## The four workspaces
 
 Each workspace is a folder the agent is locked into. It holds Kelder's dbt repo at one state and a copy
