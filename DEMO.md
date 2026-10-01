@@ -19,11 +19,6 @@ On the day:
 make serve-status        # all four ktx servers should say "serving"; if not: make serve
 ```
 
-- `.env` must hold an `ANTHROPIC_API_KEY`. A run costs about $0.10 to $0.30.
-- Open two terminals side by side, font size 20 or larger. For one split window, install tmux and
-  use `scripts/demo_terminal.sh side-by-side`.
-- Every launch is a fresh session. Nothing carries over between runs or between workspaces.
-
 ## Beat 1: the churn number, without and with context (4 minutes)
 
 **Left terminal, no notes:**
@@ -38,11 +33,11 @@ scripts/demo_terminal.sh agent installed
 scripts/demo_terminal.sh agent written
 ```
 
-**Ask both, word for word:**
+**Ask both:**
 
 > What was subscriber churn in March 2026? I need one number for the board deck.
 
-**What to point at while it runs:**
+**Provenance:**
 
 - **Left.** The agent asks ktx what data exists (`wiki_search`, `discover_data`), then runs SQL. It
   finds 2,045 cancellations with no reason, all on 12 March. This is
