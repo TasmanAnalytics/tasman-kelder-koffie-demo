@@ -16,17 +16,40 @@ real figure is 3.3%. Nothing in the tables says so.
 
 We asked an AI agent the same questions in four set-ups and kept every run.
 
-## What we found
+## Three tenets
 
-1. **An agent can find what looks odd. It cannot know why.** With no notes, the agent found the
-   batch of cancellations on 12 March every time. It never gave the board the right number (0 of 5
-   runs).
-2. **Writing the reasons down fixes it, wherever they live.** With the notes in the repo, 3 of 3 runs
-   gave 3.3%. With the same notes only in the ktx wiki, 2 of 2.
-3. **Written notes go stale.** One ordinary commit, "Fix churn logic", flips a year-on-year comparison
-   from better to worse. Every note and every dbt test still agree with the old answer. A pinned
-   answer in CI catches it. So did the agent, which read the SQL (3 of 3 runs, our reading of the
-   transcripts). A dashboard would not have.
+### 1. An agent needs curated context to avoid confidently wrong answers
+
+With no notes, the agent found the batch of cancellations on 12 March every time. It could not know
+that most of them were not real, so it never gave the board the right number (0 of 5 runs). Four of
+the five recommended 2.8% instead, with a plausible explanation.
+
+With curated notes it was right every time: 3 of 3 runs with the notes in the repo, and 2 of 2 with
+the same notes only in the ktx wiki. Where the notes live matters less than whether someone wrote
+them down.
+
+### 2. Context evolves, so governance is key
+
+Notes describe the business on the day they were written. In the `rot` state, one ordinary commit,
+"Fix churn logic", flips a year-on-year comparison from better to worse. Every note and every dbt
+test still agree with the old answer.
+
+Two cheap checks catch it. A verified query with a pinned answer fails in CI, and the pull request
+template asks one question about metric impact, which this commit left unanswered. The agent also
+caught it by reading the SQL (3 of 3 runs, our reading of the transcripts). A dashboard would not have.
+
+### 3. Model the business before you model the data
+
+Kelder's marts follow its source systems, so the warehouse accepted whatever Recharge called a
+cancellation. A domain model starts from what the business is made of: customers, subscriptions,
+status changes, deliveries and payment attempts. With one rule, that a cancellation needs an
+initiator and a reason, the import rows would never have counted as churn, and that note would not
+be needed.
+
+This tenet is design reasoning, not a trial result. The proposed model is in
+[`kelder-dbt/docs/`](kelder-dbt/docs/); Kelder's dbt project does not implement it.
+
+### About the numbers
 
 These are small samples: 69 runs on `claude-opus-5-5`, about $12 in all. The results by question are in
 [`demo/trial_summary.md`](demo/trial_summary.md), and our reading of every run is in

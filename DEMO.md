@@ -1,12 +1,9 @@
 # Demo playbook
 
-Three short beats, about ten minutes in all. Every number below comes from the recorded runs in
-`demo/trial_summary.md` and `demo/labels/labels.csv`. Live answers vary from run to run, so have the
-recorded answers in `demo/selected/` open as a backup.
+
 
 ## Before you start
 
-Once, on the demo machine:
 
 ```bash
 make setup && make all && make demo
